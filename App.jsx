@@ -125,9 +125,7 @@ function MeditationTimerScreen({ route }) {
     setSliderDisabled(false);
     if (timerRef.current) {
       BackgroundTimer.clearInterval(timerRef.current);
-    }
-    // Call addSessionDuration to update totalTimeMeditated
-    addMeditationTime(selectedDuration);
+    } 
   };
 
   const resetTimer = () => {

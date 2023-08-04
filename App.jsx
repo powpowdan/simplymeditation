@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   stopButton: {
     backgroundColor: '#717171', 
-    marginTop:55,  
+    marginTop:35,  
   },
   colorBlack: {
     textAlign: 'center',

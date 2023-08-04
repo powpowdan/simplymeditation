@@ -1,0 +1,452 @@
+import 'react-native-gesture-handler';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, AppState, TouchableOpacity, Image, Text, StyleSheet, Alert } from 'react-native';
+import Slider from '@react-native-community/slider';
+import Sound from 'react-native-sound';
+Sound.setCategory('Playback');
+import BackgroundTimer from 'react-native-background-timer';
+import ProgressCircle from 'react-native-progress-circle';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack'; 
+import { SafeAreaView } from 'react-native-safe-area-context'; // Update the import
+import GoToStatsImage from './android/app/src/img/cloud.png';  
+import { SessionProvider } from './SessionContext';
+import SessionList from './SessionList'; 
+import { useSessionContext } from './SessionContext';
+
+
+function HomeScreen({ navigation }) {
+  // Get the totalTimeMeditated from the context using the useSessionContext hook
+  const { totalTimeMeditated } = useSessionContext();
+
+  const handleGoToHome = () => {
+    navigation.navigate('MeditationTimer');
+  };
+  return (
+    <View style={styles.container}>
+      <Text style={styles.headerText}>Stats Screen</Text>
+      <Text>Total Time Meditated: {totalTimeMeditated} minutes</Text>
+      <TouchableOpacity
+        style={{ marginTop: 20, backgroundColor: '#74aff7', padding: 10, borderRadius: 8 }}
+        onPress={handleGoToHome}>
+        <Text style={{ color: '#ededed', fontSize: 18 }}>Go to Meditation Timer</Text>
+      </TouchableOpacity>
+    </View> 
+  );
+}
+
+function MeditationTimerScreen({ route }) {
+  
+  const navigation = useNavigation();
+  const [sessionInProgress, setSessionInProgress] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(0); 
+  const [selectedDuration, setSelectedDuration] = useState(15);
+  const { addMeditationTime } = useSessionContext();
+  const appState = useRef(AppState.currentState);
+  const timerRef = useRef();
+  const timerDurations = [5, 10, 15, 20]; 
+  const [sliderDisabled, setSliderDisabled] = useState(false);
+  // Initialize buttonSelectedDuration with useState
+  const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
+    button5Mins: 5,
+    button10Mins: 10,
+    button15Mins: 15,
+    button20Mins: 20, 
+  });
+  
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription.remove('change', handleAppStateChange);
+      BackgroundTimer.stopBackgroundTimer(); // Stop background timer when unmounting
+    };
+  }, []);
+
+  useEffect(() => {
+    // When the slider value changes, update the selected duration for each button
+    setButtonSelectedDuration((prev) => ({
+      button5Mins: prev.button5Mins,
+      button10Mins: prev.button10Mins,
+      button15Mins: prev.button15Mins,
+      button20Mins: prev.button20Mins,
+      [sessionInProgress ? `button${selectedDuration}Mins` : '']: selectedDuration,
+    }));
+  }, [selectedDuration, sessionInProgress]);
+
+  const handleAppStateChange = (nextAppState) => {
+    if (
+      appState.current.match(/active/) &&
+      nextAppState === 'active' &&
+      sessionInProgress &&
+      remainingSeconds > 0
+    ) {
+      // App is back to foreground, and the session is in progress with remaining time
+      startTimer(remainingSeconds);
+    }
+
+    appState.current = nextAppState;
+  };
+
+   const handleGoToHome = () => {
+    navigation.navigate('Home');
+  };
+
+  const playTone = () => {
+    const sound = new Sound('audio_file.mp3', null, (error) => {
+      if (error) {
+        alert('Error', JSON.stringify(error));
+      }
+      sound.play(() => sound.release());
+    });
+  };
+
+  const startTimer = (duration) => {
+    setRemainingSeconds(duration);
+    timerRef.current = BackgroundTimer.setInterval(() => {
+      setRemainingSeconds((prevRemainingSeconds) => {
+        const seconds = prevRemainingSeconds - 1;
+
+        if (seconds === 0) {
+          stopSession();
+          playTone();
+          BackgroundTimer.clearInterval(timerRef.current);
+           // Save the session duration in minutes
+           addMeditationTime(selectedDuration);
+        }
+
+        return seconds;
+      });
+    }, 1000);
+  };
+
+  const stopSession = () => {
+    resetTimer();
+    setSliderDisabled(false);
+    if (timerRef.current) {
+      BackgroundTimer.clearInterval(timerRef.current);
+    }
+    // Call addSessionDuration to update totalTimeMeditated
+    addMeditationTime(selectedDuration);
+  };
+
+  const resetTimer = () => {
+    setSessionInProgress(false);
+    setRemainingSeconds(0);
+  };
+
+  const handleTimerChange = (value) => {
+    if (!sessionInProgress) {
+      setSelectedDuration(value);
+    }
+  };
+
+  const handleButtonLongPress = (buttonKey) => {
+    Alert.alert(
+      'Confirmation:',
+      `Are you sure you want to set this buttons duration to ${selectedDuration} minutes?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'OK',
+          onPress: () => {
+            setButtonSelectedDuration((prev) => ({
+              ...prev,
+              [buttonKey]: selectedDuration,
+            }));
+            setSelectedDuration(selectedDuration);
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+ const beginSession = () => {
+    playTone();
+    resetTimer(); // Reset the timer before starting a new session
+    setSessionInProgress(true);
+    setSliderDisabled(true);
+    startTimer(selectedDuration * 60); // Start the timer with the selected duration in seconds
+  };
+
+
+  return (
+    <View style={styles.container}>
+   <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+        <Image source={GoToStatsImage} style={styles.goToStatsImage} />
+      </TouchableOpacity>
+      <View style={{ alignItems: 'center' }}>
+      <Text style={styles.headerText}>Simply Meditation</Text>
+      <Text style={styles.instructions}>
+        Close your eyes, empty your mind, <Text style={styles.bold}>breathe</Text>
+      </Text>
+        <ProgressCircle
+          percent={sessionInProgress ? (remainingSeconds / (selectedDuration * 60)) * 100 : 0}
+          radius={80}
+          borderWidth={10}
+          color="#74aff7"
+          shadowColor="#101010" 
+          bgColor="#212121" 
+        >
+          <TouchableOpacity
+            onPress={sessionInProgress ? stopSession : beginSession}
+            style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}
+          > 
+            {sessionInProgress ? (
+              <Text style={styles.countdown}>
+                {Math.floor(remainingSeconds / 60).toString().padStart(2, '0')}:
+                {(remainingSeconds % 60).toString().padStart(2, '0')}
+              </Text>
+            ) : (
+              <Text style={styles.duration}>
+                {selectedDuration.toString().padStart(2, '0')}:00
+              </Text>
+            )}
+          </TouchableOpacity>
+        </ProgressCircle>
+      </View>
+
+      <Text style={styles.slidertext}>
+         Choose your session length
+      </Text>
+      <View style={styles.sliderContainer}>
+      <Slider
+        style={styles.slider}
+        minimumValue={1}
+        maximumValue={60}
+        step={1}
+        value={selectedDuration}
+        onValueChange={handleTimerChange}
+        minimumTrackTintColor="#97d2f7"
+        maximumTrackTintColor="white" 
+        thumbTintColor="#97d2f7" 
+        thumbStyle={styles.sliderThumb}
+        trackStyle={styles.sliderTrack}
+        disabled={sliderDisabled}
+      />
+      </View> 
+      <View style={[styles.timerButtonsContainer, { marginTop: -27}]}>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button5Mins')}
+          onPress={() => handleTimerChange(buttonSelectedDuration.button5Mins)} 
+        >
+          <Text style={styles.colorBlack}>{buttonSelectedDuration.button5Mins} Mins</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button10Mins')}
+          onPress={() => handleTimerChange(buttonSelectedDuration.button10Mins)} 
+        >
+          <Text style={styles.colorBlack}>{buttonSelectedDuration.button10Mins} Mins</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[styles.timerButtonsContainer, { marginTop: -27}]}>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button15Mins')}
+          onPress={() => handleTimerChange(buttonSelectedDuration.button15Mins)} 
+        >
+          <Text style={styles.colorBlack}>{buttonSelectedDuration.button15Mins} Mins</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button20Mins')}
+          onPress={() => handleTimerChange(buttonSelectedDuration.button20Mins)} 
+        >
+          <Text style={styles.colorBlack}>{buttonSelectedDuration.button20Mins} Mins</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.beginEndContainer}>
+      {!sessionInProgress ? (
+        <TouchableOpacity style={[styles.button, styles.beginButton]} onPress={beginSession}>
+          <Text style={styles.colorBlack}>Begin Session</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={[styles.button, styles.stopButton]} onPress={stopSession}>
+          <Text style={styles.colorBlack}>Stop Session</Text>
+        </TouchableOpacity>
+      )}
+      </View>
+    </View>
+  );
+}
+
+
+const Stack = createStackNavigator(); 
+// const SessionContext = createContext();
+const App = () => {  
+
+  const { totalTimeMeditated } = useSessionContext();
+
+  return (
+    <SessionProvider >
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          ...TransitionPresets.SlideFromRightIOS,
+        }}
+      >
+      <Stack.Screen name="MeditationTimer" component={MeditationTimerScreen} options={{ headerShown: false }}   initialParams={{ totalTimeMeditated }}/>
+        <Stack.Screen name="Home"  options={{
+    headerStyle: {
+      backgroundColor: '#212121', // Set the background color of the header
+    }, 
+    headerTintColor: '#ededed', // Set the text color of the header
+    headerTitleStyle: {
+      fontWeight: 'bold', // Set the font weight of the header title
+    },
+  }} >
+          {() => <HomeScreen totalTimeMeditated={totalTimeMeditated} />}
+        </Stack.Screen>
+        <Stack.Screen name="SessionList" component={SessionList} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  </SessionProvider>
+  );
+}; 
+
+ 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#212121', // Dark background color
+  },
+  timerContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  circleContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,  
+  },
+  countdown: {
+    fontSize: 20,
+    color: '#ededed', // Light text color
+    fontWeight: 'bold',
+  },
+  duration: {
+    fontSize: 29,
+    color: '#ededed', // Light text color
+    fontWeight: 'bold',
+  },
+  instructions: {
+    textAlign: 'center',
+    color: '#ededed',
+    marginBottom: 55, 
+  }, 
+  button: {
+    margin: 10,
+    padding: 10,
+    width: '70%',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 35,
+    
+  },
+  beginButton: {
+    backgroundColor: '#74aff7', 
+    marginTop:55, 
+  },
+  stopButton: {
+    backgroundColor: '#717171', 
+    marginTop:55,  
+  },
+  colorBlack: {
+    textAlign: 'center',
+    color: '#ededed', // Light text color
+    fontSize: 18,
+  },
+  header: {
+    position: 'absolute',
+    top: 0,
+    height: 60,
+    width: '100%',
+    backgroundColor: '#79a3b1', // Meditation-themed color
+  },
+  headerText: {
+    fontSize: 24,
+    color: '#74aff7', // Light text color
+    paddingTop: 1,
+    paddingLeft: 10,
+    textAlign: 'center',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+    marginTop: 0, 
+    backgroundColor: "#74aff7", // Meditation-themed color
+    borderRadius: 20,
+  },
+  slidertext: {
+    marginTop: 50,
+    textAlign: 'center', 
+    color: '#74aff7', // Light text color
+    marginBottom: 5,
+    
+  },
+  sliderThumb: {
+    width: 5, // Adjust the width of the thumb
+    height: 5, // Adjust the height of the thumb
+    borderRadius: 15, // Rounded corners for the thumb to make it a circle
+    backgroundColor: '#74aff7', // Thumb color
+  },
+  sliderContainer: {
+    width: '80%',
+    height: 40,
+    marginTop: 0,
+    marginBottom: 20,
+    backgroundColor: "#74aff7", // Meditation-themed color
+    borderRadius: 20, // Rounded corners for the slider track container
+    overflow: 'hidden', // Clip the slider track within the container with rounded corners
+  },
+  sliderTrack: {
+    height: 10, // Adjust the height of the track line
+    borderRadius: 5, // Center the line by setting half of the height as border radius
+    backgroundColor: "#97d2f7", // Set the color of the track line
+  },
+  timerButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '80%',
+    marginBottom: 0,  
+    marginTop: 0, 
+  },
+  timerButton: {
+    flex: 1,
+    margin: 5, // Add margin to reduce space between buttons
+    borderRadius: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    backgroundColor: '#74aff7',
+  },
+  timerButtonWrapper: {
+    flex: 1, // Set flex to 1 to make each button take an equal amount of space
+    margin: 1,
+  },
+  beginEndContainer: {
+    paddingBottom: 0,
+    bottom: 0, // Adjust the value as needed to set the vertical position from the bottom
+    width: '80%',
+    alignItems: 'center', 
+  },
+  goToStatsImage: {
+    width: 80, 
+    height: 80, 
+    marginTop: -30,
+    marginBottom: -10,
+     
+  },
+});
+
+export default App;

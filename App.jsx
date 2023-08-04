@@ -14,6 +14,7 @@ import GoToStatsImage from './android/app/src/img/cloud.png';
 import { SessionProvider } from './SessionContext';
 import SessionList from './SessionList'; 
 import { useSessionContext } from './SessionContext';
+import { AsyncStorage } from 'react-native';
 
 
 function HomeScreen({ navigation }) {

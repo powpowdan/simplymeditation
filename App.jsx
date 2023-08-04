@@ -24,14 +24,21 @@ function HomeScreen({ navigation }) {
     navigation.navigate('MeditationTimer');
   };
   return (
-    <View style={styles.container}>
-      <Text style={styles.headerText}>Stats Screen</Text>
+    <View style={styles.container2}>
+      <Text style={styles.headerText2}>Statistics</Text>
       <Text>Total Time Meditated: {totalTimeMeditated} minutes</Text>
-      <TouchableOpacity
+      <Text style={styles.headerText2}>Options</Text>
+      <TouchableOpacity><Text>Light mode / dark mode</Text></TouchableOpacity>
+      <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity>
+      <TouchableOpacity><Text style={styles.options}>Reset favorited times</Text></TouchableOpacity> 
+      <TouchableOpacity><Text style={styles.options}>Randomized meditation</Text></TouchableOpacity> 
+      
+      
+      {/* <TouchableOpacity
         style={{ marginTop: 20, backgroundColor: '#74aff7', padding: 10, borderRadius: 8 }}
         onPress={handleGoToHome}>
         <Text style={{ color: '#ededed', fontSize: 18 }}>Go to Meditation Timer</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View> 
   );
 }
@@ -313,7 +320,31 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#212121', // Dark background color
+    backgroundColor: '#212121',  
+  },
+  headerText: {
+    fontSize: 24,
+    color: '#74aff7',  
+    paddingTop: 1,
+    paddingLeft: 10,
+    textAlign: 'center',
+  },
+  container2: {
+    flex: 1, 
+    alignItems: 'center',
+    justifyContent: "flex-start",
+    backgroundColor: '#212121',  
+  },
+  headerText2: {
+    fontSize: 24,
+    color: '#74aff7',  
+    paddingTop: 50,
+    paddingBottom: 20,
+    textAlign: 'center',
+  },
+  options: {
+    paddingTop: 20,
+
   },
   timerContainer: {
     alignItems: 'center',
@@ -326,12 +357,12 @@ const styles = StyleSheet.create({
   },
   countdown: {
     fontSize: 20,
-    color: '#ededed', // Light text color
+    color: '#ededed',  
     fontWeight: 'bold',
   },
   duration: {
     fontSize: 29,
-    color: '#ededed', // Light text color
+    color: '#ededed',  
     fontWeight: 'bold',
   },
   instructions: {
@@ -359,7 +390,7 @@ const styles = StyleSheet.create({
   },
   colorBlack: {
     textAlign: 'center',
-    color: '#ededed', // Light text color
+    color: '#ededed',  
     fontSize: 18,
   },
   header: {
@@ -367,15 +398,8 @@ const styles = StyleSheet.create({
     top: 0,
     height: 60,
     width: '100%',
-    backgroundColor: '#79a3b1', // Meditation-themed color
-  },
-  headerText: {
-    fontSize: 24,
-    color: '#74aff7', // Light text color
-    paddingTop: 1,
-    paddingLeft: 10,
-    textAlign: 'center',
-  },
+    backgroundColor: '#79a3b1',  
+  }, 
   bold: {
     fontWeight: 'bold',
   },
@@ -383,35 +407,35 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
     marginTop: 0, 
-    backgroundColor: "#74aff7", // Meditation-themed color
+    backgroundColor: "#74aff7",  
     borderRadius: 20,
   },
   slidertext: {
     marginTop: 50,
     textAlign: 'center', 
-    color: '#74aff7', // Light text color
+    color: '#74aff7', 
     marginBottom: 5,
     
   },
   sliderThumb: {
-    width: 5, // Adjust the width of the thumb
-    height: 5, // Adjust the height of the thumb
-    borderRadius: 15, // Rounded corners for the thumb to make it a circle
-    backgroundColor: '#74aff7', // Thumb color
+    width: 5,  
+    height: 5,  
+    borderRadius: 15,  
+    backgroundColor: '#74aff7', 
   },
   sliderContainer: {
     width: '80%',
     height: 40,
     marginTop: 0,
     marginBottom: 20,
-    backgroundColor: "#74aff7", // Meditation-themed color
-    borderRadius: 20, // Rounded corners for the slider track container
-    overflow: 'hidden', // Clip the slider track within the container with rounded corners
+    backgroundColor: "#74aff7",  
+    borderRadius: 20,  
+    overflow: 'hidden',  
   },
   sliderTrack: {
-    height: 10, // Adjust the height of the track line
-    borderRadius: 5, // Center the line by setting half of the height as border radius
-    backgroundColor: "#97d2f7", // Set the color of the track line
+    height: 10,  
+    borderRadius: 5,  
+    backgroundColor: "#97d2f7",  
   },
   timerButtonsContainer: {
     flexDirection: 'row',
@@ -423,19 +447,19 @@ const styles = StyleSheet.create({
   },
   timerButton: {
     flex: 1,
-    margin: 5, // Add margin to reduce space between buttons
+    margin: 5,  
     borderRadius: 8,
     paddingVertical: 15,
     paddingHorizontal: 10,
     backgroundColor: '#74aff7',
   },
   timerButtonWrapper: {
-    flex: 1, // Set flex to 1 to make each button take an equal amount of space
+    flex: 1, 
     margin: 1,
   },
   beginEndContainer: {
     paddingBottom: 0,
-    bottom: 0, // Adjust the value as needed to set the vertical position from the bottom
+    bottom: 0,  
     width: '80%',
     alignItems: 'center', 
   },

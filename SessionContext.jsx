@@ -1,20 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Create a context for the session data
 const SessionContext = createContext();
 
-// Create a provider component to manage the session data
 export function SessionProvider({ children }) {
-  // Initialize state to track total time meditated
   const [totalTimeMeditated, setTotalTimeMeditated] = useState(0);
 
-  // Function to add meditation time to the total
   const addMeditationTime = (minutes) => {
     setTotalTimeMeditated((prevTotal) => prevTotal + minutes);
   };
 
-  // Load total time meditated from AsyncStorage on initial render
   useEffect(() => {
     const loadTotalTimeMeditated = async () => {
       try {
@@ -30,7 +25,6 @@ export function SessionProvider({ children }) {
     loadTotalTimeMeditated();
   }, []);
 
-  // Store total time meditated to AsyncStorage whenever it changes
   useEffect(() => {
     const storeTotalTimeMeditated = async () => {
       try {
@@ -43,13 +37,13 @@ export function SessionProvider({ children }) {
     storeTotalTimeMeditated();
   }, [totalTimeMeditated]);
 
-  // Define the context value
-  const contextValue = {
-    totalTimeMeditated,
-    addMeditationTime,
-  };
+  const contextValue = useMemo(() => {
+    return {
+      totalTimeMeditated,
+      addMeditationTime,
+    };
+  }, [totalTimeMeditated]);
 
-  // Provide the context value to the children components
   return (
     <SessionContext.Provider value={contextValue}>
       {children}
@@ -57,7 +51,6 @@ export function SessionProvider({ children }) {
   );
 }
 
-// Custom hook to access the session context
 export function useSessionContext() {
   const context = useContext(SessionContext);
   if (!context) {

@@ -14,7 +14,7 @@ import GoToStatsImage from './android/app/src/img/cloud.png';
 import { SessionProvider } from './SessionContext';
 import SessionList from './SessionList'; 
 import { useSessionContext } from './SessionContext';
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 function HomeScreen({ navigation }) {
@@ -66,22 +66,43 @@ function MeditationTimerScreen({ route }) {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', handleAppStateChange);
 
+    // Retrieve the saved selected durations from AsyncStorage
+    const retrieveSelectedDurations = async () => {
+      try {
+        const storedDurations = await AsyncStorage.getItem('selectedDurations');
+        if (storedDurations) {
+          const parsedDurations = JSON.parse(storedDurations);
+          setButtonSelectedDuration(parsedDurations);
+        } else {
+          // Apply initial values if no stored durations are found
+          setButtonSelectedDuration({
+            button5Mins: 5,
+            button10Mins: 10,
+            button15Mins: 15,
+            button20Mins: 20,
+          });
+        }
+      } catch (error) {
+        console.error('Error retrieving selected durations:', error);
+      }
+    };
+
+    retrieveSelectedDurations();
+
     return () => {
       subscription.remove('change', handleAppStateChange);
-      BackgroundTimer.stopBackgroundTimer(); // Stop background timer when unmounting
+      BackgroundTimer.stopBackgroundTimer();
     };
   }, []);
 
+  // Save the selected durations to AsyncStorage whenever they change
   useEffect(() => {
-    // When the slider value changes, update the selected duration for each button
-    setButtonSelectedDuration((prev) => ({
-      button5Mins: prev.button5Mins,
-      button10Mins: prev.button10Mins,
-      button15Mins: prev.button15Mins,
-      button20Mins: prev.button20Mins,
-      [sessionInProgress ? `button${selectedDuration}Mins` : '']: selectedDuration,
-    }));
-  }, [selectedDuration, sessionInProgress]);
+    try {
+      AsyncStorage.setItem('selectedDurations', JSON.stringify(buttonSelectedDuration));
+    } catch (error) {
+      console.error('Error saving selected durations:', error);
+    }
+  }, [buttonSelectedDuration]);
 
   const handleAppStateChange = (nextAppState) => {
     if (
@@ -151,23 +172,26 @@ function MeditationTimerScreen({ route }) {
   const handleButtonLongPress = (buttonKey) => {
     Alert.alert(
       'Confirmation:',
-      `Are you sure you want to set this buttons duration to ${selectedDuration} minutes?`,
+      `Are you sure you want to set this button's duration to ${selectedDuration} minutes?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'OK',
-          onPress: () => {
+          onPress: async () => {
+            // Save the selected duration to AsyncStorage
+            await AsyncStorage.setItem(buttonKey, selectedDuration.toString());
             setButtonSelectedDuration((prev) => ({
               ...prev,
               [buttonKey]: selectedDuration,
             }));
-            setSelectedDuration(selectedDuration);
           },
         },
       ],
       { cancelable: false }
     );
   };
+
+  
 
  const beginSession = () => {
     playTone();

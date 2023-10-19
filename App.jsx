@@ -10,7 +10,7 @@ import ProgressCircle from 'react-native-progress-circle';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack'; 
 import { SafeAreaView } from 'react-native-safe-area-context'; // Update the import
-import GoToStatsImage from './android/app/src/img/cloud.png';  
+import GoToStatsImage from './android/app/src/img/QQ3.png';   
 import { SessionProvider } from './SessionContext';
 import SessionList from './SessionList'; 
 import { useSessionContext } from './SessionContext';
@@ -77,7 +77,7 @@ function MeditationTimerScreen({ route }) {
           // Apply initial values if no stored durations are found
           setButtonSelectedDuration({
             button5Mins: 5,
-            button10Mins: 10,
+            button10Mins: 10, 
             button15Mins: 15,
             button20Mins: 20,
           });
@@ -116,7 +116,7 @@ function MeditationTimerScreen({ route }) {
     }
 
     appState.current = nextAppState;
-  };
+  }; 
 
    const handleGoToHome = () => {
     navigation.navigate('Home');
@@ -489,10 +489,10 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
   },
   goToStatsImage: {
-    width: 80, 
-    height: 80, 
+    width: 110, 
+    height: 110, 
     marginTop: -30,
-    marginBottom: -10,
+    marginBottom: -5,
      
   },
 });

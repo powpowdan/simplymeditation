@@ -10,7 +10,7 @@ import ProgressCircle from 'react-native-progress-circle';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack'; 
 import { SafeAreaView } from 'react-native-safe-area-context'; // Update the import
-import GoToStatsImage from './android/app/src/img/QQ3.png';   
+import GoToStatsImage from './android/app/src/img/QQ4.png';   
 import { SessionProvider } from './SessionContext';
 import SessionList from './SessionList'; 
 import { useSessionContext } from './SessionContext';
@@ -26,15 +26,16 @@ function HomeScreen({ navigation }) {
   };
   return (
     <View style={styles.container2}>
-      <Text style={styles.headerText2}>Statistics</Text>
+      <Text style={styles.headerText2}>Stats</Text>
       <Text>Total Time Meditated: {totalTimeMeditated} minutes</Text>
-      <Text style={styles.headerText2}>Options</Text>
-      <TouchableOpacity><Text>Light mode / dark mode</Text></TouchableOpacity>
+      <Text>Day Streak: TODO</Text>
+
+      <Text style={styles.headerText2}>Options TODO:</Text> 
       <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity>
-      <TouchableOpacity><Text style={styles.options}>Reset favorited times</Text></TouchableOpacity> 
-      <TouchableOpacity><Text style={styles.options}>Randomized meditation</Text></TouchableOpacity> 
-      
-      
+      <TouchableOpacity><Text style={styles.options}>Monk chanting switch</Text></TouchableOpacity> 
+      <TouchableOpacity><Text style={styles.options}>Randomized meditation alarm switch</Text></TouchableOpacity> 
+       
+       
       {/* <TouchableOpacity
         style={{ marginTop: 20, backgroundColor: '#74aff7', padding: 10, borderRadius: 8 }}
         onPress={handleGoToHome}>
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
   instructions: {
     textAlign: 'center',
     color: '#ededed',
-    marginBottom: 55, 
+    marginBottom: 45, 
   }, 
   button: {
     margin: 10,
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   slidertext: {
-    marginTop: 50,
+    marginTop: 40,
     textAlign: 'center', 
     color: '#74aff7', 
     marginBottom: 5,
@@ -489,10 +490,10 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
   },
   goToStatsImage: {
-    width: 110, 
-    height: 110, 
+    width: 160, 
+    height: 160, 
     marginTop: -30,
-    marginBottom: -5,
+    marginBottom: -18,
      
   },
 });

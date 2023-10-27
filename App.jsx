@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-gesture-handler';
 import React, { useState, useEffect, useRef } from 'react';
-import { View, AppState, TouchableOpacity, Image, Text, StyleSheet, Alert } from 'react-native';
+import { View,Switch, AppState, TouchableOpacity, Image, Text, StyleSheet, Alert } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
 Sound.setCategory('Playback');
@@ -11,29 +11,68 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator, TransitionPresets } from '@react-navigation/stack'; 
 import { SafeAreaView } from 'react-native-safe-area-context'; // Update the import
 import GoToStatsImage from './android/app/src/img/QQ4.png';   
+import { MusicSwitchProvider } from './MusicSwitchContext';
 import { SessionProvider } from './SessionContext';
 import SessionList from './SessionList'; 
-import { useSessionContext } from './SessionContext';
+import { useSessionContext } from './SessionContext'; 
+import { useMusicSwitchContext } from './MusicSwitchContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-function HomeScreen({ navigation }) {
+function OptionsScreen({ navigation}) {
+  
   // Get the totalTimeMeditated from the context using the useSessionContext hook
+  console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
   const { totalTimeMeditated } = useSessionContext();
-
+  const { musicSwitchState, setMusicSwitchState } = useMusicSwitchContext(); 
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
   };
+
+  useEffect(() => {
+    // Load the switch state from AsyncStorage when the component mounts
+    loadSwitchState();
+  }, []);
+
+  const loadSwitchState = async () => {
+    try { 
+      const value = await AsyncStorage.getItem('musicSwitchState');
+      if (value !== null) {
+        // Parse the value from AsyncStorage (it's stored as a string)
+        setMusicSwitchState(JSON.parse(value));
+      }
+    } catch (error) {
+      console.error('Error loading switch state:', error);
+    }
+  };
+
+  const saveSwitchState = async (value) => {
+    try {
+      // Save the switch state to AsyncStorage as a string
+      await AsyncStorage.setItem('musicSwitchState', JSON.stringify(value));
+      console.log('saved');
+    } catch (error) {
+      console.error('Error saving switch state:', error);
+    }
+  };
+
+  const handleMusicSwitchChange = (value) => {
+    // Update the switch state and save it to AsyncStorage when it changes
+    setMusicSwitchState(value); 
+    saveSwitchState(value);
+  };
+
   return (
-    <View style={styles.container2}>
+    <View style={styles.container2}> 
       <Text style={styles.headerText2}>Stats</Text>
       <Text>Total Time Meditated: {totalTimeMeditated} minutes</Text>
-      <Text>Day Streak: TODO</Text>
+      {/* <Text>Day Streak: TODO</Text> */}
 
-      <Text style={styles.headerText2}>Options TODO:</Text> 
-      <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity>
-      <TouchableOpacity><Text style={styles.options}>Monk chanting switch</Text></TouchableOpacity> 
-      <TouchableOpacity><Text style={styles.options}>Randomized meditation alarm switch</Text></TouchableOpacity> 
+      <Text style={styles.headerText2}>Options</Text> 
+      {/* <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity> */}
+      <TouchableOpacity><Text style={styles.options}>Monk chanting</Text></TouchableOpacity> 
+      <Switch value={musicSwitchState} onValueChange={handleMusicSwitchChange} />
+      {/* <TouchableOpacity><Text style={styles.options}>Randomized meditation alarm switch</Text></TouchableOpacity>  */}
        
        
       {/* <TouchableOpacity
@@ -45,13 +84,16 @@ function HomeScreen({ navigation }) {
   );
 }
 
-function MeditationTimerScreen({ route }) {
+function HomeScreen() {
   
   const navigation = useNavigation();
   const [sessionInProgress, setSessionInProgress] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0); 
   const [selectedDuration, setSelectedDuration] = useState(15);
   const { addMeditationTime } = useSessionContext();
+  const [sound, setSound] = useState(null);
+  const { musicSwitchState } = useMusicSwitchContext();
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
   const timerRef = useRef();
   const timerDurations = [5, 10, 15, 20]; 
@@ -162,13 +204,18 @@ function MeditationTimerScreen({ route }) {
   const resetTimer = () => {
     setSessionInProgress(false);
     setRemainingSeconds(0);
+    if (sound) {
+      sound.stop();
+      sound.release();
+      setSound(null); 
+    }
   };
 
   const handleTimerChange = (value) => {
     if (!sessionInProgress) {
       setSelectedDuration(value);
     }
-  };
+  }; 
 
   const handleButtonLongPress = (buttonKey) => {
     Alert.alert(
@@ -199,9 +246,29 @@ function MeditationTimerScreen({ route }) {
     resetTimer(); // Reset the timer before starting a new session
     setSessionInProgress(true);
     setSliderDisabled(true);
+      if (musicSwitchState) {
+    playMusic();
+    setIsMusicPlaying(true);
+  }
     startTimer(selectedDuration * 60); // Start the timer with the selected duration in seconds
-  };
+  }; 
+ 
 
+  const playMusic = () => {
+    // Check if musicSwitchState is active
+    if (musicSwitchState) {
+      const newSound = new Sound('now.mp3', null, (error) => {
+        if (error) {
+          console.error('Error:', error);
+        } else {
+          newSound.play(() => { 
+            newSound.release(); 
+          });
+          setSound(newSound);
+        } 
+      });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -210,6 +277,7 @@ function MeditationTimerScreen({ route }) {
       </TouchableOpacity>
       <View style={{ alignItems: 'center' }}>
       <Text style={styles.headerText}>Simply Meditation</Text>
+      {/* <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text> */} 
       <Text style={styles.instructions}>
         Close your eyes, empty your mind, <Text style={styles.bold}>breathe</Text>
       </Text>
@@ -253,7 +321,7 @@ function MeditationTimerScreen({ route }) {
         minimumTrackTintColor="#97d2f7"
         maximumTrackTintColor="white" 
         thumbTintColor="#97d2f7" 
-        thumbStyle={styles.sliderThumb}
+        thumbStyle={styles.sliderThumb} 
         trackStyle={styles.sliderTrack}
         disabled={sliderDisabled}
       />
@@ -289,7 +357,7 @@ function MeditationTimerScreen({ route }) {
         >
           <Text style={styles.colorBlack}>{buttonSelectedDuration.button20Mins} Mins</Text>
         </TouchableOpacity>
-      </View>
+      </View> 
 
       <View style={styles.beginEndContainer}>
       {!sessionInProgress ? (
@@ -312,30 +380,35 @@ const Stack = createStackNavigator();
 const App = () => {  
 
   const { totalTimeMeditated } = useSessionContext();
-
+  const [musicSwitchState, setMusicSwitchState] = useState(false);
+ 
   return (
     <SessionProvider >
+     <MusicSwitchProvider>
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           ...TransitionPresets.SlideFromRightIOS,
         }}
       >
-      <Stack.Screen name="MeditationTimer" component={MeditationTimerScreen} options={{ headerShown: false }}   initialParams={{ totalTimeMeditated }}/>
-        <Stack.Screen name="Home"  options={{
+      <Stack.Screen name="MeditationTimer" component={HomeScreen} options={{ headerShown: false }}   initialParams={{ totalTimeMeditated }}/>
+        <Stack.Screen name="Home"  options={{ 
     headerStyle: {
-      backgroundColor: '#212121', // Set the background color of the header
+      backgroundColor: '#212121', // Set the background color of the header 
     }, 
-    headerTintColor: '#ededed', // Set the text color of the header
+    headerTintColor: '#ededed', // Set the text color of the header 
     headerTitleStyle: {
-      fontWeight: 'bold', // Set the font weight of the header title
+      fontWeight: 'bold', // Set the font weight of the header title 
     },
   }} >
-          {() => <HomeScreen totalTimeMeditated={totalTimeMeditated} />}
+          {() => <OptionsScreen totalTimeMeditated={totalTimeMeditated}
+                                musicSwitchState={musicSwitchState} 
+                                setMusicSwitchState={setMusicSwitchState}/>}
         </Stack.Screen>
         <Stack.Screen name="SessionList" component={SessionList} />
       </Stack.Navigator>
     </NavigationContainer>
+    </MusicSwitchProvider>
   </SessionProvider>
   );
 }; 

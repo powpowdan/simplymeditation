@@ -154,10 +154,7 @@ function HomeScreen() {
     };
   }, []);
 
-  useEffect(() => {
-    playMusicIfNeeded();
-  }, [musicSwitchState]);
-
+  
   // Save the selected durations to AsyncStorage whenever they change
   useEffect(() => { 
     try {
@@ -181,13 +178,7 @@ function HomeScreen() {
     appState.current = nextAppState;
   }; 
 
-  const playMusicIfNeeded = () => {
-    if (musicSwitchState) {
-      // playMusic();
-    }
-  };
-
-
+   
    const handleGoToHome = () => {
     navigation.navigate('Home');
   };

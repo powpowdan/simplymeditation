@@ -92,12 +92,13 @@ function HomeScreen() {
   const [selectedDuration, setSelectedDuration] = useState(15);
   const { addMeditationTime } = useSessionContext();
   const [sound, setSound] = useState(null);
-  const { musicSwitchState } = useMusicSwitchContext();
+  const { musicSwitchState, setMusicSwitchState } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
   const timerRef = useRef();
   const timerDurations = [5, 10, 15, 20]; 
   const [sliderDisabled, setSliderDisabled] = useState(false);
+  
   // Initialize buttonSelectedDuration with useState
   const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
     button5Mins: 5,
@@ -105,6 +106,21 @@ function HomeScreen() {
     button15Mins: 15,
     button20Mins: 20, 
   });
+
+  useEffect(() => { 
+    loadMusicSwitchState();
+  }, []);
+
+  const loadMusicSwitchState = async () => {
+    try {
+      const value = await AsyncStorage.getItem('musicSwitchState');
+      if (value !== null) { 
+        setMusicSwitchState(JSON.parse(value));
+      }
+    } catch (error) {
+      console.error('Error loading musicSwitchState:', error);
+    }
+  };
   
   useEffect(() => {
     const subscription = AppState.addEventListener('change', handleAppStateChange);
@@ -138,8 +154,12 @@ function HomeScreen() {
     };
   }, []);
 
-  // Save the selected durations to AsyncStorage whenever they change
   useEffect(() => {
+    playMusicIfNeeded();
+  }, [musicSwitchState]);
+
+  // Save the selected durations to AsyncStorage whenever they change
+  useEffect(() => { 
     try {
       AsyncStorage.setItem('selectedDurations', JSON.stringify(buttonSelectedDuration));
     } catch (error) {
@@ -160,6 +180,13 @@ function HomeScreen() {
 
     appState.current = nextAppState;
   }; 
+
+  const playMusicIfNeeded = () => {
+    if (musicSwitchState) {
+      // playMusic();
+    }
+  };
+
 
    const handleGoToHome = () => {
     navigation.navigate('Home');
@@ -225,8 +252,7 @@ function HomeScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'OK',
-          onPress: async () => {
-            // Save the selected duration to AsyncStorage
+          onPress: async () => { 
             await AsyncStorage.setItem(buttonKey, selectedDuration.toString());
             setButtonSelectedDuration((prev) => ({
               ...prev,
@@ -276,8 +302,8 @@ function HomeScreen() {
         <Image source={GoToStatsImage} style={styles.goToStatsImage} />
       </TouchableOpacity>
       <View style={{ alignItems: 'center' }}>
-      <Text style={styles.headerText}>Simply Meditation</Text>
-      {/* <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text> */} 
+      <Text style={styles.headerText}>Simply Meditation</Text> 
+      <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text> 
       <Text style={styles.instructions}>
         Close your eyes, empty your mind, <Text style={styles.bold}>breathe</Text>
       </Text>
@@ -383,8 +409,8 @@ const App = () => {
   const [musicSwitchState, setMusicSwitchState] = useState(false);
  
   return (
-    <SessionProvider >
-     <MusicSwitchProvider>
+    <MusicSwitchProvider>
+    <SessionProvider > 
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
@@ -407,9 +433,9 @@ const App = () => {
         </Stack.Screen>
         <Stack.Screen name="SessionList" component={SessionList} />
       </Stack.Navigator>
-    </NavigationContainer>
-    </MusicSwitchProvider>
+    </NavigationContainer> 
   </SessionProvider>
+  </MusicSwitchProvider>
   );
 }; 
 

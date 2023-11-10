@@ -17,7 +17,7 @@ import SessionList from './SessionList';
 import { useSessionContext } from './SessionContext'; 
 import { useMusicSwitchContext } from './MusicSwitchContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Animatable from 'react-native-animatable';
+import * as Animatable from 'react-native-animatable'; 
 
 
 function OptionsScreen({ navigation}) {
@@ -376,7 +376,12 @@ const currentSentence = sentences[currentSentenceIndex];
  
   return (
     <View style={styles.container}>
-   <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+    
+    {/* <TouchableOpacity disabled={sliderDisabled} onPress={() => navigation.navigate('Home')} style={{ position: 'absolute', top: 0, right: 16 }}>
+     <Text style={{color: '#74aff7', fontSize: 10}}>Options</Text>   
+        </TouchableOpacity>    */}
+     
+   <TouchableOpacity disabled={sliderDisabled} onPress={() => navigation.navigate('Home')}>
         <Image source={GoToStatsImage} style={styles.goToStatsImage} />
       </TouchableOpacity>   
       <View style={{ alignItems: 'center' }}>
@@ -509,6 +514,7 @@ const App = () => {
       >
       <Stack.Screen name="MeditationTimer" component={HomeScreen} options={{ headerShown: false }}   initialParams={{ totalTimeMeditated }}/>
         <Stack.Screen name="Home"  options={{ 
+           title: 'Meditate',
     headerStyle: {
       backgroundColor: '#212121', // Set the background color of the header 
     }, 

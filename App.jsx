@@ -17,6 +17,7 @@ import SessionList from './SessionList';
 import { useSessionContext } from './SessionContext'; 
 import { useMusicSwitchContext } from './MusicSwitchContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Animatable from 'react-native-animatable';
 
 
 function OptionsScreen({ navigation}) {
@@ -107,6 +108,87 @@ function HomeScreen() {
     button20Mins: 20, 
   });
 
+  const sentences = [
+  "Be the change that you wish to see in the world",
+  "Peace is not found in the world but in the quiet spaces within",
+  "The future depends on what you do today", 
+  "The quieter you become, the more you can hear", 
+  "When you realize nothing is lacking, the whole world belongs to you", 
+  "To the mind that is still, the whole universe surrenders", 
+  "The only real failure in life is not to be true to the best one knows", 
+  "Meditation makes you accident-prone to enlightenment", 
+  "Greatness is not just what one does, but also what one refuses to do", 
+  "You should sit in meditation for twenty minutes every day — unless you’re too busy. Then you should sit for an hour", 
+  "Continuous improvement is better than delayed perfection", 
+  "Simplicity, patience, compassion. These three are your greatest treasures", 
+  "The wise man is one who, knows, what he does not know", 
+  "When I let go of what I am, I become what I might be", 
+  "Knowing others is wisdom, knowing yourself is Enlightenment", 
+  "Continuous improvement is better than delayed perfection", 
+  "Do you have the patience to wait until your mud settles and the water is clear?",
+  "He who is contented is rich",
+  "Your work is to discover your world and then with all your heart give yourself to it",
+  "The soul always knows what to do to heal itself. The challenge is to silence the mind",
+  "The moment you accept what troubles you've been given, the door will open",
+  "To enjoy the rainbow, first enjoy the rain",
+  "You can't have a rainbow without a little rain",
+  "Life will give you whatever experience is most helpful for the evolution of your consciousness",
+  "Acknowledging the good that you already have in your life is the foundation for all abundance",
+  "The moment you start watching the thinker, a higher level of consciousness becomes activated",
+  "Worry pretends to be necessary but serves no useful purpose", 
+  "Force always moves against something, whereas power does not move against something but moves toward something",
+  "Force can only be used against something already manifest; power can be used at any time because it is the source of all manifestation",
+
+];
+
+// Generate a random index different from the current and last sentence indexes
+const getRandomSentenceIndex = () => { 
+  const availableIndexes = sentences
+    .map((_, index) => index) 
+    .filter((index) => index !== currentSentenceIndex && index !== lastSentenceIndex); 
+  if (availableIndexes.length > 0) {
+    return availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+  }  
+  // When all indexes are used, return a random index except the current sentence
+  return sentences
+    .map((_, index) => index)
+    .filter((index) => index !== currentSentenceIndex)[Math.floor(Math.random() * (sentences.length - 1))];
+}; 
+
+ 
+const [currentSentenceIndex, setCurrentSentenceIndex] = useState(getRandomSentenceIndex());
+  const [lastSentenceIndex, setLastSentenceIndex] = useState(-1);
+  const [animation, setAnimation] = useState('fadeIn');
+  const [sentenceVisible, setSentenceVisible] = useState(true);
+  const [fadeout, setFadeout] = useState(false);
+
+  
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setAnimation('fadeOut');
+      setFadeout(true);
+
+      // Add a delay to switch to the next sentence
+      setTimeout(() => {
+        let newIndex;
+        do {
+          newIndex = getRandomSentenceIndex();
+        } while (newIndex === currentSentenceIndex || newIndex === lastSentenceIndex);
+        setCurrentSentenceIndex(newIndex);
+        setLastSentenceIndex(currentSentenceIndex);
+        setAnimation('fadeIn');
+        setFadeout(false);
+      }, 1000); // Adjust this delay as needed for smoother transitions
+    }, 10000); // 5-second interval for updating sentences
+
+    return () => clearInterval(timer);
+  }, [currentSentenceIndex, lastSentenceIndex]);
+
+
+
+const currentSentence = sentences[currentSentenceIndex];
+  
   useEffect(() => { 
     loadMusicSwitchState();
   }, []);
@@ -204,6 +286,7 @@ function HomeScreen() {
           BackgroundTimer.clearInterval(timerRef.current);
            // Save the session duration in minutes
            addMeditationTime(selectedDuration);
+           //STOP MUSIC HERE?
         }
 
         return seconds;
@@ -212,20 +295,24 @@ function HomeScreen() {
   };
 
   const stopSession = () => {
+    console.log("stop session");
     resetTimer();
     setSliderDisabled(false);
     if (timerRef.current) {
       BackgroundTimer.clearInterval(timerRef.current);
     } 
+    
   };
 
   const resetTimer = () => {
+    console.log("resetTimer");
     setSessionInProgress(false);
     setRemainingSeconds(0);
     if (sound) {
       sound.stop();
       sound.release();
       setSound(null); 
+      console.log("stopsound"); 
     }
   };
 
@@ -260,19 +347,18 @@ function HomeScreen() {
 
  const beginSession = () => {
     playTone();
-    resetTimer(); // Reset the timer before starting a new session
+    resetTimer();  
     setSessionInProgress(true);
     setSliderDisabled(true);
       if (musicSwitchState) {
     playMusic();
     setIsMusicPlaying(true);
   }
-    startTimer(selectedDuration * 60); // Start the timer with the selected duration in seconds
+    startTimer(selectedDuration * 60); 
   }; 
  
 
-  const playMusic = () => {
-    // Check if musicSwitchState is active
+  const playMusic = () => { 
     if (musicSwitchState) {
       const newSound = new Sound('now.mp3', null, (error) => {
         if (error) {
@@ -284,21 +370,34 @@ function HomeScreen() {
           setSound(newSound);
         } 
       });
-    }
-  };
+    }   
+  }; 
 
+ 
   return (
     <View style={styles.container}>
    <TouchableOpacity onPress={() => navigation.navigate('Home')}>
         <Image source={GoToStatsImage} style={styles.goToStatsImage} />
-      </TouchableOpacity>
+      </TouchableOpacity>   
       <View style={{ alignItems: 'center' }}>
       <Text style={styles.headerText}>Simply Meditation</Text> 
-      <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text> 
-      <Text style={styles.instructions}>
-        Close your eyes, empty your mind, <Text style={styles.bold}>breathe</Text>
-      </Text>
-        <ProgressCircle
+      {/* <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text>  */}    
+
+
+      {sentenceVisible && (
+        <Animatable.Text
+          style={styles.instructions}
+          animation={animation} 
+          duration={1000} // Adjust the duration for smoother transitions
+        >
+          {currentSentence}
+        </Animatable.Text>
+      )}
+
+
+
+      
+        <ProgressCircle 
           percent={sessionInProgress ? (remainingSeconds / (selectedDuration * 60)) * 100 : 0}
           radius={80}
           borderWidth={10}
@@ -392,12 +491,12 @@ function HomeScreen() {
 }
 
 
-const Stack = createStackNavigator(); 
-// const SessionContext = createContext();
+const Stack = createStackNavigator();  
 const App = () => {  
 
-  const { totalTimeMeditated } = useSessionContext();
   const [musicSwitchState, setMusicSwitchState] = useState(false);
+  const { totalTimeMeditated } = useSessionContext();
+  
  
   return (
     <MusicSwitchProvider>
@@ -482,10 +581,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   instructions: {
+    height: 40,
     textAlign: 'center',
     color: '#ededed',
-    marginBottom: 45, 
-  }, 
+    marginBottom: 25, 
+    marginTop: 5, 
+    paddingHorizontal: 10, 
+  },  
   button: {
     margin: 10,
     padding: 10,
@@ -583,9 +685,10 @@ const styles = StyleSheet.create({
     width: 160, 
     height: 160, 
     marginTop: -30,
-    marginBottom: -18,
+    marginBottom: -18, 
      
-  },
+  }, 
+
 });
 
 export default App;

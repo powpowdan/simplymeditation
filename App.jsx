@@ -509,7 +509,7 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          ...TransitionPresets.SlideFromRightIOS,
+          ...TransitionPresets.ModalFadeTransition,
         }}
       >
       <Stack.Screen name="MeditationTimer" component={HomeScreen} options={{ headerShown: false }}   initialParams={{ totalTimeMeditated }}/>
@@ -520,10 +520,12 @@ const App = () => {
     }, 
     headerTintColor: '#ededed', // Set the text color of the header 
     headerTitleStyle: {
-      fontWeight: 'bold', // Set the font weight of the header title 
+      fontWeight: 'bold',
+       // Set the font weight of the header title 
     },
   }} >
-          {() => <OptionsScreen totalTimeMeditated={totalTimeMeditated}
+          {() => <OptionsScreen 
+          totalTimeMeditated={totalTimeMeditated}
                                 musicSwitchState={musicSwitchState} 
                                 setMusicSwitchState={setMusicSwitchState}/>}
         </Stack.Screen>

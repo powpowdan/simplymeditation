@@ -25,7 +25,7 @@ function OptionsScreen({ navigation}) {
   // Get the totalTimeMeditated from the context using the useSessionContext hook
   console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
   const { musicSwitchState, setMusicSwitchState } = useMusicSwitchContext(); 
-  const { totalTimeMeditated } = useSessionContext();
+  const { totalTimeMeditated, sessionCount  } = useSessionContext();
   
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
@@ -68,6 +68,7 @@ function OptionsScreen({ navigation}) {
     <View style={styles.container2}> 
       <Text style={styles.headerText2}>Stats</Text>
       <Text>Total Time Meditated: {totalTimeMeditated} minutes</Text>
+      <Text>Total Sessions: {sessionCount}</Text>
       {/* <Text>Day Streak: TODO</Text> */}
 
       <Text style={styles.headerText2}>Options</Text> 
@@ -92,7 +93,7 @@ function HomeScreen() {
   const [sessionInProgress, setSessionInProgress] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0); 
   const [selectedDuration, setSelectedDuration] = useState(15);
-  const { addMeditationTime } = useSessionContext();
+  const { addMeditationTime, incrementSessionCount  } = useSessionContext();
   const [sound, setSound] = useState(null);
   const { musicSwitchState, setMusicSwitchState } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -295,7 +296,7 @@ const currentSentence = sentences[currentSentenceIndex];
         } 
         return seconds;
       });
-    }, 1000);
+    }, 1);
   };
 
   useEffect(() => {
@@ -312,7 +313,7 @@ const currentSentence = sentences[currentSentenceIndex];
       BackgroundTimer.clearInterval(timerRef.current);
     } 
     // Stop the music if it is currently playing
-   
+    incrementSessionCount();
   };
 
   const stopMusic = () => {

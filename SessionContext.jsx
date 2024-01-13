@@ -5,11 +5,34 @@ const SessionContext = createContext();
 
 export function SessionProvider({ children }) {
   const [totalTimeMeditated, setTotalTimeMeditated] = useState(0);
+  const [sessionCount, setSessionCount] = useState(0);
 
   const addMeditationTime = (minutes) => {
     setTotalTimeMeditated((prevTotal) => prevTotal + minutes);
   };
 
+  const incrementSessionCount = () => {
+    setSessionCount((prevCount) => prevCount + 1);
+  };
+
+  // load session count
+  useEffect(() => {
+    const loadSessionCount = async () => {
+      try {
+        const value = await AsyncStorage.getItem('sessionCount');
+        if (value !== null) {
+          setSessionCount(parseInt(value, 10));
+        }
+      } catch (error) {
+        console.error('Error loading sessionCount:', error);
+      }
+    };
+
+    loadSessionCount();
+  }, []);
+
+
+// load total time meditated
   useEffect(() => {
     const loadTotalTimeMeditated = async () => {
       try {
@@ -25,6 +48,8 @@ export function SessionProvider({ children }) {
     loadTotalTimeMeditated();
   }, []);
 
+
+//store total time meditated
   useEffect(() => {
     const storeTotalTimeMeditated = async () => {
       try {
@@ -37,10 +62,25 @@ export function SessionProvider({ children }) {
     storeTotalTimeMeditated();
   }, [totalTimeMeditated]);
 
+  //total session count
+  useEffect(() => {
+    const saveSessionCount = async () => {
+      try {
+        await AsyncStorage.setItem('sessionCount', sessionCount.toString());
+      } catch (error) {
+        console.error('Error saving sessionCount:', error);
+      }
+    };
+
+    saveSessionCount();
+  }, [sessionCount]);
+
   const contextValue = useMemo(() => {
     return {
       totalTimeMeditated,
       addMeditationTime,
+      sessionCount,
+      incrementSessionCount,
     };
   }, [totalTimeMeditated]);
 

@@ -37,6 +37,7 @@ function OptionsScreen({navigation}) {
     sessionCount,
     resetStatistics,
     longestTimeMeditated,
+    shortestTimeMeditated,
   } = useSessionContext();
 
   const handleGoToHome = () => {
@@ -115,6 +116,7 @@ function OptionsScreen({navigation}) {
       <Text style={styles.statText}>
         Longest Meditation Session: {longestTimeMeditated} minutes
       </Text>
+      <Text style={styles.statText}>Shortest Meditation Session: {shortestTimeMeditated} minutes</Text>
       {/* <Text>Day Streak: TODO</Text> */}
 
       <Text style={styles.headerText2}>Options</Text>

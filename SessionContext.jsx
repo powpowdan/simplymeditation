@@ -7,13 +7,15 @@ export function SessionProvider({ children }) {
   const [totalTimeMeditated, setTotalTimeMeditated] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [longestTimeMeditated, setLongestTimeMeditated] = useState(0);
+  const [shortestTimeMeditated, setShortestTimeMeditated] = useState(0);
 
   const addMeditationTime = (minutes) => {
     setTotalTimeMeditated((prevTotal) => prevTotal + minutes);
 
      // Update longestTimeMeditated if the current session is longer
-     if (minutes > longestTimeMeditated) {
-      setLongestTimeMeditated(minutes);
+    setLongestTimeMeditated((prevLongest) => Math.max(prevLongest, minutes));
+    if (shortestTimeMeditated === 0 || minutes < shortestTimeMeditated) {
+      setShortestTimeMeditated(minutes);
     }
 
   };
@@ -27,10 +29,12 @@ export function SessionProvider({ children }) {
       await AsyncStorage.setItem('sessionCount', '0');
       await AsyncStorage.setItem('totalTimeMeditated', '0');
       await AsyncStorage.setItem('longestTimeMeditated', '0');
+      await AsyncStorage.setItem('shortestTimeMeditated', '0');
 
       setSessionCount(0);
       setTotalTimeMeditated(0);
       setLongestTimeMeditated(0);
+      setShortestTimeMeditated(0); 
     } catch (error) {
       console.error('Error resetting statistics:', error);
     }
@@ -134,8 +138,9 @@ export function SessionProvider({ children }) {
       incrementSessionCount,
       resetStatistics,
       longestTimeMeditated,
+      shortestTimeMeditated,
     };
-  }, [totalTimeMeditated, longestTimeMeditated]);
+  }, [totalTimeMeditated, longestTimeMeditated, shortestTimeMeditated]);
 
   return (
     <SessionContext.Provider value={contextValue}>

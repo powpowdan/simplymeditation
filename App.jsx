@@ -25,7 +25,7 @@ function OptionsScreen({ navigation}) {
   // Get the totalTimeMeditated from the context using the useSessionContext hook
   console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
   const { musicSwitchState, setMusicSwitchState } = useMusicSwitchContext(); 
-  const { totalTimeMeditated, sessionCount, resetStatistics   } = useSessionContext();
+  const { totalTimeMeditated, sessionCount, resetStatistics, longestTimeMeditated } = useSessionContext();
   
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
@@ -95,6 +95,7 @@ function OptionsScreen({ navigation}) {
       <Text>Total Time Meditated: {totalTimeMeditated} minutes</Text>
       <Text>Total Sessions: {sessionCount}</Text>
       <Text>Average Session Duration: {calculateAverageDuration().toFixed(2)} minutes</Text>
+      <Text>Longest Time Meditated: {longestTimeMeditated} minutes</Text>
       {/* <Text>Day Streak: TODO</Text> */}
 
       <Text style={styles.headerText2}>Options</Text> 

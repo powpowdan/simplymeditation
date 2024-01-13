@@ -6,9 +6,16 @@ const SessionContext = createContext();
 export function SessionProvider({ children }) {
   const [totalTimeMeditated, setTotalTimeMeditated] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
+  const [longestTimeMeditated, setLongestTimeMeditated] = useState(0);
 
   const addMeditationTime = (minutes) => {
     setTotalTimeMeditated((prevTotal) => prevTotal + minutes);
+
+     // Update longestTimeMeditated if the current session is longer
+     if (minutes > longestTimeMeditated) {
+      setLongestTimeMeditated(minutes);
+    }
+
   };
 
   const incrementSessionCount = () => {
@@ -19,9 +26,11 @@ export function SessionProvider({ children }) {
     try {
       await AsyncStorage.setItem('sessionCount', '0');
       await AsyncStorage.setItem('totalTimeMeditated', '0');
+      await AsyncStorage.setItem('longestTimeMeditated', '0');
 
       setSessionCount(0);
       setTotalTimeMeditated(0);
+      setLongestTimeMeditated(0);
     } catch (error) {
       console.error('Error resetting statistics:', error);
     }
@@ -87,6 +96,36 @@ export function SessionProvider({ children }) {
     saveSessionCount();
   }, [sessionCount]);
 
+  // load longest time meditated
+  useEffect(() => {
+    const loadLongestTimeMeditated = async () => {
+      try {
+        const storedLongestTime = await AsyncStorage.getItem('longestTimeMeditated');
+        if (storedLongestTime !== null) {
+          setLongestTimeMeditated(parseInt(storedLongestTime));
+        }
+      } catch (error) {
+        console.error('Error loading longestTimeMeditated:', error);
+      }
+    };
+
+    loadLongestTimeMeditated();
+  }, []);
+
+  //store longest time
+  useEffect(() => {
+    const storeLongestTimeMeditated = async () => {
+      try {
+        await AsyncStorage.setItem('longestTimeMeditated', longestTimeMeditated.toString());
+      } catch (error) {
+        console.error('Error storing longestTimeMeditated:', error);
+      }
+    };
+
+    storeLongestTimeMeditated();
+  }, [longestTimeMeditated]);
+
+
   const contextValue = useMemo(() => {
     return {
       totalTimeMeditated,
@@ -94,8 +133,9 @@ export function SessionProvider({ children }) {
       sessionCount,
       incrementSessionCount,
       resetStatistics,
+      longestTimeMeditated,
     };
-  }, [totalTimeMeditated]);
+  }, [totalTimeMeditated, longestTimeMeditated]);
 
   return (
     <SessionContext.Provider value={contextValue}>

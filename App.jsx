@@ -31,6 +31,13 @@ function OptionsScreen({ navigation}) {
     navigation.navigate('MeditationTimer');
   };
 
+  const calculateAverageDuration = () => {
+    if (sessionCount === 0) {
+      return 0;
+    }
+    return totalTimeMeditated / sessionCount;
+  };
+
   useEffect(() => {
     // Load the switch state from AsyncStorage when the component mounts
     loadSwitchState();
@@ -69,6 +76,7 @@ function OptionsScreen({ navigation}) {
       <Text style={styles.headerText2}>Stats</Text>
       <Text>Total Time Meditated: {totalTimeMeditated} minutes</Text>
       <Text>Total Sessions: {sessionCount}</Text>
+      <Text>Average Session Duration: {calculateAverageDuration().toFixed(2)} minutes</Text>
       {/* <Text>Day Streak: TODO</Text> */}
 
       <Text style={styles.headerText2}>Options</Text> 

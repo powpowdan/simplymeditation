@@ -15,6 +15,18 @@ export function SessionProvider({ children }) {
     setSessionCount((prevCount) => prevCount + 1);
   };
 
+  const resetStatistics = async () => {
+    try {
+      await AsyncStorage.setItem('sessionCount', '0');
+      await AsyncStorage.setItem('totalTimeMeditated', '0');
+
+      setSessionCount(0);
+      setTotalTimeMeditated(0);
+    } catch (error) {
+      console.error('Error resetting statistics:', error);
+    }
+  };
+
   // load session count
   useEffect(() => {
     const loadSessionCount = async () => {
@@ -81,6 +93,7 @@ export function SessionProvider({ children }) {
       addMeditationTime,
       sessionCount,
       incrementSessionCount,
+      resetStatistics,
     };
   }, [totalTimeMeditated]);
 

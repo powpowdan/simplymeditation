@@ -25,10 +25,28 @@ function OptionsScreen({ navigation}) {
   // Get the totalTimeMeditated from the context using the useSessionContext hook
   console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
   const { musicSwitchState, setMusicSwitchState } = useMusicSwitchContext(); 
-  const { totalTimeMeditated, sessionCount  } = useSessionContext();
+  const { totalTimeMeditated, sessionCount, resetStatistics   } = useSessionContext();
   
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
+  };
+ 
+  const handleResetStatistics = () => {
+    Alert.alert(
+      'Confirm Reset',
+      'Are you sure you want to reset all statistics?',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'RESET',
+          onPress: resetStatistics,
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const calculateAverageDuration = () => {
@@ -83,6 +101,9 @@ function OptionsScreen({ navigation}) {
       {/* <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity> */}
       <TouchableOpacity><Text style={styles.options}>Monk chanting</Text></TouchableOpacity> 
       <Switch value={musicSwitchState} onValueChange={handleMusicSwitchChange} />
+      <TouchableOpacity onPress={handleResetStatistics}>
+        <Text style={{ color: '#ff0000', marginTop: 20 }}>Reset Statistics</Text>
+      </TouchableOpacity>
       {/* <TouchableOpacity><Text style={styles.options}>Randomized meditation alarm switch</Text></TouchableOpacity>  */}
        
        
@@ -197,8 +218,7 @@ const [currentSentenceIndex, setCurrentSentenceIndex] = useState(getRandomSenten
   
     return () => clearInterval(timer);
   }, [currentSentenceIndex, lastSentenceIndex]);
-  
- 
+   
 const currentSentence = sentences[currentSentenceIndex];
   
  useEffect(() => {
@@ -368,9 +388,7 @@ const currentSentence = sentences[currentSentenceIndex];
       { cancelable: false }
     );
   };
-
-  
-
+ 
  const beginSession = () => {
     playTone();
     resetTimer();  
@@ -381,8 +399,7 @@ const currentSentence = sentences[currentSentenceIndex];
     setIsMusicPlaying(true);
   }
     startTimer(selectedDuration * 60); 
-  }; 
- 
+  };  
 
   const playMusic = () => { 
     if (musicSwitchState) {
@@ -399,7 +416,7 @@ const currentSentence = sentences[currentSentenceIndex];
     }   
   }; 
 
- 
+   
   return (
     <View style={styles.container}>
     
@@ -425,9 +442,7 @@ const currentSentence = sentences[currentSentenceIndex];
         </Animatable.Text>
       )}
 
-
-
-      
+ 
         <ProgressCircle 
           percent={sessionInProgress ? (remainingSeconds / (selectedDuration * 60)) * 100 : 0}
           radius={80}
@@ -550,7 +565,7 @@ const App = () => {
        // Set the font weight of the header title 
     },
   }} >
-          {() => <OptionsScreen 
+          {() => <OptionsScreen  
           totalTimeMeditated={totalTimeMeditated}
                                 musicSwitchState={musicSwitchState} 
                                 setMusicSwitchState={setMusicSwitchState}/>}

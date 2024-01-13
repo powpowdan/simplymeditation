@@ -24,8 +24,9 @@ function OptionsScreen({ navigation}) {
   
   // Get the totalTimeMeditated from the context using the useSessionContext hook
   console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
-  const { totalTimeMeditated } = useSessionContext();
   const { musicSwitchState, setMusicSwitchState } = useMusicSwitchContext(); 
+  const { totalTimeMeditated } = useSessionContext();
+  
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
   };
@@ -99,10 +100,11 @@ function HomeScreen() {
   const timerRef = useRef();
   const timerDurations = [5, 10, 15, 20]; 
   const [sliderDisabled, setSliderDisabled] = useState(false);
+  const soundRef = useRef(null);
   
   // Initialize buttonSelectedDuration with useState
   const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
-    button5Mins: 5,
+    button5Mins:  5,
     button10Mins: 10,
     button15Mins: 15,
     button20Mins: 20, 
@@ -162,47 +164,49 @@ const [currentSentenceIndex, setCurrentSentenceIndex] = useState(getRandomSenten
   const [sentenceVisible, setSentenceVisible] = useState(true);
   const [fadeout, setFadeout] = useState(false);
 
-  
+   
 
   useEffect(() => {
     const timer = setInterval(() => {
       setAnimation('fadeOut');
       setFadeout(true);
-
+  
       // Add a delay to switch to the next sentence
       setTimeout(() => {
-        let newIndex;
-        do {
-          newIndex = getRandomSentenceIndex();
-        } while (newIndex === currentSentenceIndex || newIndex === lastSentenceIndex);
-        setCurrentSentenceIndex(newIndex);
-        setLastSentenceIndex(currentSentenceIndex);
-        setAnimation('fadeIn');
-        setFadeout(false);
+        setCurrentSentenceIndex((prevCurrentIndex) => {
+          let newIndex;
+          do {
+            newIndex = getRandomSentenceIndex();
+          } while (newIndex === prevCurrentIndex || newIndex === lastSentenceIndex);
+          setLastSentenceIndex(prevCurrentIndex);
+          setAnimation('fadeIn');
+          setFadeout(false);
+          return newIndex;
+        });
       }, 1000); // Adjust this delay as needed for smoother transitions
     }, 10000); // 5-second interval for updating sentences
-
+  
     return () => clearInterval(timer);
   }, [currentSentenceIndex, lastSentenceIndex]);
-
-
-
+  
+ 
 const currentSentence = sentences[currentSentenceIndex];
   
-  useEffect(() => { 
-    loadMusicSwitchState();
-  }, []);
-
+ useEffect(() => {
   const loadMusicSwitchState = async () => {
     try {
       const value = await AsyncStorage.getItem('musicSwitchState');
-      if (value !== null) { 
+      if (value !== null) {
         setMusicSwitchState(JSON.parse(value));
       }
     } catch (error) {
       console.error('Error loading musicSwitchState:', error);
     }
   };
+
+  loadMusicSwitchState();
+}, []);
+  
   
   useEffect(() => {
     const subscription = AppState.addEventListener('change', handleAppStateChange);
@@ -280,19 +284,25 @@ const currentSentence = sentences[currentSentenceIndex];
       setRemainingSeconds((prevRemainingSeconds) => {
         const seconds = prevRemainingSeconds - 1;
 
-        if (seconds === 0) {
+        if (seconds === 0) { 
           stopSession();
           playTone();
           BackgroundTimer.clearInterval(timerRef.current);
            // Save the session duration in minutes
            addMeditationTime(selectedDuration);
-           //STOP MUSIC HERE?
-        }
-
+           //STOP MUSIC HERE? 
+           stopMusic(); 
+        } 
         return seconds;
       });
     }, 1000);
   };
+
+  useEffect(() => {
+    return () => {
+      stopMusic();
+    };
+  }, [sound]);
 
   const stopSession = () => {
     console.log("stop session");
@@ -301,19 +311,26 @@ const currentSentence = sentences[currentSentenceIndex];
     if (timerRef.current) {
       BackgroundTimer.clearInterval(timerRef.current);
     } 
-    
+    // Stop the music if it is currently playing
+   
   };
 
+  const stopMusic = () => {
+    const currentSound = soundRef.current; 
+    if (currentSound) { 
+      currentSound.stop(); 
+      currentSound.release(); 
+      soundRef.current = null; 
+      setIsMusicPlaying(false); 
+      console.log("stopMusicFunction ran");
+    } 
+  };
+ 
   const resetTimer = () => {
     console.log("resetTimer");
     setSessionInProgress(false);
     setRemainingSeconds(0);
-    if (sound) {
-      sound.stop();
-      sound.release();
-      setSound(null); 
-      console.log("stopsound"); 
-    }
+   stopMusic();
   };
 
   const handleTimerChange = (value) => {
@@ -367,7 +384,7 @@ const currentSentence = sentences[currentSentenceIndex];
           newSound.play(() => { 
             newSound.release(); 
           });
-          setSound(newSound);
+          soundRef.current = newSound;
         } 
       });
     }   

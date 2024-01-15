@@ -12,7 +12,7 @@ export function SessionProvider({ children }) {
   const addMeditationTime = (minutes) => {
     setTotalTimeMeditated((prevTotal) => prevTotal + minutes);
 
-     // Update longestTimeMeditated if the current session is longer
+     // Update longestTimeMeditated + shortest 
     setLongestTimeMeditated((prevLongest) => Math.max(prevLongest, minutes));
     if (shortestTimeMeditated === 0 || minutes < shortestTimeMeditated) {
       setShortestTimeMeditated(minutes);
@@ -128,6 +128,35 @@ export function SessionProvider({ children }) {
 
     storeLongestTimeMeditated();
   }, [longestTimeMeditated]);
+
+  // Load shortest time meditated
+useEffect(() => {
+  const loadShortestTimeMeditated = async () => {
+    try {
+      const storedShortestTime = await AsyncStorage.getItem('shortestTimeMeditated');
+      if (storedShortestTime !== null) {
+        setShortestTimeMeditated(parseInt(storedShortestTime));
+      }
+    } catch (error) {
+      console.error('Error loading shortestTimeMeditated:', error);
+    }
+  };
+
+  loadShortestTimeMeditated();
+}, []);
+
+// Store shortest time meditated
+useEffect(() => {
+  const storeShortestTimeMeditated = async () => {
+    try {
+      await AsyncStorage.setItem('shortestTimeMeditated', shortestTimeMeditated.toString());
+    } catch (error) {
+      console.error('Error storing shortestTimeMeditated:', error);
+    }
+  };
+
+  storeShortestTimeMeditated();
+}, [shortestTimeMeditated]);
 
 
   const contextValue = useMemo(() => {

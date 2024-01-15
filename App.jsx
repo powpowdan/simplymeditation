@@ -224,7 +224,7 @@ function OptionsScreen({navigation}) {
         <>
         <View style={styles.switchContainer}>
             <Switch value={interval75Active} onValueChange={handleInterval75Change} />
-            <Text style={styles.switchText}>25% of ssession</Text>
+            <Text style={styles.switchText}>25% of session</Text>
           </View>
   
           <View style={styles.switchContainer}>
@@ -237,12 +237,13 @@ function OptionsScreen({navigation}) {
             <Switch value={interval25Active} onValueChange={handleInterval25Change} />
             <Text style={styles.switchText}>75% of session</Text>
           </View>
-
-         
-
-         
+  
         </>
       ) : null}
+
+      <TouchableOpacity onPress={handleResetStatistics}>
+        <Text style={{color: '#ff0000', marginTop: 200}}>Reset  Statistics</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -481,10 +482,10 @@ function HomeScreen() {
           addMeditationTime(selectedDuration);
           //STOP MUSIC HERE?
           stopMusic();
-        }
+        } 
         return seconds;
-      });
-    }, 1000);
+      }); 
+    }, 1);
   };
 
   useEffect(() => {

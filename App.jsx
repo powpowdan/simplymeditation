@@ -31,7 +31,17 @@ import * as Animatable from 'react-native-animatable';
 function OptionsScreen({navigation}) {
   // Get the totalTimeMeditated from the context using the useSessionContext hook
   console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
-  const {musicSwitchState, setMusicSwitchState, intervalBellsSwitchState, setIntervalBellsSwitchState} = useMusicSwitchContext();
+  const {musicSwitchState, 
+    setMusicSwitchState,
+     intervalBellsSwitchState, 
+     setIntervalBellsSwitchState,
+     interval25Active, 
+     toggleInterval25, 
+     interval50Active, 
+     toggleInterval50, 
+     interval75Active, 
+     toggleInterval75, 
+    } = useMusicSwitchContext();
   const {
     totalTimeMeditated,
     sessionCount,
@@ -134,6 +144,52 @@ function OptionsScreen({navigation}) {
     }
   };
 
+  //interval bell options
+  
+
+  const saveInterval25ActiveState = async (value) => {
+    try {
+      await AsyncStorage.setItem('interval25Active', JSON.stringify(value));
+      console.log('25% Interval switch state saved');
+    } catch (error) {
+      console.error('Error saving 25% Interval switch state:', error);
+    }
+  }; 
+  const saveInterval50ActiveState = async (value) => {
+    try {
+      await AsyncStorage.setItem('interval50Active', JSON.stringify(value));
+      console.log('50% Interval switch state saved');
+    } catch (error) {
+      console.error('Error saving 50% Interval switch state:', error);
+    }
+  };
+
+  const handleInterval25Change = (value) => {
+    toggleInterval25(value);
+    saveInterval25ActiveState(value);
+  };
+
+  const handleInterval50Change = (value) => {
+    toggleInterval50(value);
+    saveInterval50ActiveState(value);
+  };
+
+  const handleInterval75Change = (value) => {
+    toggleInterval75(value);
+    saveInterval75ActiveState(value);
+  };
+
+  const saveInterval75ActiveState = async (value) => {
+    try {
+      await AsyncStorage.setItem('interval75Active', JSON.stringify(value));
+      console.log('75% Interval switch state saved');
+    } catch (error) {
+      console.error('Error saving 75% Interval switch state:', error);
+    }
+  };
+
+  
+
   return (
     <View style={styles.container2}>
       <Text style={styles.headerText2}>Statistics</Text>
@@ -163,16 +219,30 @@ function OptionsScreen({navigation}) {
       <Text style={styles.options}>Interval Bells</Text>
       <Switch value={intervalBellsSwitchState} onValueChange={handleIntervalBellsSwitchChange} />
 
-      <TouchableOpacity onPress={handleResetStatistics}>
-        <Text style={{color: '#ff0000', marginTop: 20}}>Reset Statistics</Text>
-      </TouchableOpacity>
-      {/* <TouchableOpacity><Text style={styles.options}>Randomized meditation alarm switch</Text></TouchableOpacity>  */}
+      {intervalBellsSwitchState ? (
+        // Render the interval options only if the "Interval Bells" switch is active
+        <>
+        <View style={styles.switchContainer}>
+            <Switch value={interval75Active} onValueChange={handleInterval75Change} />
+            <Text style={styles.switchText}>25% of ssession</Text>
+          </View>
+  
+          <View style={styles.switchContainer}>
+            <Switch value={interval50Active} onValueChange={handleInterval50Change} />
+            <Text style={styles.switchText}>50% of session</Text>
+          </View>
 
-      {/* <TouchableOpacity
-        style={{ marginTop: 20, backgroundColor: '#74aff7', padding: 10, borderRadius: 8 }}
-        onPress={handleGoToHome}>
-        <Text style={{ color: '#ededed', fontSize: 18 }}>Go to Meditation Timer</Text>
-      </TouchableOpacity> */}
+
+        <View style={styles.switchContainer}>
+            <Switch value={interval25Active} onValueChange={handleInterval25Change} />
+            <Text style={styles.switchText}>75% of session</Text>
+          </View>
+
+         
+
+         
+        </>
+      ) : null}
     </View>
   );
 }
@@ -184,7 +254,10 @@ function HomeScreen() {
   const [selectedDuration, setSelectedDuration] = useState(15);
   const {addMeditationTime, incrementSessionCount} = useSessionContext();
   const [sound, setSound] = useState(null);
-  const {musicSwitchState, setMusicSwitchState, intervalBellsSwitchState } = useMusicSwitchContext();
+  const {musicSwitchState, setMusicSwitchState, intervalBellsSwitchState,  setIntervalBellsSwitchState,
+    interval25Active,
+    interval50Active,
+    interval75Active, } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
   const timerRef = useRef();
@@ -229,7 +302,7 @@ function HomeScreen() {
     'The moment you start watching the thinker, a higher level of consciousness becomes activated',
     'Worry pretends to be necessary but serves no useful purpose',
     'Force always moves against something, whereas power does not move against something but moves toward something',
-    'Force can only be used against something already manifest; power can be used at any time because it is the source of all manifestation',
+    
   ];
 
   // Generate a random index different from the current and last sentence indexes
@@ -377,10 +450,10 @@ function HomeScreen() {
     });
   };
 
-  const playIntervalBell = () => {
-    const sound = new Sound('intervalbell.mp3', null, error => {
+  const playIntervalBell = (percentage) => {
+    const sound = new Sound('intervalbell.mp3', null, (error) => {
       if (error) {
-        alert('Interbal bell ALERT', JSON.stringify(error));
+        alert(`Interval bell ${percentage}% ALERT`, JSON.stringify(error));
       }
       sound.play(() => sound.release());
     });
@@ -392,15 +465,13 @@ function HomeScreen() {
       setRemainingSeconds(prevRemainingSeconds => {
         const seconds = prevRemainingSeconds - 1;
 
-      if (intervalBellsSwitchState) {
-        if (seconds === Math.floor(duration * 0.25)) {
-          playIntervalBell(); }
-        else if (seconds === Math.floor(duration * 0.5)) {
-          playIntervalBell(); } 
-         else if (seconds === Math.floor(duration * 0.75)) { 
-          playIntervalBell();  
-         }
-      }
+        if (intervalBellsSwitchState && interval25Active && seconds === Math.floor(duration * 0.25)) {
+          playIntervalBell(25);
+        } else if (intervalBellsSwitchState && interval50Active && seconds === Math.floor(duration * 0.5)) {
+          playIntervalBell(50);
+        } else if (intervalBellsSwitchState && interval75Active && seconds === Math.floor(duration * 0.75)) {
+          playIntervalBell(75);
+        }
 
         if (seconds === 0) {
           stopSession();
@@ -413,7 +484,7 @@ function HomeScreen() {
         }
         return seconds;
       });
-    }, 1);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -721,6 +792,7 @@ const styles = StyleSheet.create({
   },
   options: {
     paddingTop: 20,
+    marginBottom: 10,
   },
   timerContainer: {
     alignItems: 'center',
@@ -845,6 +917,15 @@ const styles = StyleSheet.create({
     height: 160,
     marginTop: -30,
     marginBottom: -18,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5, 
+    marginLeft: 110,
+  },
+  switchText: {
+    marginLeft: 10,
   },
 });
 

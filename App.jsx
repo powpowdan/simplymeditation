@@ -31,7 +31,7 @@ import * as Animatable from 'react-native-animatable';
 function OptionsScreen({navigation}) {
   // Get the totalTimeMeditated from the context using the useSessionContext hook
   console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
-  const {musicSwitchState, setMusicSwitchState} = useMusicSwitchContext();
+  const {musicSwitchState, setMusicSwitchState, intervalBellsSwitchState, setIntervalBellsSwitchState} = useMusicSwitchContext();
   const {
     totalTimeMeditated,
     sessionCount,
@@ -102,6 +102,38 @@ function OptionsScreen({navigation}) {
     saveSwitchState(value);
   };
 
+
+  //intervals
+  const handleIntervalBellsSwitchChange = (value) => {
+    setIntervalBellsSwitchState(value);
+    saveIntervalBellsSwitchState(value);
+  };
+  
+  const saveIntervalBellsSwitchState = async (value) => {
+    try {
+      await AsyncStorage.setItem('intervalBellsSwitchState', JSON.stringify(value));
+      console.log('Interval Bells switch state saved');
+    } catch (error) {
+      console.error('Error saving Interval Bells switch state:', error);
+    }
+  }; 
+  
+  // Load the Interval Bells switch state from AsyncStorage when the component mounts
+  useEffect(() => {
+    loadIntervalBellsSwitchState();
+  }, []);
+  
+  const loadIntervalBellsSwitchState = async () => {
+    try {
+      const value = await AsyncStorage.getItem('intervalBellsSwitchState');
+      if (value !== null) {
+        setIntervalBellsSwitchState(JSON.parse(value));
+      }
+    } catch (error) {
+      console.error('Error loading Interval Bells switch state:', error);
+    }
+  };
+
   return (
     <View style={styles.container2}>
       <Text style={styles.headerText2}>Statistics</Text>
@@ -128,6 +160,9 @@ function OptionsScreen({navigation}) {
         value={musicSwitchState}
         onValueChange={handleMusicSwitchChange}
       />
+      <Text style={styles.options}>Interval Bells</Text>
+      <Switch value={intervalBellsSwitchState} onValueChange={handleIntervalBellsSwitchChange} />
+
       <TouchableOpacity onPress={handleResetStatistics}>
         <Text style={{color: '#ff0000', marginTop: 20}}>Reset Statistics</Text>
       </TouchableOpacity>
@@ -149,7 +184,7 @@ function HomeScreen() {
   const [selectedDuration, setSelectedDuration] = useState(15);
   const {addMeditationTime, incrementSessionCount} = useSessionContext();
   const [sound, setSound] = useState(null);
-  const {musicSwitchState, setMusicSwitchState} = useMusicSwitchContext();
+  const {musicSwitchState, setMusicSwitchState, intervalBellsSwitchState } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
   const timerRef = useRef();
@@ -342,11 +377,30 @@ function HomeScreen() {
     });
   };
 
+  const playIntervalBell = () => {
+    const sound = new Sound('intervalbell.mp3', null, error => {
+      if (error) {
+        alert('Interbal bell ALERT', JSON.stringify(error));
+      }
+      sound.play(() => sound.release());
+    });
+  };
+
   const startTimer = duration => {
     setRemainingSeconds(duration);
     timerRef.current = BackgroundTimer.setInterval(() => {
       setRemainingSeconds(prevRemainingSeconds => {
         const seconds = prevRemainingSeconds - 1;
+
+      if (intervalBellsSwitchState) {
+        if (seconds === Math.floor(duration * 0.25)) {
+          playIntervalBell(); }
+        else if (seconds === Math.floor(duration * 0.5)) {
+          playIntervalBell(); } 
+         else if (seconds === Math.floor(duration * 0.75)) { 
+          playIntervalBell();  
+         }
+      }
 
         if (seconds === 0) {
           stopSession();
@@ -450,6 +504,8 @@ function HomeScreen() {
       });
     }
   };
+
+
 
   return (
     <View style={styles.container}>

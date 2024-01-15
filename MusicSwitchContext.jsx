@@ -4,13 +4,16 @@ const MusicSwitchContext = createContext();
 
 export function MusicSwitchProvider({ children }) {
   const [musicSwitchState, setMusicSwitchState] = useState(false);
+  const [intervalBellsSwitchState, setIntervalBellsSwitchState] = useState(false);
 
   const contextValue = useMemo(() => {
     return {
       musicSwitchState,
       setMusicSwitchState,
+      intervalBellsSwitchState,
+      setIntervalBellsSwitchState,
     }; 
-  }, [musicSwitchState]);
+  }, [musicSwitchState, intervalBellsSwitchState]);
 
   return (
     <MusicSwitchContext.Provider value={contextValue}>

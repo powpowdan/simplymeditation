@@ -216,7 +216,7 @@ function OptionsScreen({navigation}) {
         value={musicSwitchState}
         onValueChange={handleMusicSwitchChange}
       />
-      <Text style={styles.options}>Interval Bells</Text>
+      <Text style={styles.belloptions}>Interval Bells</Text>
       <Switch value={intervalBellsSwitchState} onValueChange={handleIntervalBellsSwitchChange} />
 
       {intervalBellsSwitchState ? (
@@ -241,8 +241,8 @@ function OptionsScreen({navigation}) {
         </>
       ) : null}
 
-      <TouchableOpacity onPress={handleResetStatistics}>
-        <Text style={{color: '#ff0000', marginTop: 200}}>Reset  Statistics</Text>
+      <TouchableOpacity onPress={handleResetStatistics}  style={styles.resetButtonContainer}>
+        <Text style={styles.reset}>Reset  Statistics</Text>
       </TouchableOpacity>
     </View>
   );
@@ -795,6 +795,10 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     marginBottom: 10,
   },
+  belloptions: {
+    paddingTop: 20,
+    marginBottom: 10,
+  },
   timerContainer: {
     alignItems: 'center',
     marginBottom: 30,
@@ -922,11 +926,19 @@ const styles = StyleSheet.create({
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5, 
+    marginTop: 15, 
     marginLeft: 110,
   },
   switchText: {
     marginLeft: 10,
+  },
+  reset: { 
+    color: 'red', 
+  },
+  resetButtonContainer: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
   },
 });
 

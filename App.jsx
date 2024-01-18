@@ -41,6 +41,10 @@ function OptionsScreen({navigation}) {
      toggleInterval50, 
      interval75Active, 
      toggleInterval75, 
+     adjustmentSwitchState,
+     toggleAdjustmentSwitch  ,
+     adjustmentValue,
+     setAdjustmentValue,
     } = useMusicSwitchContext();
   const {
     totalTimeMeditated,
@@ -48,8 +52,7 @@ function OptionsScreen({navigation}) {
     resetStatistics,
     longestTimeMeditated,
     shortestTimeMeditated,
-  } = useSessionContext();
-
+  } = useSessionContext(); 
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
   };
@@ -214,8 +217,17 @@ function OptionsScreen({navigation}) {
       </TouchableOpacity>
       <Switch
         value={musicSwitchState}
-        onValueChange={handleMusicSwitchChange}
+        onValueChange={handleMusicSwitchChange} 
       />
+
+ 
+  <Text style={styles.options}>Adjust Timer</Text>
+  <Switch
+    value={adjustmentSwitchState}
+    onValueChange={(value) => toggleAdjustmentSwitch(value)}
+  />
+ 
+
       <Text style={styles.belloptions}>Interval Bells</Text>
       <Switch value={intervalBellsSwitchState} onValueChange={handleIntervalBellsSwitchChange} />
 
@@ -255,16 +267,29 @@ function HomeScreen() {
   const [selectedDuration, setSelectedDuration] = useState(15);
   const {addMeditationTime, incrementSessionCount} = useSessionContext();
   const [sound, setSound] = useState(null);
-  const {musicSwitchState, setMusicSwitchState, intervalBellsSwitchState,  setIntervalBellsSwitchState,
+  const {musicSwitchState,
+     setMusicSwitchState,
+     intervalBellsSwitchState, 
+     setIntervalBellsSwitchState, 
     interval25Active,
     interval50Active,
-    interval75Active, } = useMusicSwitchContext();
+    interval75Active,
+    toggleAdjustmentSwitch,
+    adjustmentSwitchState,
+    adjustmentValue,
+   } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
   const timerRef = useRef();
   const timerDurations = [5, 10, 15, 20];
   const [sliderDisabled, setSliderDisabled] = useState(false);
-  const soundRef = useRef(null);
+  const soundRef = useRef(null); 
+  const [randomizedDuration, setRandomizedDuration] = useState(0);
+  const [totalMeditationTime, setTotalMeditationTime] = useState(0);
+  const [adjustedSessionDuration, setAdjustedSessionDuration] = useState(0);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
+
+
 
   // Initialize buttonSelectedDuration with useState
   const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
@@ -424,6 +449,12 @@ function HomeScreen() {
     }
   }, [buttonSelectedDuration]);
 
+  useEffect(() => {
+    const randomAdjustment = adjustmentSwitchState ? (Math.random() * 0.5 - 0.3) * selectedDuration : 0;
+    const newRandomizedDuration = selectedDuration + randomAdjustment;
+    setRandomizedDuration(newRandomizedDuration);
+  }, [selectedDuration, adjustmentSwitchState]);
+
   const handleAppStateChange = nextAppState => {
     if (
       appState.current.match(/active/) &&
@@ -460,33 +491,36 @@ function HomeScreen() {
     });
   };
 
-  const startTimer = duration => {
-    setRemainingSeconds(duration);
+  const startTimer  = (totalSeconds) => { 
+
+    setRemainingSeconds(totalSeconds);
+
     timerRef.current = BackgroundTimer.setInterval(() => {
-      setRemainingSeconds(prevRemainingSeconds => {
+      setRemainingSeconds((prevRemainingSeconds) => {
         const seconds = prevRemainingSeconds - 1;
 
-        if (intervalBellsSwitchState && interval25Active && seconds === Math.floor(duration * 0.25)) {
-          playIntervalBell(25);
-        } else if (intervalBellsSwitchState && interval50Active && seconds === Math.floor(duration * 0.5)) {
-          playIntervalBell(50);
-        } else if (intervalBellsSwitchState && interval75Active && seconds === Math.floor(duration * 0.75)) {
-          playIntervalBell(75);
-        }
+      const interval25 = Math.floor((totalSeconds) * 0.25);
+      const interval50 = Math.floor((totalSeconds) * 0.5);
+      const interval75 = Math.floor((totalSeconds) * 0.75);
+ 
+      if (intervalBellsSwitchState && interval25Active && seconds === interval25) {
+        playIntervalBell(25);
+      } else if (intervalBellsSwitchState && interval50Active && seconds === interval50) {
+        playIntervalBell(50);
+      } else if (intervalBellsSwitchState && interval75Active && seconds === interval75) {
+        playIntervalBell(75);
+      }
 
-        if (seconds === 0) {
-          stopSession();
-          playTone();
-          BackgroundTimer.clearInterval(timerRef.current);
-          // Save the session duration in minutes
-          addMeditationTime(selectedDuration);
-          //STOP MUSIC HERE?
-          stopMusic();
-        } 
+      if (seconds === 0) {
+        handleTimerEnd();
+        playTone();
+        BackgroundTimer.clearInterval(timerRef.current); 
+        stopMusic();
+      }
         return seconds;
       }); 
-    }, 1);
-  };
+    }, 1); 
+  }; 
 
   useEffect(() => {
     return () => {
@@ -495,14 +529,28 @@ function HomeScreen() {
   }, [sound]);
 
   const stopSession = () => {
-    console.log('stop session');
-    resetTimer();
+    console.log('stop session by user');  
     setSliderDisabled(false);
     if (timerRef.current) {
       BackgroundTimer.clearInterval(timerRef.current);
-    }
-    // Stop the music if it is currently playing
+    }  
+    stopMusic();
+    setSessionInProgress(false);
+  };
+
+  const handleTimerEnd = () => {
+    console.log('timer ended naturally');
+    const sessionDuration = adjustmentSwitchState
+    ? Math.round(randomizedDuration + adjustmentValue)
+    : Math.round(randomizedDuration);
+
+  addMeditationTime(sessionDuration);
+    setTotalMeditationTime((prevTotal) => prevTotal + sessionDuration);
+    resetTimer();
+    setSliderDisabled(false);
     incrementSessionCount();
+    setSessionCompleted(true);
+    setSessionInProgress(false);
   };
 
   const stopMusic = () => {
@@ -549,17 +597,33 @@ function HomeScreen() {
       {cancelable: false},
     );
   };
+ 
+  const beginSession = () => {  
+    const randomAdjustment = adjustmentSwitchState
+    ? (Math.random() * 0.5 - 0.3) * selectedDuration 
+    : 0;
+    const randomizedDuration = selectedDuration + randomAdjustment;
+    const totalSeconds = Math.round(randomizedDuration * 60);
+      const initialMinutes = Math.floor(totalSeconds / 60);
+  const initialSeconds = totalSeconds % 60;
+  setRandomizedDuration(randomizedDuration);
 
-  const beginSession = () => {
+  const adjustedDuration = adjustmentSwitchState
+  ? Math.round(randomizedDuration + adjustmentValue)
+  : randomizedDuration;
+  setAdjustedSessionDuration(adjustedDuration);
+  console.log(
+    `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`
+  );
     playTone();
     resetTimer();
     setSessionInProgress(true);
     setSliderDisabled(true);
-    if (musicSwitchState) {
+    if (musicSwitchState) { 
       playMusic();
       setIsMusicPlaying(true);
-    }
-    startTimer(selectedDuration * 60);
+    } 
+    startTimer(totalSeconds);
   };
 
   const playMusic = () => {

@@ -59,14 +59,16 @@ function OptionsScreen({navigation}) {
     navigation.navigate('MeditationTimer');
   };
 
-  const formatTime = (timeInMinutes) => {
-    const hours = Math.floor(timeInMinutes / 60);
-    const remainingMinutes = Math.floor(timeInMinutes % 60);
-    const seconds = Math.round((timeInMinutes % 1) * 60);
+  const formatTime = (timeInSeconds) => {
+    const hours = Math.floor(timeInSeconds / 3600);
+    const remainingMinutes = Math.floor((timeInSeconds % 3600) / 60);
+    const remainingSeconds = Math.round(timeInSeconds % 60);
   
     const formatHours = hours > 0 ? `${hours} ${hours === 1 ? 'hour' : 'hours'}` : '';
-    const formatMinutes = remainingMinutes > 0 ? `${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}` : '';
-    const formatSeconds = seconds > 0 ? `${seconds} ${seconds === 1 ? 'second' : 'seconds'}` : '';
+    const formatMinutes =
+      remainingMinutes > 0 ? `${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}` : '';
+    const formatSeconds =
+      remainingSeconds > 0 ? `${remainingSeconds} ${remainingSeconds === 1 ? 'second' : 'seconds'}` : '';
   
     const timeArray = [formatHours, formatMinutes, formatSeconds].filter(Boolean);
   
@@ -80,7 +82,7 @@ function OptionsScreen({navigation}) {
   
       return formattedTime;
     }
-  };  
+  };
    
   const handleResetStatistics = () => {
     Alert.alert(
@@ -496,6 +498,25 @@ function HomeScreen() {
 
     appState.current = nextAppState;
   };
+
+  const loadAndFormatTotalTime = async () => {
+    try {
+      const storedTotalTime = await AsyncStorage.getItem('totalTimeMeditated');
+      if (storedTotalTime !== null) {
+        const totalTimeInMinutes = parseInt(storedTotalTime);
+        const formattedTotalTime = formatTime(totalTimeInMinutes);
+        console.log('Formatted Total Time:', formattedTotalTime);
+        // Set the formatted time to your component state or wherever you need it
+      }
+    } catch (error) {
+      console.error('Error loading and formatting totalTimeMeditated:', error);
+    }
+  };
+  
+  // Call the function when your app initializes
+  useEffect(() => {
+    loadAndFormatTotalTime();
+  }, []);
 
   const handleGoToHome = () => {
     navigation.navigate('Home');

@@ -58,19 +58,27 @@ function OptionsScreen({navigation}) {
   };
 
   const formatTime = (timeInMinutes) => {
-    const minutes = Math.floor(timeInMinutes);
+    const hours = Math.floor(timeInMinutes / 60);
+    const remainingMinutes = Math.floor(timeInMinutes % 60);
     const seconds = Math.round((timeInMinutes % 1) * 60);
-    
-    if (minutes === 1 && seconds === 1) {
-      return `${minutes} minute and ${seconds} second`;
-    } else if (minutes === 1) {
-      return `${minutes} minute and ${seconds} seconds`;
-    } else if (seconds === 1) {
-      return `${minutes} minutes and ${seconds} second`;
+  
+    const formatHours = hours > 0 ? `${hours} ${hours === 1 ? 'hour' : 'hours'}` : '';
+    const formatMinutes = remainingMinutes > 0 ? `${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}` : '';
+    const formatSeconds = seconds > 0 ? `${seconds} ${seconds === 1 ? 'second' : 'seconds'}` : '';
+  
+    const timeArray = [formatHours, formatMinutes, formatSeconds].filter(Boolean);
+  
+    if (timeArray.length === 0) {
+      return '0 seconds';
     } else {
-      return `${minutes} minutes and ${seconds} seconds`;
+      const formattedTime =
+        timeArray.length > 1
+          ? timeArray.slice(0, -1).join(' ') + ' and ' + timeArray[timeArray.length - 1]
+          : timeArray[0];
+  
+      return formattedTime;
     }
-  };
+  };  
   
 
   const handleResetStatistics = () => {

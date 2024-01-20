@@ -40,6 +40,15 @@ export function SessionProvider({ children }) {
     }
   };
 
+  const resetShortestStatistics = async () => {
+    try { 
+      await AsyncStorage.setItem('shortestTimeMeditated', '0'); 
+      setShortestTimeMeditated(0); 
+    } catch (error) {
+      console.error('Error resetting statistics:', error);
+    }
+  };
+
   // load session count
   useEffect(() => {
     const loadSessionCount = async () => {
@@ -166,6 +175,7 @@ useEffect(() => {
       sessionCount,
       incrementSessionCount,
       resetStatistics,
+      resetShortestStatistics,
       longestTimeMeditated,
       shortestTimeMeditated,
     };

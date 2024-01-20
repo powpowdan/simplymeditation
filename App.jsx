@@ -10,6 +10,7 @@ import {
   Text,
   StyleSheet,
   Alert,
+  Button,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
@@ -50,6 +51,7 @@ function OptionsScreen({navigation}) {
     totalTimeMeditated,
     sessionCount,
     resetStatistics,
+    resetShortestStatistics,
     longestTimeMeditated,
     shortestTimeMeditated,
   } = useSessionContext(); 
@@ -79,26 +81,30 @@ function OptionsScreen({navigation}) {
       return formattedTime;
     }
   };  
-  
-
+   
   const handleResetStatistics = () => {
     Alert.alert(
       'Confirm Reset',
       'Are you sure you want to reset all statistics?',
       [
         {
-          text: 'No',
+          text: 'Do not reset',
           style: 'cancel',
-        },
+        }, 
         {
-          text: 'RESET',
+          text: 'Reset Shortest Only',
+          onPress: resetShortestStatistics,
+        },
+        { 
+          text: 'RESET ALL',
           onPress: resetStatistics,
+          style: 'destructive',
         },
       ],
-      {cancelable: false},
+      {cancelable: false,},
     );
   };
-
+ 
   const calculateAverageDuration = () => {
     if (sessionCount === 0) {
       return 0;
@@ -274,9 +280,10 @@ function OptionsScreen({navigation}) {
         </>
       ) : null}
 
-      <TouchableOpacity onPress={handleResetStatistics}  style={styles.resetButtonContainer}>
-        <Text style={styles.reset}>Reset  Statistics</Text>
-      </TouchableOpacity>
+      <View style={styles.resetButtonContainer}>
+     
+      <Button title="Reset Statistics" onPress={handleResetStatistics} />
+      </View>
     </View>
   );
 }
@@ -1031,9 +1038,13 @@ const styles = StyleSheet.create({
     color: 'red', 
   },
   resetButtonContainer: {
+    color: '#74aff7',
     position: 'absolute',
     bottom: 30,
     alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
   },
 });
 

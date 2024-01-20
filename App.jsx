@@ -57,6 +57,22 @@ function OptionsScreen({navigation}) {
     navigation.navigate('MeditationTimer');
   };
 
+  const formatTime = (timeInMinutes) => {
+    const minutes = Math.floor(timeInMinutes);
+    const seconds = Math.round((timeInMinutes % 1) * 60);
+    
+    if (minutes === 1 && seconds === 1) {
+      return `${minutes} minute and ${seconds} second`;
+    } else if (minutes === 1) {
+      return `${minutes} minute and ${seconds} seconds`;
+    } else if (seconds === 1) {
+      return `${minutes} minutes and ${seconds} second`;
+    } else {
+      return `${minutes} minutes and ${seconds} seconds`;
+    }
+  };
+  
+
   const handleResetStatistics = () => {
     Alert.alert(
       'Confirm Reset',
@@ -191,25 +207,22 @@ function OptionsScreen({navigation}) {
     }
   };
 
-  
-
   return (
     <View style={styles.container2}>
       <Text style={styles.headerText2}>Statistics</Text>
       <Text style={styles.statText}>
-        Total Time Meditated: {totalTimeMeditated.toFixed(2)} minutes
+        Total Time Meditated: {formatTime(totalTimeMeditated)}
       </Text>
       <Text style={styles.statText}>Total Sessions: {sessionCount}</Text>
       <Text style={styles.statText}>
-        Average Session Duration: {calculateAverageDuration().toFixed(2)}{' '}
-        minutes
+        Average Session Duration: {formatTime(calculateAverageDuration())}{' '}
+         
       </Text>
       <Text style={styles.statText}>
-        Longest Meditation Session: {longestTimeMeditated.toFixed(2)} minutes
+        Longest Meditation Session: {formatTime(longestTimeMeditated)}
       </Text>
-      <Text style={styles.statText}>Shortest Meditation Session: {shortestTimeMeditated.toFixed(2)} minutes</Text>
-      {/* <Text>Day Streak: TODO</Text> */}
-
+      <Text style={styles.statText}>Shortest Meditation Session: {formatTime(shortestTimeMeditated)}</Text>
+       
       <Text style={styles.headerText2}>Options</Text>
       {/* <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity> */}
       <TouchableOpacity>
@@ -491,6 +504,7 @@ function HomeScreen() {
     });
   };
 
+  
   const startTimer  = (totalSeconds) => { 
 
     setRemainingSeconds(totalSeconds);
@@ -542,16 +556,10 @@ function HomeScreen() {
  
 
   const handleTimerEnd = (totalSeconds) => {
-    console.log("handletimerend totalsecondsPASSED:", totalSeconds); 
-    
-    
-    const sessionDuration = totalSeconds / 60;
-    sessionDuration
-     
+    console.log("handletimerend totalsecondsPASSED:", totalSeconds);  
+    const sessionDuration = totalSeconds / 60; 
       console.log('Session Duration:handleTimerEnd  ===', sessionDuration); 
        
-
-      
  
   addMeditationTime(sessionDuration); 
   setTotalMeditationTime((prevTotal) => prevTotal + totalSeconds);
@@ -568,9 +576,7 @@ function HomeScreen() {
 const calculateRandomizedDuration = () => {
   const randomAdjustment = adjustmentSwitchState
     ? (Math.random() * 0.5 - 0.3) * selectedDuration
-    : 0;
-console.log("calculateRandomizedDuration function, selectedDuration==",selectedDuration)
-console.log("calculateRandomizedDuration function, randomAdjustment ==", randomAdjustment) 
+    : 0; 
   return selectedDuration + randomAdjustment;
 };
 
@@ -623,10 +629,11 @@ console.log("calculateRandomizedDuration function, randomAdjustment ==", randomA
     
     const randomizedDuration = calculateRandomizedDuration();
     console.log("randomizedduration in begin session: ", randomizedDuration)
+
   const totalSeconds = Math.round(randomizedDuration * 60);
   const initialMinutes = Math.floor(totalSeconds / 60);
   const initialSeconds = totalSeconds % 60;
-  //descrepecy here for intial seconds, seconds are slightly off
+ 
   console.log(
     `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`
   );

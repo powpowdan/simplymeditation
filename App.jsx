@@ -197,7 +197,7 @@ function OptionsScreen({navigation}) {
     <View style={styles.container2}>
       <Text style={styles.headerText2}>Statistics</Text>
       <Text style={styles.statText}>
-        Total Time Meditated: {totalTimeMeditated} minutes
+        Total Time Meditated: {totalTimeMeditated.toFixed(2)} minutes
       </Text>
       <Text style={styles.statText}>Total Sessions: {sessionCount}</Text>
       <Text style={styles.statText}>
@@ -205,9 +205,9 @@ function OptionsScreen({navigation}) {
         minutes
       </Text>
       <Text style={styles.statText}>
-        Longest Meditation Session: {longestTimeMeditated} minutes
+        Longest Meditation Session: {longestTimeMeditated.toFixed(2)} minutes
       </Text>
-      <Text style={styles.statText}>Shortest Meditation Session: {shortestTimeMeditated} minutes</Text>
+      <Text style={styles.statText}>Shortest Meditation Session: {shortestTimeMeditated.toFixed(2)} minutes</Text>
       {/* <Text>Day Streak: TODO</Text> */}
 
       <Text style={styles.headerText2}>Options</Text>
@@ -221,13 +221,13 @@ function OptionsScreen({navigation}) {
       />
 
  
-  <Text style={styles.options}>Adjust Timer</Text>
+  <Text style={styles.options}>Randomize timer</Text>
   <Switch
     value={adjustmentSwitchState}
     onValueChange={(value) => toggleAdjustmentSwitch(value)}
   />
  
-
+ 
       <Text style={styles.belloptions}>Interval Bells</Text>
       <Switch value={intervalBellsSwitchState} onValueChange={handleIntervalBellsSwitchChange} />
 
@@ -497,8 +497,7 @@ function HomeScreen() {
 
     timerRef.current = BackgroundTimer.setInterval(() => {
       setRemainingSeconds((prevRemainingSeconds) => {
-        const seconds = prevRemainingSeconds - 1;
-
+      const seconds = prevRemainingSeconds - 1; 
       const interval25 = Math.floor((totalSeconds) * 0.25);
       const interval50 = Math.floor((totalSeconds) * 0.5);
       const interval75 = Math.floor((totalSeconds) * 0.75);
@@ -512,7 +511,9 @@ function HomeScreen() {
       }
 
       if (seconds === 0) {
-        handleTimerEnd();
+        //maybe totalSeconds should be passed to handle timer or made a global usestate and then used in handletimer()
+         
+        handleTimerEnd(totalSeconds);
         playTone();
         BackgroundTimer.clearInterval(timerRef.current); 
         stopMusic();
@@ -538,20 +539,40 @@ function HomeScreen() {
     setSessionInProgress(false);
   };
 
-  const handleTimerEnd = () => {
-    console.log('timer ended naturally');
-    const sessionDuration = adjustmentSwitchState
-    ? Math.round(randomizedDuration + adjustmentValue)
-    : Math.round(randomizedDuration);
+ 
 
-  addMeditationTime(sessionDuration);
-    setTotalMeditationTime((prevTotal) => prevTotal + sessionDuration);
-    resetTimer();
-    setSliderDisabled(false);
-    incrementSessionCount();
-    setSessionCompleted(true);
-    setSessionInProgress(false);
-  };
+  const handleTimerEnd = (totalSeconds) => {
+    console.log("handletimerend totalsecondsPASSED:", totalSeconds); 
+    
+    
+    const sessionDuration = totalSeconds / 60;
+    sessionDuration
+     
+      console.log('Session Duration:handleTimerEnd  ===', sessionDuration); 
+       
+
+      
+ 
+  addMeditationTime(sessionDuration); 
+  setTotalMeditationTime((prevTotal) => prevTotal + totalSeconds);
+  resetTimer();
+  setSliderDisabled(false);
+  incrementSessionCount();
+  setSessionCompleted(true);
+  setSessionInProgress(false);
+};
+
+
+
+// Function to calculate randomized duration
+const calculateRandomizedDuration = () => {
+  const randomAdjustment = adjustmentSwitchState
+    ? (Math.random() * 0.5 - 0.3) * selectedDuration
+    : 0;
+console.log("calculateRandomizedDuration function, selectedDuration==",selectedDuration)
+console.log("calculateRandomizedDuration function, randomAdjustment ==", randomAdjustment) 
+  return selectedDuration + randomAdjustment;
+};
 
   const stopMusic = () => {
     const currentSound = soundRef.current;
@@ -599,19 +620,13 @@ function HomeScreen() {
   };
  
   const beginSession = () => {  
-    const randomAdjustment = adjustmentSwitchState
-    ? (Math.random() * 0.5 - 0.3) * selectedDuration 
-    : 0;
-    const randomizedDuration = selectedDuration + randomAdjustment;
-    const totalSeconds = Math.round(randomizedDuration * 60);
-      const initialMinutes = Math.floor(totalSeconds / 60);
+    
+    const randomizedDuration = calculateRandomizedDuration();
+    console.log("randomizedduration in begin session: ", randomizedDuration)
+  const totalSeconds = Math.round(randomizedDuration * 60);
+  const initialMinutes = Math.floor(totalSeconds / 60);
   const initialSeconds = totalSeconds % 60;
-  setRandomizedDuration(randomizedDuration);
-
-  const adjustedDuration = adjustmentSwitchState
-  ? Math.round(randomizedDuration + adjustmentValue)
-  : randomizedDuration;
-  setAdjustedSessionDuration(adjustedDuration);
+  //descrepecy here for intial seconds, seconds are slightly off
   console.log(
     `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`
   );
@@ -623,6 +638,7 @@ function HomeScreen() {
       playMusic();
       setIsMusicPlaying(true);
     } 
+    console.log("beginSession total seconds: ", totalSeconds)
     startTimer(totalSeconds);
   };
 

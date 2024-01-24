@@ -9,6 +9,7 @@ export function MusicSwitchProvider({ children }) {
   const [interval25Active, setInterval25Active] = useState(false);
   const [interval50Active, setInterval50Active] = useState(false);
   const [interval75Active, setInterval75Active] = useState(false);
+  const [interval90Active, setInterval90Active] = useState(false);
   const [adjustmentSwitchState, setAdjustmentSwitchState] = useState(false);
   const [adjustmentValue, setAdjustmentValue] = useState(0);
 
@@ -22,6 +23,10 @@ export function MusicSwitchProvider({ children }) {
 
   const toggleInterval75 = () => {
     setInterval75Active(!interval75Active);
+  };
+
+  const toggleInterval90 = () => {
+    setInterval90Active(!interval90Active);
   };
 
   
@@ -46,12 +51,14 @@ export function MusicSwitchProvider({ children }) {
       toggleInterval50,
       interval75Active,
       toggleInterval75,
+      interval90Active,
+      toggleInterval90,
       adjustmentSwitchState,
       toggleAdjustmentSwitch,
       adjustmentValue,
       setAdjustment,
     }; 
-  }, [musicSwitchState, intervalBellsSwitchState, interval25Active, interval50Active, interval75Active, adjustmentSwitchState,
+  }, [musicSwitchState, intervalBellsSwitchState, interval25Active, interval50Active, interval75Active, interval90Active, adjustmentSwitchState,
     adjustmentValue,]);
 
   useEffect(() => {
@@ -75,6 +82,11 @@ export function MusicSwitchProvider({ children }) {
         const savedInterval75State = await AsyncStorage.getItem('interval75Active');
         if (savedInterval75State !== null) {
           setInterval75Active(JSON.parse(savedInterval75State));
+        }
+
+        const savedInterval90State = await AsyncStorage.getItem('interval90Active');
+        if (savedInterval90State !== null) {
+          setInterval90Active(JSON.parse(savedInterval90State));
         }
         const savedAdjustmentSwitchState = await AsyncStorage.getItem('adjustmentSwitchState');
         if (savedAdjustmentSwitchState !== null) {
@@ -101,6 +113,7 @@ export function MusicSwitchProvider({ children }) {
         await AsyncStorage.setItem('interval25Active', JSON.stringify(interval25Active));
         await AsyncStorage.setItem('interval50Active', JSON.stringify(interval50Active));
         await AsyncStorage.setItem('interval75Active', JSON.stringify(interval75Active));
+        await AsyncStorage.setItem('interval90Active', JSON.stringify(interval90Active));
         await AsyncStorage.setItem('adjustmentSwitchState', JSON.stringify(adjustmentSwitchState));
         await AsyncStorage.setItem('adjustmentValue', JSON.stringify(adjustmentValue));
       } catch (error) {
@@ -109,7 +122,7 @@ export function MusicSwitchProvider({ children }) {
     };
 
     saveState();
-  }, [musicSwitchState, interval25Active, interval50Active, interval75Active, adjustmentSwitchState, adjustmentValue]);
+  }, [musicSwitchState, interval25Active, interval50Active, interval75Active, interval90Active, adjustmentSwitchState, adjustmentValue]);
  
   return (
     <MusicSwitchContext.Provider value={contextValue}>

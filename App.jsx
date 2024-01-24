@@ -1,13 +1,11 @@
-import {StatusBar} from 'expo-status-bar';
-import 'react-native-gesture-handler';
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Switch,
   AppState,
-  TouchableOpacity,
+  TouchableOpacity,  
   Image,
-  Text,
+  Text, 
   StyleSheet,
   Alert,
   Button,
@@ -42,8 +40,10 @@ function OptionsScreen({navigation}) {
      toggleInterval50, 
      interval75Active, 
      toggleInterval75, 
+     interval90Active, 
+     toggleInterval90, 
      adjustmentSwitchState,
-     toggleAdjustmentSwitch  ,
+     toggleAdjustmentSwitch,
      adjustmentValue,
      setAdjustmentValue,
     } = useMusicSwitchContext();
@@ -57,7 +57,7 @@ function OptionsScreen({navigation}) {
   } = useSessionContext(); 
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
-  };
+  }; 
 
   const formatTime = (timeInSeconds) => {
     const hours = Math.floor(timeInSeconds / 3600);
@@ -141,18 +141,17 @@ function OptionsScreen({navigation}) {
     }
   };
 
-  const handleMusicSwitchChange = value => {
-    // Update the switch state and save it to AsyncStorage when it changes
-    setMusicSwitchState(value);
-    saveSwitchState(value);
-  };
-
-
-  //intervals
+ //intervals
   const handleIntervalBellsSwitchChange = (value) => {
     setIntervalBellsSwitchState(value);
     saveIntervalBellsSwitchState(value);
   };
+
+  const handleMusicSwitchChange = value => {
+    // Update the switch state and save it to AsyncStorage when it changes
+    setMusicSwitchState(value);
+    saveSwitchState(value);
+  }; 
   
   const saveIntervalBellsSwitchState = async (value) => {
     try {
@@ -179,9 +178,7 @@ function OptionsScreen({navigation}) {
     }
   };
 
-  //interval bell options
-  
-
+  //interval bell options 
   const saveInterval25ActiveState = async (value) => {
     try {
       await AsyncStorage.setItem('interval25Active', JSON.stringify(value));
@@ -196,6 +193,24 @@ function OptionsScreen({navigation}) {
       console.log('50% Interval switch state saved');
     } catch (error) {
       console.error('Error saving 50% Interval switch state:', error);
+    }
+  };
+
+  const saveInterval75ActiveState = async (value) => {
+    try {
+      await AsyncStorage.setItem('interval75Active', JSON.stringify(value));
+      console.log('75% Interval switch state saved');
+    } catch (error) {
+      console.error('Error saving 75% Interval switch state:', error);
+    }
+  };
+
+  const saveInterval90ActiveState = async (value) => {
+    try {
+      await AsyncStorage.setItem('interval90Active', JSON.stringify(value));
+      console.log('90% Interval switch state saved');
+    } catch (error) {
+      console.error('Error saving 90% Interval switch state:', error);
     }
   };
 
@@ -214,14 +229,12 @@ function OptionsScreen({navigation}) {
     saveInterval75ActiveState(value);
   };
 
-  const saveInterval75ActiveState = async (value) => {
-    try {
-      await AsyncStorage.setItem('interval75Active', JSON.stringify(value));
-      console.log('75% Interval switch state saved');
-    } catch (error) {
-      console.error('Error saving 75% Interval switch state:', error);
-    }
+  const handleInterval90Change = (value) => {
+    toggleInterval90(value);
+    saveInterval90ActiveState(value);
   };
+
+ 
 
   return (
     <View style={styles.container2}>
@@ -260,27 +273,36 @@ function OptionsScreen({navigation}) {
       <Text style={styles.belloptions}>Interval Bells</Text>
       <Switch value={intervalBellsSwitchState} onValueChange={handleIntervalBellsSwitchChange} />
 
-      {intervalBellsSwitchState ? (
+      {intervalBellsSwitchState ? 
         // Render the interval options only if the "Interval Bells" switch is active
-        <>
-        <View style={styles.switchContainer}>
+        
+        <View style={styles.belltotalcontainer}> 
+        <View style={styles.rowContainer}> 
+        <View style={styles.bellContainer}>
             <Switch value={interval75Active} onValueChange={handleInterval75Change} />
             <Text style={styles.switchText}>25% of session</Text>
           </View>
   
-          <View style={styles.switchContainer}>
+          <View style={styles.bellContainer}>
             <Switch value={interval50Active} onValueChange={handleInterval50Change} />
             <Text style={styles.switchText}>50% of session</Text>
           </View>
+        </View>
 
-
-        <View style={styles.switchContainer}>
+        <View style={styles.rowContainer}>
+        <View style={styles.bellContainer}>
             <Switch value={interval25Active} onValueChange={handleInterval25Change} />
             <Text style={styles.switchText}>75% of session</Text>
           </View>
-  
-        </>
-      ) : null}
+
+          <View style={styles.bellContainer}>
+            <Switch value={interval90Active} onValueChange={handleInterval90Change} />
+            <Text style={styles.switchText}>90% of session</Text>
+            </View>
+      </View>
+    </View>
+       
+       : null}
 
       <View style={styles.resetButtonContainer}>
      
@@ -304,6 +326,7 @@ function HomeScreen() {
     interval25Active,
     interval50Active,
     interval75Active,
+    interval90Active,
     toggleAdjustmentSwitch,
     adjustmentSwitchState,
     adjustmentValue,
@@ -497,31 +520,8 @@ function HomeScreen() {
     }
 
     appState.current = nextAppState;
-  };
-
-  const loadAndFormatTotalTime = async () => {
-    try {
-      const storedTotalTime = await AsyncStorage.getItem('totalTimeMeditated');
-      if (storedTotalTime !== null) {
-        const totalTimeInMinutes = parseInt(storedTotalTime);
-        const formattedTotalTime = formatTime(totalTimeInMinutes);
-        console.log('Formatted Total Time:', formattedTotalTime);
-        // Set the formatted time to your component state or wherever you need it
-      }
-    } catch (error) {
-      console.error('Error loading and formatting totalTimeMeditated:', error);
-    }
-  };
+  }; 
   
-  // Call the function when your app initializes
-  useEffect(() => {
-    loadAndFormatTotalTime();
-  }, []);
-
-  const handleGoToHome = () => {
-    navigation.navigate('Home');
-  };
-
   const playTone = () => {
     const sound = new Sound('audio_file.mp3', null, error => {
       if (error) {
@@ -551,6 +551,7 @@ function HomeScreen() {
       const interval25 = Math.floor((totalSeconds) * 0.25);
       const interval50 = Math.floor((totalSeconds) * 0.5);
       const interval75 = Math.floor((totalSeconds) * 0.75);
+      const interval90 = Math.floor((totalSeconds) * 0.10);
  
       if (intervalBellsSwitchState && interval25Active && seconds === interval25) {
         playIntervalBell(25);
@@ -558,6 +559,8 @@ function HomeScreen() {
         playIntervalBell(50);
       } else if (intervalBellsSwitchState && interval75Active && seconds === interval75) {
         playIntervalBell(75);
+      } else if (intervalBellsSwitchState && interval90Active && seconds === interval90) {
+          playIntervalBell(90);
       }
 
       if (seconds === 0) {
@@ -1057,15 +1060,33 @@ const styles = StyleSheet.create({
   },
   reset: { 
     color: 'red', 
+  }, 
+
+  rowContainer: { 
+    flexDirection: 'row',
+    marginBottom: 5, // Adjust as needed
+  }, 
+  bellContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'black',
+    padding: 5,
+    margin: 5,
   },
   resetButtonContainer: {
     color: '#74aff7',
     position: 'absolute',
-    bottom: 30,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 10,
+    bottom: 10,
+    alignSelf: 'center', 
+    justifyContent: 'space-around', 
+  }, 
+  belltotalcontainer: {
+    marginTop: -50,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center', 
   },
 });
 

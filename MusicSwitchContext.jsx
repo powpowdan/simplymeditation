@@ -13,6 +13,11 @@ export function MusicSwitchProvider({ children }) {
   const [adjustmentSwitchState, setAdjustmentSwitchState] = useState(false);
   const [adjustmentValue, setAdjustmentValue] = useState(0);
 
+
+  // const toggleIntervalBellsSwitchState = () => {
+  //   setIntervalBellsSwitchState(!intervalBellsSwitchState);
+  // };
+
   const toggleInterval25 = () => {
     setInterval25Active(!interval25Active);
   };
@@ -69,6 +74,11 @@ export function MusicSwitchProvider({ children }) {
           setMusicSwitchState(JSON.parse(savedMusicSwitchState));
         }
 
+        const savedIntervalMainState = await AsyncStorage.getItem('intervalBellsSwitchState');
+        if (savedIntervalMainState !== null) {
+          setIntervalBellsSwitchState(JSON.parse(savedIntervalMainState));
+        }
+
         const savedInterval25State = await AsyncStorage.getItem('interval25Active');
         if (savedInterval25State !== null) {
           setInterval25Active(JSON.parse(savedInterval25State));
@@ -109,7 +119,8 @@ export function MusicSwitchProvider({ children }) {
   useEffect(() => {
     const saveState = async () => {
       try {
-        await AsyncStorage.setItem('musicSwitchState', JSON.stringify(musicSwitchState));
+        await AsyncStorage.setItem('musicSwitchState', JSON.stringify(musicSwitchState)); 
+        await AsyncStorage.setItem('intervalBellsSwitchState', JSON.stringify(intervalBellsSwitchState));
         await AsyncStorage.setItem('interval25Active', JSON.stringify(interval25Active));
         await AsyncStorage.setItem('interval50Active', JSON.stringify(interval50Active));
         await AsyncStorage.setItem('interval75Active', JSON.stringify(interval75Active));
@@ -122,7 +133,7 @@ export function MusicSwitchProvider({ children }) {
     };
 
     saveState();
-  }, [musicSwitchState, interval25Active, interval50Active, interval75Active, interval90Active, adjustmentSwitchState, adjustmentValue]);
+  }, [musicSwitchState, intervalBellsSwitchState, interval25Active, interval50Active, interval75Active, interval90Active, adjustmentSwitchState, adjustmentValue]);
  
   return (
     <MusicSwitchContext.Provider value={contextValue}>

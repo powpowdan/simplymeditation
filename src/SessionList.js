@@ -11,7 +11,7 @@ const SessionList = () => {
       {/* Render other session duration items here using FlatList */}
     </View>
   );
-};
+}; 
 
 const styles = StyleSheet.create({
   container: {

@@ -3,9 +3,9 @@ import {
   View,
   Switch,
   AppState,
-  TouchableOpacity,  
+  TouchableOpacity,
   Image,
-  Text, 
+  Text,
   StyleSheet,
   Alert,
   Button,
@@ -16,9 +16,9 @@ Sound.setCategory('Playback');
 import BackgroundTimer from 'react-native-background-timer';
 import ProgressCircle from 'react-native-progress-circle';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
-import {createStackNavigator, TransitionPresets} from '@react-navigation/stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {SafeAreaView} from 'react-native-safe-area-context'; // Update the import
-import GoToStatsImage from './android/app/src/img/QQ4.png';
+import GoToStatsImage from '../android/app/src/img/QQ4.png';
 import {MusicSwitchProvider} from './MusicSwitchContext';
 import {SessionProvider} from './SessionContext';
 import SessionList from './SessionList';
@@ -30,23 +30,24 @@ import * as Animatable from 'react-native-animatable';
 function OptionsScreen({navigation}) {
   // Get the totalTimeMeditated from the context using the useSessionContext hook
   console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
-  const {musicSwitchState, 
+  const {
+    musicSwitchState,
     setMusicSwitchState,
-     intervalBellsSwitchState, 
-     setIntervalBellsSwitchState,
-     interval25Active, 
-     toggleInterval25, 
-     interval50Active, 
-     toggleInterval50, 
-     interval75Active, 
-     toggleInterval75, 
-     interval90Active, 
-     toggleInterval90, 
-     adjustmentSwitchState,
-     toggleAdjustmentSwitch,
-     adjustmentValue,
-     setAdjustmentValue,
-    } = useMusicSwitchContext();
+    intervalBellsSwitchState,
+    setIntervalBellsSwitchState,
+    interval25Active,
+    toggleInterval25,
+    interval50Active,
+    toggleInterval50,
+    interval75Active,
+    toggleInterval75,
+    interval90Active,
+    toggleInterval90,
+    adjustmentSwitchState,
+    toggleAdjustmentSwitch,
+    adjustmentValue,
+    setAdjustmentValue,
+  } = useMusicSwitchContext();
   const {
     totalTimeMeditated,
     sessionCount,
@@ -54,36 +55,45 @@ function OptionsScreen({navigation}) {
     resetShortestStatistics,
     longestTimeMeditated,
     shortestTimeMeditated,
-  } = useSessionContext(); 
+  } = useSessionContext();
   const handleGoToHome = () => {
     navigation.navigate('MeditationTimer');
-  }; 
+  };
 
-  const formatTime = (timeInSeconds) => {
+  const formatTime = timeInSeconds => {
     const hours = Math.floor(timeInSeconds / 3600);
     const remainingMinutes = Math.floor((timeInSeconds % 3600) / 60);
     const remainingSeconds = Math.round(timeInSeconds % 60);
-  
-    const formatHours = hours > 0 ? `${hours} ${hours === 1 ? 'hour' : 'hours'}` : '';
+
+    const formatHours =
+      hours > 0 ? `${hours} ${hours === 1 ? 'hour' : 'hours'}` : '';
     const formatMinutes =
-      remainingMinutes > 0 ? `${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}` : '';
+      remainingMinutes > 0
+        ? `${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}`
+        : '';
     const formatSeconds =
-      remainingSeconds > 0 ? `${remainingSeconds} ${remainingSeconds === 1 ? 'second' : 'seconds'}` : '';
-  
-    const timeArray = [formatHours, formatMinutes, formatSeconds].filter(Boolean);
-  
+      remainingSeconds > 0
+        ? `${remainingSeconds} ${remainingSeconds === 1 ? 'second' : 'seconds'}`
+        : '';
+
+    const timeArray = [formatHours, formatMinutes, formatSeconds].filter(
+      Boolean,
+    );
+
     if (timeArray.length === 0) {
       return '0 seconds';
     } else {
       const formattedTime =
         timeArray.length > 1
-          ? timeArray.slice(0, -1).join(' ') + ' and ' + timeArray[timeArray.length - 1]
+          ? timeArray.slice(0, -1).join(' ') +
+            ' and ' +
+            timeArray[timeArray.length - 1]
           : timeArray[0];
-  
+
       return formattedTime;
     }
   };
-   
+
   const handleResetStatistics = () => {
     Alert.alert(
       'Confirm Reset',
@@ -92,21 +102,21 @@ function OptionsScreen({navigation}) {
         {
           text: 'Do not reset',
           style: 'cancel',
-        }, 
+        },
         {
           text: 'Reset Shortest Only',
           onPress: resetShortestStatistics,
         },
-        { 
+        {
           text: 'RESET ALL',
           onPress: resetStatistics,
           style: 'destructive',
         },
       ],
-      {cancelable: false,},
+      {cancelable: false},
     );
   };
- 
+
   const calculateAverageDuration = () => {
     if (sessionCount === 0) {
       return 0;
@@ -141,8 +151,8 @@ function OptionsScreen({navigation}) {
     }
   };
 
- //intervals
-  const handleIntervalBellsSwitchChange = (value) => {
+  //intervals
+  const handleIntervalBellsSwitchChange = value => {
     setIntervalBellsSwitchState(value);
     saveIntervalBellsSwitchState(value);
   };
@@ -151,22 +161,25 @@ function OptionsScreen({navigation}) {
     // Update the switch state and save it to AsyncStorage when it changes
     setMusicSwitchState(value);
     saveSwitchState(value);
-  }; 
-  
-  const saveIntervalBellsSwitchState = async (value) => {
+  };
+
+  const saveIntervalBellsSwitchState = async value => {
     try {
-      await AsyncStorage.setItem('intervalBellsSwitchState', JSON.stringify(value));
+      await AsyncStorage.setItem(
+        'intervalBellsSwitchState',
+        JSON.stringify(value),
+      );
       console.log('Interval Bells switch state saved');
     } catch (error) {
       console.error('Error saving Interval Bells switch state:', error);
     }
-  }; 
-  
+  };
+
   // Load the Interval Bells switch state from AsyncStorage when the component mounts
   useEffect(() => {
     loadIntervalBellsSwitchState();
   }, []);
-  
+
   const loadIntervalBellsSwitchState = async () => {
     try {
       const value = await AsyncStorage.getItem('intervalBellsSwitchState');
@@ -178,16 +191,16 @@ function OptionsScreen({navigation}) {
     }
   };
 
-  //interval bell options 
-  const saveInterval25ActiveState = async (value) => {
+  //interval bell options
+  const saveInterval25ActiveState = async value => {
     try {
       await AsyncStorage.setItem('interval25Active', JSON.stringify(value));
       console.log('25% Interval switch state saved');
     } catch (error) {
       console.error('Error saving 25% Interval switch state:', error);
     }
-  }; 
-  const saveInterval50ActiveState = async (value) => {
+  };
+  const saveInterval50ActiveState = async value => {
     try {
       await AsyncStorage.setItem('interval50Active', JSON.stringify(value));
       console.log('50% Interval switch state saved');
@@ -196,7 +209,7 @@ function OptionsScreen({navigation}) {
     }
   };
 
-  const saveInterval75ActiveState = async (value) => {
+  const saveInterval75ActiveState = async value => {
     try {
       await AsyncStorage.setItem('interval75Active', JSON.stringify(value));
       console.log('75% Interval switch state saved');
@@ -205,7 +218,7 @@ function OptionsScreen({navigation}) {
     }
   };
 
-  const saveInterval90ActiveState = async (value) => {
+  const saveInterval90ActiveState = async value => {
     try {
       await AsyncStorage.setItem('interval90Active', JSON.stringify(value));
       console.log('90% Interval switch state saved');
@@ -214,27 +227,25 @@ function OptionsScreen({navigation}) {
     }
   };
 
-  const handleInterval25Change = (value) => {
+  const handleInterval25Change = value => {
     toggleInterval25(value);
     saveInterval25ActiveState(value);
   };
 
-  const handleInterval50Change = (value) => {
+  const handleInterval50Change = value => {
     toggleInterval50(value);
     saveInterval50ActiveState(value);
   };
 
-  const handleInterval75Change = (value) => {
+  const handleInterval75Change = value => {
     toggleInterval75(value);
     saveInterval75ActiveState(value);
   };
 
-  const handleInterval90Change = (value) => {
+  const handleInterval90Change = value => {
     toggleInterval90(value);
     saveInterval90ActiveState(value);
   };
-
- 
 
   return (
     <View style={styles.container2}>
@@ -245,13 +256,14 @@ function OptionsScreen({navigation}) {
       <Text style={styles.statText}>Total Sessions: {sessionCount}</Text>
       <Text style={styles.statText}>
         Average Session Duration: {formatTime(calculateAverageDuration())}{' '}
-         
       </Text>
       <Text style={styles.statText}>
         Longest Meditation Session: {formatTime(longestTimeMeditated)}
       </Text>
-      <Text style={styles.statText}>Shortest Meditation Session: {formatTime(shortestTimeMeditated)}</Text>
-       
+      <Text style={styles.statText}>
+        Shortest Meditation Session: {formatTime(shortestTimeMeditated)}
+      </Text>
+
       <Text style={styles.headerText2}>Options</Text>
       {/* <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity> */}
       <TouchableOpacity>
@@ -259,54 +271,65 @@ function OptionsScreen({navigation}) {
       </TouchableOpacity>
       <Switch
         value={musicSwitchState}
-        onValueChange={handleMusicSwitchChange} 
+        onValueChange={handleMusicSwitchChange}
       />
 
- 
-  <Text style={styles.options}>Randomize timer</Text>
-  <Switch
-    value={adjustmentSwitchState}
-    onValueChange={(value) => toggleAdjustmentSwitch(value)}
-  />
- 
- 
-      <Text style={styles.belloptions}>Interval Bells</Text>
-      <Switch value={intervalBellsSwitchState} onValueChange={handleIntervalBellsSwitchChange} />
+      <Text style={styles.options}>Randomize timer</Text>
+      <Switch
+        value={adjustmentSwitchState}
+        onValueChange={value => toggleAdjustmentSwitch(value)}
+      />
 
-      {intervalBellsSwitchState ? 
+      <Text style={styles.belloptions}>Interval Bells</Text>
+      <Switch
+        value={intervalBellsSwitchState}
+        onValueChange={handleIntervalBellsSwitchChange}
+      />
+
+      {intervalBellsSwitchState ? (
         // Render the interval options only if the "Interval Bells" switch is active
-        
-        <View style={styles.belltotalcontainer}> 
-        <View style={styles.rowContainer}> 
-        <View style={styles.bellContainer}>
-            <Switch value={interval75Active} onValueChange={handleInterval75Change} />
-            <Text style={styles.switchText}>25% of session</Text>
+
+        <View style={styles.belltotalcontainer}>
+          <View style={styles.rowContainer}>
+            <View style={styles.bellContainer}>
+              <Switch
+                value={interval75Active}
+                onValueChange={handleInterval75Change}
+              />
+              <Text style={styles.switchText}>25% of session</Text>
+            </View>
+
+            <View style={styles.bellContainer}>
+              <Switch
+                value={interval50Active}
+                onValueChange={handleInterval50Change}
+              />
+              <Text style={styles.switchText}>50% of session</Text>
+            </View>
           </View>
-  
-          <View style={styles.bellContainer}>
-            <Switch value={interval50Active} onValueChange={handleInterval50Change} />
-            <Text style={styles.switchText}>50% of session</Text>
+
+          <View style={styles.rowContainer}>
+            <View style={styles.bellContainer}>
+              <Switch
+                value={interval25Active}
+                onValueChange={handleInterval25Change}
+              />
+              <Text style={styles.switchText}>75% of session</Text>
+            </View>
+
+            <View style={styles.bellContainer}>
+              <Switch
+                value={interval90Active}
+                onValueChange={handleInterval90Change}
+              />
+              <Text style={styles.switchText}>90% of session</Text>
+            </View>
           </View>
         </View>
-
-        <View style={styles.rowContainer}>
-        <View style={styles.bellContainer}>
-            <Switch value={interval25Active} onValueChange={handleInterval25Change} />
-            <Text style={styles.switchText}>75% of session</Text>
-          </View>
-
-          <View style={styles.bellContainer}>
-            <Switch value={interval90Active} onValueChange={handleInterval90Change} />
-            <Text style={styles.switchText}>90% of session</Text>
-            </View>
-      </View>
-    </View>
-       
-       : null}
+      ) : null}
 
       <View style={styles.resetButtonContainer}>
-     
-      <Button title="Reset Statistics" onPress={handleResetStatistics} />
+        <Button title="Reset Statistics" onPress={handleResetStatistics} />
       </View>
     </View>
   );
@@ -319,10 +342,11 @@ function HomeScreen() {
   const [selectedDuration, setSelectedDuration] = useState(15);
   const {addMeditationTime, incrementSessionCount} = useSessionContext();
   const [sound, setSound] = useState(null);
-  const {musicSwitchState,
-     setMusicSwitchState,
-     intervalBellsSwitchState, 
-     setIntervalBellsSwitchState, 
+  const {
+    musicSwitchState,
+    setMusicSwitchState,
+    intervalBellsSwitchState,
+    setIntervalBellsSwitchState,
     interval25Active,
     interval50Active,
     interval75Active,
@@ -330,21 +354,19 @@ function HomeScreen() {
     toggleAdjustmentSwitch,
     adjustmentSwitchState,
     adjustmentValue,
-   } = useMusicSwitchContext();
+  } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
   const timerRef = useRef();
   const timerDurations = [5, 10, 15, 20];
   const [sliderDisabled, setSliderDisabled] = useState(false);
-  const soundRef = useRef(null); 
+  const soundRef = useRef(null);
   const [randomizedDuration, setRandomizedDuration] = useState(0);
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [adjustedSessionDuration, setAdjustedSessionDuration] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
 
-
-
-  // Initialize buttonSelectedDuration with useState
+  // Initialize buttonSelectedDuration default
   const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
     button5Mins: 5,
     button10Mins: 10,
@@ -381,7 +403,6 @@ function HomeScreen() {
     'The moment you start watching the thinker, a higher level of consciousness becomes activated',
     'Worry pretends to be necessary but serves no useful purpose',
     'Force always moves against something, whereas power does not move against something but moves toward something',
-    
   ];
 
   // Generate a random index different from the current and last sentence indexes
@@ -503,7 +524,9 @@ function HomeScreen() {
   }, [buttonSelectedDuration]);
 
   useEffect(() => {
-    const randomAdjustment = adjustmentSwitchState ? (Math.random() * 0.5 - 0.3) * selectedDuration : 0;
+    const randomAdjustment = adjustmentSwitchState
+      ? (Math.random() * 0.5 - 0.3) * selectedDuration
+      : 0;
     const newRandomizedDuration = selectedDuration + randomAdjustment;
     setRandomizedDuration(newRandomizedDuration);
   }, [selectedDuration, adjustmentSwitchState]);
@@ -520,8 +543,8 @@ function HomeScreen() {
     }
 
     appState.current = nextAppState;
-  }; 
-  
+  };
+
   const playTone = () => {
     const sound = new Sound('audio_file.mp3', null, error => {
       if (error) {
@@ -531,8 +554,8 @@ function HomeScreen() {
     });
   };
 
-  const playIntervalBell = (percentage) => {
-    const sound = new Sound('intervalbell.mp3', null, (error) => {
+  const playIntervalBell = percentage => {
+    const sound = new Sound('intervalbell.mp3', null, error => {
       if (error) {
         alert(`Interval bell ${percentage}% ALERT`, JSON.stringify(error));
       }
@@ -540,41 +563,55 @@ function HomeScreen() {
     });
   };
 
-  
-  const startTimer  = (totalSeconds) => { 
-
+  const startTimer = totalSeconds => {
     setRemainingSeconds(totalSeconds);
 
     timerRef.current = BackgroundTimer.setInterval(() => {
-      setRemainingSeconds((prevRemainingSeconds) => {
-      const seconds = prevRemainingSeconds - 1; 
-      const interval25 = Math.floor((totalSeconds) * 0.25);
-      const interval50 = Math.floor((totalSeconds) * 0.5);
-      const interval75 = Math.floor((totalSeconds) * 0.75);
-      const interval90 = Math.floor((totalSeconds) * 0.10);
- 
-      if (intervalBellsSwitchState && interval25Active && seconds === interval25) {
-        playIntervalBell(25);
-      } else if (intervalBellsSwitchState && interval50Active && seconds === interval50) {
-        playIntervalBell(50);
-      } else if (intervalBellsSwitchState && interval75Active && seconds === interval75) {
-        playIntervalBell(75);
-      } else if (intervalBellsSwitchState && interval90Active && seconds === interval90) {
-          playIntervalBell(90);
-      }
+      setRemainingSeconds(prevRemainingSeconds => {
+        const seconds = prevRemainingSeconds - 1;
+        const interval25 = Math.floor(totalSeconds * 0.25);
+        const interval50 = Math.floor(totalSeconds * 0.5);
+        const interval75 = Math.floor(totalSeconds * 0.75);
+        const interval90 = Math.floor(totalSeconds * 0.1);
 
-      if (seconds === 0) {
-        //maybe totalSeconds should be passed to handle timer or made a global usestate and then used in handletimer()
-         
-        handleTimerEnd(totalSeconds);
-        playTone();
-        BackgroundTimer.clearInterval(timerRef.current); 
-        stopMusic();
-      }
+        if (
+          intervalBellsSwitchState &&
+          interval25Active &&
+          seconds === interval25
+        ) {
+          playIntervalBell(25);
+        } else if (
+          intervalBellsSwitchState &&
+          interval50Active &&
+          seconds === interval50
+        ) {
+          playIntervalBell(50);
+        } else if (
+          intervalBellsSwitchState &&
+          interval75Active &&
+          seconds === interval75
+        ) {
+          playIntervalBell(75);
+        } else if (
+          intervalBellsSwitchState &&
+          interval90Active &&
+          seconds === interval90
+        ) {
+          playIntervalBell(90);
+        }
+
+        if (seconds === 0) {
+          //maybe totalSeconds should be passed to handle timer or made a global usestate and then used in handletimer()
+
+          handleTimerEnd(totalSeconds);
+          playTone();
+          BackgroundTimer.clearInterval(timerRef.current);
+          stopMusic();
+        }
         return seconds;
-      }); 
-    }, 1); 
-  }; 
+      });
+    }, 1000);
+  };
 
   useEffect(() => {
     return () => {
@@ -583,41 +620,36 @@ function HomeScreen() {
   }, [sound]);
 
   const stopSession = () => {
-    console.log('stop session by user');  
+    console.log('stop session by user');
     setSliderDisabled(false);
     if (timerRef.current) {
       BackgroundTimer.clearInterval(timerRef.current);
-    }  
+    }
     stopMusic();
     setSessionInProgress(false);
   };
 
- 
+  const handleTimerEnd = totalSeconds => {
+    console.log('handletimerend totalsecondsPASSED:', totalSeconds);
+    const sessionDuration = totalSeconds / 60;
+    console.log('Session Duration:handleTimerEnd  ===', sessionDuration);
 
-  const handleTimerEnd = (totalSeconds) => {
-    console.log("handletimerend totalsecondsPASSED:", totalSeconds);  
-    const sessionDuration = totalSeconds / 60; 
-      console.log('Session Duration:handleTimerEnd  ===', sessionDuration); 
-       
- 
-  addMeditationTime(sessionDuration); 
-  setTotalMeditationTime((prevTotal) => prevTotal + totalSeconds);
-  resetTimer();
-  setSliderDisabled(false);
-  incrementSessionCount();
-  setSessionCompleted(true);
-  setSessionInProgress(false);
-};
+    addMeditationTime(sessionDuration);
+    setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
+    resetTimer();
+    setSliderDisabled(false);
+    incrementSessionCount();
+    setSessionCompleted(true);
+    setSessionInProgress(false);
+  };
 
-
-
-// Function to calculate randomized duration
-const calculateRandomizedDuration = () => {
-  const randomAdjustment = adjustmentSwitchState
-    ? (Math.random() * 0.5 - 0.3) * selectedDuration
-    : 0; 
-  return selectedDuration + randomAdjustment;
-};
+  // Function to calculate randomized duration
+  const calculateRandomizedDuration = () => {
+    const randomAdjustment = adjustmentSwitchState
+      ? (Math.random() * 0.5 - 0.3) * selectedDuration
+      : 0;
+    return selectedDuration + randomAdjustment;
+  };
 
   const stopMusic = () => {
     const currentSound = soundRef.current;
@@ -663,28 +695,27 @@ const calculateRandomizedDuration = () => {
       {cancelable: false},
     );
   };
- 
-  const beginSession = () => {  
-    
-    const randomizedDuration = calculateRandomizedDuration();
-    console.log("randomizedduration in begin session: ", randomizedDuration)
 
-  const totalSeconds = Math.round(randomizedDuration * 60);
-  const initialMinutes = Math.floor(totalSeconds / 60);
-  const initialSeconds = totalSeconds % 60;
- 
-  console.log(
-    `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`
-  );
+  const beginSession = () => {
+    const randomizedDuration = calculateRandomizedDuration();
+    console.log('randomizedduration in begin session: ', randomizedDuration);
+
+    const totalSeconds = Math.round(randomizedDuration * 60);
+    const initialMinutes = Math.floor(totalSeconds / 60);
+    const initialSeconds = totalSeconds % 60;
+
+    console.log(
+      `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`,
+    );
     playTone();
     resetTimer();
     setSessionInProgress(true);
     setSliderDisabled(true);
-    if (musicSwitchState) { 
+    if (musicSwitchState) {
       playMusic();
       setIsMusicPlaying(true);
-    } 
-    console.log("beginSession total seconds: ", totalSeconds)
+    }
+    console.log('beginSession total seconds: ', totalSeconds);
     startTimer(totalSeconds);
   };
 
@@ -702,8 +733,6 @@ const calculateRandomizedDuration = () => {
       });
     }
   };
-
-
 
   return (
     <View style={styles.container}>
@@ -839,46 +868,40 @@ const calculateRandomizedDuration = () => {
   );
 }
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const App = () => {
-  const [musicSwitchState, setMusicSwitchState] = useState(false);
-  const {totalTimeMeditated} = useSessionContext();
-
   return (
     <MusicSwitchProvider>
       <SessionProvider>
         <NavigationContainer>
           <Stack.Navigator
             screenOptions={{
-              ...TransitionPresets.ModalFadeTransition,
+              gestureEnabled: true, // Enable gestures for transitions (optional)
+              headerShown: false, // Hide header for all screens by default (optional)
             }}>
+            {/* Meditation Timer Screen */}
             <Stack.Screen
               name="MeditationTimer"
               component={HomeScreen}
-              options={{headerShown: false}}
-              initialParams={{totalTimeMeditated}}
+              options={{headerShown: false,  animation: 'fade'}}
             />
+            {/* Options Screen */}
             <Stack.Screen
-              name="Home"
-              options={{
-                title: 'Meditate',
+              name="Home" 
+              component={OptionsScreen}
+              options={{ 
+                animation: 'fade', 
+                title: 'Options',
                 headerStyle: {
                   backgroundColor: '#212121', // Set the background color of the header
                 },
                 headerTintColor: '#ededed', // Set the text color of the header
                 headerTitleStyle: {
                   fontWeight: 'bold',
-                  // Set the font weight of the header title
                 },
-              }}>
-              {() => (
-                <OptionsScreen
-                  totalTimeMeditated={totalTimeMeditated}
-                  musicSwitchState={musicSwitchState}
-                  setMusicSwitchState={setMusicSwitchState}
-                />
-              )}
-            </Stack.Screen>
+              }}
+            />
+            {/* Session List Screen */}
             <Stack.Screen name="SessionList" component={SessionList} />
           </Stack.Navigator>
         </NavigationContainer>
@@ -1052,20 +1075,20 @@ const styles = StyleSheet.create({
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 15, 
+    marginTop: 15,
     marginLeft: 110,
   },
   switchText: {
     marginLeft: 10,
   },
-  reset: { 
-    color: 'red', 
-  }, 
+  reset: {
+    color: 'red',
+  },
 
-  rowContainer: { 
+  rowContainer: {
     flexDirection: 'row',
     marginBottom: 5, // Adjust as needed
-  }, 
+  },
   bellContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -1079,14 +1102,14 @@ const styles = StyleSheet.create({
     color: '#74aff7',
     position: 'absolute',
     bottom: 10,
-    alignSelf: 'center', 
-    justifyContent: 'space-around', 
-  }, 
+    alignSelf: 'center',
+    justifyContent: 'space-around',
+  },
   belltotalcontainer: {
     marginTop: -50,
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', 
+    justifyContent: 'center',
   },
 });
 

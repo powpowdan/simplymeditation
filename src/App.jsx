@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Switch,
@@ -12,328 +12,17 @@ import {
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
-Sound.setCategory('Playback');
 import BackgroundTimer from 'react-native-background-timer';
 import ProgressCircle from 'react-native-progress-circle';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {SafeAreaView} from 'react-native-safe-area-context'; // Update the import
-import GoToStatsImage from '../android/app/src/img/QQ4.png';
-import {MusicSwitchProvider} from './MusicSwitchContext';
-import {SessionProvider} from './SessionContext';
-import SessionList from './SessionList';
-import {useSessionContext} from './SessionContext';
-import {useMusicSwitchContext} from './MusicSwitchContext';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'; 
+import { MusicSwitchProvider, useMusicSwitchContext } from './MusicSwitchContext';
+import { SessionProvider, useSessionContext } from './SessionContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
-
-function OptionsScreen({navigation}) {
-  // Get the totalTimeMeditated from the context using the useSessionContext hook
-  console.log('OptionsScreen re-rendered. musicSwitchState:', musicSwitchState);
-  const {
-    musicSwitchState,
-    setMusicSwitchState,
-    intervalBellsSwitchState,
-    setIntervalBellsSwitchState,
-    interval25Active,
-    toggleInterval25,
-    interval50Active,
-    toggleInterval50,
-    interval75Active,
-    toggleInterval75,
-    interval90Active,
-    toggleInterval90,
-    adjustmentSwitchState,
-    toggleAdjustmentSwitch,
-    adjustmentValue,
-    setAdjustmentValue,
-  } = useMusicSwitchContext();
-  const {
-    totalTimeMeditated,
-    sessionCount,
-    resetStatistics,
-    resetShortestStatistics,
-    longestTimeMeditated,
-    shortestTimeMeditated,
-  } = useSessionContext();
-  const handleGoToHome = () => {
-    navigation.navigate('MeditationTimer');
-  };
-
-  const formatTime = timeInSeconds => {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const remainingMinutes = Math.floor((timeInSeconds % 3600) / 60);
-    const remainingSeconds = Math.round(timeInSeconds % 60);
-
-    const formatHours =
-      hours > 0 ? `${hours} ${hours === 1 ? 'hour' : 'hours'}` : '';
-    const formatMinutes =
-      remainingMinutes > 0
-        ? `${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}`
-        : '';
-    const formatSeconds =
-      remainingSeconds > 0
-        ? `${remainingSeconds} ${remainingSeconds === 1 ? 'second' : 'seconds'}`
-        : '';
-
-    const timeArray = [formatHours, formatMinutes, formatSeconds].filter(
-      Boolean,
-    );
-
-    if (timeArray.length === 0) {
-      return '0 seconds';
-    } else {
-      const formattedTime =
-        timeArray.length > 1
-          ? timeArray.slice(0, -1).join(' ') +
-            ' and ' +
-            timeArray[timeArray.length - 1]
-          : timeArray[0];
-
-      return formattedTime;
-    }
-  };
-
-  const handleResetStatistics = () => {
-    Alert.alert(
-      'Confirm Reset',
-      'Are you sure you want to reset all statistics?',
-      [
-        {
-          text: 'Do not reset',
-          style: 'cancel',
-        },
-        {
-          text: 'Reset Shortest Only',
-          onPress: resetShortestStatistics,
-        },
-        {
-          text: 'RESET ALL',
-          onPress: resetStatistics,
-          style: 'destructive',
-        },
-      ],
-      {cancelable: false},
-    );
-  };
-
-  const calculateAverageDuration = () => {
-    if (sessionCount === 0) {
-      return 0;
-    }
-    return totalTimeMeditated / sessionCount;
-  };
-
-  useEffect(() => {
-    // Load the switch state from AsyncStorage when the component mounts
-    loadSwitchState();
-  }, []);
-
-  const loadSwitchState = async () => {
-    try {
-      const value = await AsyncStorage.getItem('musicSwitchState');
-      if (value !== null) {
-        // Parse the value from AsyncStorage (it's stored as a string)
-        setMusicSwitchState(JSON.parse(value));
-      }
-    } catch (error) {
-      console.error('Error loading switch state:', error);
-    }
-  };
-
-  const saveSwitchState = async value => {
-    try {
-      // Save the switch state to AsyncStorage as a string
-      await AsyncStorage.setItem('musicSwitchState', JSON.stringify(value));
-      console.log('saved');
-    } catch (error) {
-      console.error('Error saving switch state:', error);
-    }
-  };
-
-  //intervals
-  const handleIntervalBellsSwitchChange = value => {
-    setIntervalBellsSwitchState(value);
-    saveIntervalBellsSwitchState(value);
-  };
-
-  const handleMusicSwitchChange = value => {
-    // Update the switch state and save it to AsyncStorage when it changes
-    setMusicSwitchState(value);
-    saveSwitchState(value);
-  };
-
-  const saveIntervalBellsSwitchState = async value => {
-    try {
-      await AsyncStorage.setItem(
-        'intervalBellsSwitchState',
-        JSON.stringify(value),
-      );
-      console.log('Interval Bells switch state saved');
-    } catch (error) {
-      console.error('Error saving Interval Bells switch state:', error);
-    }
-  };
-
-  // Load the Interval Bells switch state from AsyncStorage when the component mounts
-  useEffect(() => {
-    loadIntervalBellsSwitchState();
-  }, []);
-
-  const loadIntervalBellsSwitchState = async () => {
-    try {
-      const value = await AsyncStorage.getItem('intervalBellsSwitchState');
-      if (value !== null) {
-        setIntervalBellsSwitchState(JSON.parse(value));
-      }
-    } catch (error) {
-      console.error('Error loading Interval Bells switch state:', error);
-    }
-  };
-
-  //interval bell options
-  const saveInterval25ActiveState = async value => {
-    try {
-      await AsyncStorage.setItem('interval25Active', JSON.stringify(value));
-      console.log('25% Interval switch state saved');
-    } catch (error) {
-      console.error('Error saving 25% Interval switch state:', error);
-    }
-  };
-  const saveInterval50ActiveState = async value => {
-    try {
-      await AsyncStorage.setItem('interval50Active', JSON.stringify(value));
-      console.log('50% Interval switch state saved');
-    } catch (error) {
-      console.error('Error saving 50% Interval switch state:', error);
-    }
-  };
-
-  const saveInterval75ActiveState = async value => {
-    try {
-      await AsyncStorage.setItem('interval75Active', JSON.stringify(value));
-      console.log('75% Interval switch state saved');
-    } catch (error) {
-      console.error('Error saving 75% Interval switch state:', error);
-    }
-  };
-
-  const saveInterval90ActiveState = async value => {
-    try {
-      await AsyncStorage.setItem('interval90Active', JSON.stringify(value));
-      console.log('90% Interval switch state saved');
-    } catch (error) {
-      console.error('Error saving 90% Interval switch state:', error);
-    }
-  };
-
-  const handleInterval25Change = value => {
-    toggleInterval25(value);
-    saveInterval25ActiveState(value);
-  };
-
-  const handleInterval50Change = value => {
-    toggleInterval50(value);
-    saveInterval50ActiveState(value);
-  };
-
-  const handleInterval75Change = value => {
-    toggleInterval75(value);
-    saveInterval75ActiveState(value);
-  };
-
-  const handleInterval90Change = value => {
-    toggleInterval90(value);
-    saveInterval90ActiveState(value);
-  };
-
-  return (
-    <View style={styles.container2}>
-      <Text style={styles.headerText2}>Statistics</Text>
-      <Text style={styles.statText}>
-        Total Time Meditated: {formatTime(totalTimeMeditated)}
-      </Text>
-      <Text style={styles.statText}>Total Sessions: {sessionCount}</Text>
-      <Text style={styles.statText}>
-        Average Session Duration: {formatTime(calculateAverageDuration())}{' '}
-      </Text>
-      <Text style={styles.statText}>
-        Longest Meditation Session: {formatTime(longestTimeMeditated)}
-      </Text>
-      <Text style={styles.statText}>
-        Shortest Meditation Session: {formatTime(shortestTimeMeditated)}
-      </Text>
-
-      <Text style={styles.headerText2}>Options</Text>
-      {/* <TouchableOpacity><Text style={styles.options}>Change bell sound for session</Text></TouchableOpacity> */}
-      <TouchableOpacity>
-        <Text style={styles.options}>Monk chanting</Text>
-      </TouchableOpacity>
-      <Switch
-        value={musicSwitchState}
-        onValueChange={handleMusicSwitchChange}
-      />
-
-      <Text style={styles.options}>Randomize timer</Text>
-      <Switch
-        value={adjustmentSwitchState}
-        onValueChange={value => toggleAdjustmentSwitch(value)}
-      />
-
-      <Text style={styles.belloptions}>Interval Bells</Text>
-      <Switch
-        value={intervalBellsSwitchState}
-        onValueChange={handleIntervalBellsSwitchChange}
-      />
-
-      {intervalBellsSwitchState ? (
-        // Render the interval options only if the "Interval Bells" switch is active
-
-        <View style={styles.belltotalcontainer}>
-          <View style={styles.rowContainer}>
-            <View style={styles.bellContainer}>
-              <Switch
-                value={interval75Active}
-                onValueChange={handleInterval75Change}
-              />
-              <Text style={styles.switchText}>25% of session</Text>
-            </View>
-
-            <View style={styles.bellContainer}>
-              <Switch
-                value={interval50Active}
-                onValueChange={handleInterval50Change}
-              />
-              <Text style={styles.switchText}>50% of session</Text>
-            </View>
-          </View>
-
-          <View style={styles.rowContainer}>
-            <View style={styles.bellContainer}>
-              <Switch
-                value={interval25Active}
-                onValueChange={handleInterval25Change}
-              />
-              <Text style={styles.switchText}>75% of session</Text>
-            </View>
-
-            <View style={styles.bellContainer}>
-              <Switch
-                value={interval90Active}
-                onValueChange={handleInterval90Change}
-              />
-              <Text style={styles.switchText}>90% of session</Text>
-            </View>
-          </View>
-        </View>
-      ) : null}
-
-      <View style={styles.resetButtonContainer}>
-        <Button title="Reset Statistics" onPress={handleResetStatistics} />
-      </View>
-    </View>
-  );
-}
+import OptionsScreen from './screens/OptionsScreen';  // This line will import the new OptionsScreen
+import GoToStatsImage from '../android/app/src/img/QQ4.png';
+import SessionList from './SessionList';
 
 function HomeScreen() {
   const navigation = useNavigation();
@@ -610,7 +299,7 @@ function HomeScreen() {
         }
         return seconds;
       });
-    }, 1000);
+    }, 1);
   };
 
   useEffect(() => {
@@ -742,7 +431,7 @@ function HomeScreen() {
 
       <TouchableOpacity
         disabled={sliderDisabled}
-        onPress={() => navigation.navigate('Home')}>
+        onPress={() => navigation.navigate('Options')}>
         <Image source={GoToStatsImage} style={styles.goToStatsImage} />
       </TouchableOpacity>
       <View style={{alignItems: 'center'}}>
@@ -887,10 +576,10 @@ const App = () => {
             />
             {/* Options Screen */}
             <Stack.Screen
-              name="Home" 
+              name="Options" // Use "Options" as the screen name for OptionsScreen
               component={OptionsScreen}
-              options={{ 
-                animation: 'fade', 
+              options={{
+                animation: 'fade',
                 title: 'Options',
                 headerStyle: {
                   backgroundColor: '#212121', // Set the background color of the header
@@ -911,9 +600,6 @@ const App = () => {
 };
 
 const styles = StyleSheet.create({
-  statText: {
-    marginTop: 10, // Adjust the value to add more spacing
-  },
   container: {
     flex: 1,
     alignItems: 'center',
@@ -926,27 +612,6 @@ const styles = StyleSheet.create({
     paddingTop: 1,
     paddingLeft: 10,
     textAlign: 'center',
-  },
-  container2: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    backgroundColor: '#212121',
-  },
-  headerText2: {
-    fontSize: 24,
-    color: '#74aff7',
-    paddingTop: 50,
-    paddingBottom: 10,
-    textAlign: 'center',
-  },
-  options: {
-    paddingTop: 20,
-    marginBottom: 10,
-  },
-  belloptions: {
-    paddingTop: 20,
-    marginBottom: 10,
   },
   timerContainer: {
     alignItems: 'center',
@@ -1071,45 +736,6 @@ const styles = StyleSheet.create({
     height: 160,
     marginTop: -30,
     marginBottom: -18,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 15,
-    marginLeft: 110,
-  },
-  switchText: {
-    marginLeft: 10,
-  },
-  reset: {
-    color: 'red',
-  },
-
-  rowContainer: {
-    flexDirection: 'row',
-    marginBottom: 5, // Adjust as needed
-  },
-  bellContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'black',
-    padding: 5,
-    margin: 5,
-  },
-  resetButtonContainer: {
-    color: '#74aff7',
-    position: 'absolute',
-    bottom: 10,
-    alignSelf: 'center',
-    justifyContent: 'space-around',
-  },
-  belltotalcontainer: {
-    marginTop: -50,
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

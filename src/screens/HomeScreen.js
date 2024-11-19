@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react'; 
+import React, {useState, useEffect, useRef} from 'react';
 import {
-    View,
-    AppState,
-    TouchableOpacity,
-    Image,
-    Text,
-    StyleSheet,
-    Alert,
-  } from 'react-native';  
+  View,
+  AppState,
+  TouchableOpacity,
+  Image,
+  Text,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer';
@@ -15,682 +15,576 @@ import ProgressCircle from 'react-native-progress-circle';
 import GoToStatsImage from '../../android/app/src/img/QQ4.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
-import { useMusicSwitchContext } from '../MusicSwitchContext'; 
-import { useSessionContext } from '../SessionContext'; 
-import { useNavigation } from '@react-navigation/native'; 
-
+import {useMusicSwitchContext} from '../MusicSwitchContext';
+import {useSessionContext} from '../SessionContext';
+import {useNavigation} from '@react-navigation/native';
+import Quotes from '../components/Quotes';
 
 function HomeScreen() {
-    const navigation = useNavigation();
-    const [sessionInProgress, setSessionInProgress] = useState(false);
-    const [remainingSeconds, setRemainingSeconds] = useState(0);
-    const [selectedDuration, setSelectedDuration] = useState(15);
-    const {addMeditationTime, incrementSessionCount} = useSessionContext();
-    const [sound, setSound] = useState(null);
-    const {
-      musicSwitchState,
-      setMusicSwitchState,
-      intervalBellsSwitchState,
-      setIntervalBellsSwitchState,
-      interval25Active,
-      interval50Active,
-      interval75Active,
-      interval90Active,
-      toggleAdjustmentSwitch,
-      adjustmentSwitchState,
-      adjustmentValue,
-    } = useMusicSwitchContext();
-    const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-    const appState = useRef(AppState.currentState);
-    const timerRef = useRef();
-    const timerDurations = [5, 10, 15, 20];
-    const [sliderDisabled, setSliderDisabled] = useState(false);
-    const soundRef = useRef(null);
-    const [randomizedDuration, setRandomizedDuration] = useState(0);
-    const [totalMeditationTime, setTotalMeditationTime] = useState(0);
-    const [adjustedSessionDuration, setAdjustedSessionDuration] = useState(0);
-    const [sessionCompleted, setSessionCompleted] = useState(false);
-  
-    // Initialize buttonSelectedDuration default
-    const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
-      button5Mins: 5,
-      button10Mins: 10,
-      button15Mins: 15,
-      button20Mins: 20,
-    });
-  
-    const sentences = [
-      'Be the change that you wish to see in the world',
-      'Peace is not found in the world but in the quiet spaces within',
-      'The future depends on what you do today',
-      'The quieter you become, the more you can hear',
-      'When you realize nothing is lacking, the whole world belongs to you',
-      'To the mind that is still, the whole universe surrenders',
-      'The only real failure in life is not to be true to the best one knows',
-      'Meditation makes you accident-prone to enlightenment',
-      'Greatness is not just what one does, but also what one refuses to do',
-      'You should sit in meditation for twenty minutes every day — unless you’re too busy. Then you should sit for an hour',
-      'Continuous improvement is better than delayed perfection',
-      'Simplicity, patience, compassion. These three are your greatest treasures',
-      'The wise man is one who, knows, what he does not know',
-      'When I let go of what I am, I become what I might be',
-      'Knowing others is wisdom, knowing yourself is Enlightenment',
-      'Continuous improvement is better than delayed perfection',
-      'Do you have the patience to wait until your mud settles and the water is clear?',
-      'He who is contented is rich',
-      'Your work is to discover your world and then with all your heart give yourself to it',
-      'The soul always knows what to do to heal itself. The challenge is to silence the mind',
-      "The moment you accept what troubles you've been given, the door will open",
-      'To enjoy the rainbow, first enjoy the rain',
-      "You can't have a rainbow without a little rain",
-      'Life will give you whatever experience is most helpful for the evolution of your consciousness',
-      'Acknowledging the good that you already have in your life is the foundation for all abundance',
-      'The moment you start watching the thinker, a higher level of consciousness becomes activated',
-      'Worry pretends to be necessary but serves no useful purpose',
-      'Force always moves against something, whereas power does not move against something but moves toward something',
-    ];
-  
-    // Generate a random index different from the current and last sentence indexes
-    const getRandomSentenceIndex = () => {
-      const availableIndexes = sentences
-        .map((_, index) => index)
-        .filter(
-          index => index !== currentSentenceIndex && index !== lastSentenceIndex,
-        );
-      if (availableIndexes.length > 0) {
-        return availableIndexes[
-          Math.floor(Math.random() * availableIndexes.length)
-        ];
-      }
-      // When all indexes are used, return a random index except the current sentence
-      return sentences
-        .map((_, index) => index)
-        .filter(index => index !== currentSentenceIndex)[
-        Math.floor(Math.random() * (sentences.length - 1))
-      ];
-    };
-  
-    const [currentSentenceIndex, setCurrentSentenceIndex] = useState(
-      getRandomSentenceIndex(),
-    );
-    const [lastSentenceIndex, setLastSentenceIndex] = useState(-1);
-    const [animation, setAnimation] = useState('fadeIn');
-    const [sentenceVisible, setSentenceVisible] = useState(true);
-    const [fadeout, setFadeout] = useState(false);
-  
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setAnimation('fadeOut');
-        setFadeout(true);
-  
-        // Add a delay to switch to the next sentence
-        setTimeout(() => {
-          setCurrentSentenceIndex(prevCurrentIndex => {
-            let newIndex;
-            do {
-              newIndex = getRandomSentenceIndex();
-            } while (
-              newIndex === prevCurrentIndex ||
-              newIndex === lastSentenceIndex
-            );
-            setLastSentenceIndex(prevCurrentIndex);
-            setAnimation('fadeIn');
-            setFadeout(false);
-            return newIndex;
-          });
-        }, 1000); // Adjust this delay as needed for smoother transitions
-      }, 10000); // 5-second interval for updating sentences
-  
-      return () => clearInterval(timer);
-    }, [currentSentenceIndex, lastSentenceIndex]);
-  
-    const currentSentence = sentences[currentSentenceIndex];
-  
-    useEffect(() => {
-      const loadMusicSwitchState = async () => {
-        try {
-          const value = await AsyncStorage.getItem('musicSwitchState');
-          if (value !== null) {
-            setMusicSwitchState(JSON.parse(value));
-          }
-        } catch (error) {
-          console.error('Error loading musicSwitchState:', error);
-        }
-      };
-  
-      loadMusicSwitchState();
-    }, []);
-  
-    useEffect(() => {
-      const subscription = AppState.addEventListener(
-        'change',
-        handleAppStateChange,
-      );
-  
-      // Retrieve the saved selected durations from AsyncStorage
-      const retrieveSelectedDurations = async () => {
-        try {
-          const storedDurations = await AsyncStorage.getItem('selectedDurations');
-          if (storedDurations) {
-            const parsedDurations = JSON.parse(storedDurations);
-            setButtonSelectedDuration(parsedDurations);
-          } else {
-            // Apply initial values if no stored durations are found
-            setButtonSelectedDuration({
-              button5Mins: 5,
-              button10Mins: 10,
-              button15Mins: 15,
-              button20Mins: 20,
-            });
-          }
-        } catch (error) {
-          console.error('Error retrieving selected durations:', error);
-        }
-      };
-  
-      retrieveSelectedDurations();
-  
-      return () => {
-        subscription.remove('change', handleAppStateChange);
-        BackgroundTimer.stopBackgroundTimer();
-      };
-    }, []);
-  
-    // Save the selected durations to AsyncStorage whenever they change
-    useEffect(() => {
-      try {
-        AsyncStorage.setItem(
-          'selectedDurations',
-          JSON.stringify(buttonSelectedDuration),
-        );
-      } catch (error) {
-        console.error('Error saving selected durations:', error);
-      }
-    }, [buttonSelectedDuration]);
-  
-    useEffect(() => {
-      const randomAdjustment = adjustmentSwitchState
-        ? (Math.random() * 0.5 - 0.3) * selectedDuration
-        : 0;
-      const newRandomizedDuration = selectedDuration + randomAdjustment;
-      setRandomizedDuration(newRandomizedDuration);
-    }, [selectedDuration, adjustmentSwitchState]);
-  
-    const handleAppStateChange = nextAppState => {
-      if (
-        appState.current.match(/active/) &&
-        nextAppState === 'active' &&
-        sessionInProgress &&
-        remainingSeconds > 0
-      ) {
-        // App is back to foreground, and the session is in progress with remaining time
-        startTimer(remainingSeconds);
-      }
-  
-      appState.current = nextAppState;
-    };
-  
-    const playTone = () => {
-      const sound = new Sound('audio_file.mp3', null, error => {
-        if (error) {
-          alert('Error', JSON.stringify(error));
-        }
-        sound.play(() => sound.release());
-      });
-    };
-  
-    const playIntervalBell = percentage => {
-      const sound = new Sound('intervalbell.mp3', null, error => {
-        if (error) {
-          alert(`Interval bell ${percentage}% ALERT`, JSON.stringify(error));
-        }
-        sound.play(() => sound.release());
-      });
-    };
-  
-    const startTimer = totalSeconds => {
-      setRemainingSeconds(totalSeconds);
-  
-      timerRef.current = BackgroundTimer.setInterval(() => {
-        setRemainingSeconds(prevRemainingSeconds => {
-          const seconds = prevRemainingSeconds - 1;
-          const interval25 = Math.floor(totalSeconds * 0.25);
-          const interval50 = Math.floor(totalSeconds * 0.5);
-          const interval75 = Math.floor(totalSeconds * 0.75);
-          const interval90 = Math.floor(totalSeconds * 0.1);
-  
-          if (
-            intervalBellsSwitchState &&
-            interval25Active &&
-            seconds === interval25
-          ) {
-            playIntervalBell(25);
-          } else if (
-            intervalBellsSwitchState &&
-            interval50Active &&
-            seconds === interval50
-          ) {
-            playIntervalBell(50);
-          } else if (
-            intervalBellsSwitchState &&
-            interval75Active &&
-            seconds === interval75
-          ) {
-            playIntervalBell(75);
-          } else if (
-            intervalBellsSwitchState &&
-            interval90Active &&
-            seconds === interval90
-          ) {
-            playIntervalBell(90);
-          }
-  
-          if (seconds === 0) {
-            //maybe totalSeconds should be passed to handle timer or made a global usestate and then used in handletimer()
-  
-            handleTimerEnd(totalSeconds);
-            playTone();
-            BackgroundTimer.clearInterval(timerRef.current);
-            stopMusic();
-          }
-          return seconds;
-        });
-      }, 1);
-    };
-  
-    useEffect(() => {
-      return () => {
-        stopMusic();
-      };
-    }, [sound]);
-  
-    const stopSession = () => {
-      console.log('stop session by user');
-      setSliderDisabled(false);
-      if (timerRef.current) {
-        BackgroundTimer.clearInterval(timerRef.current);
-      }
-      stopMusic();
-      setSessionInProgress(false);
-    };
-  
-    const handleTimerEnd = totalSeconds => {
-      console.log('handletimerend totalsecondsPASSED:', totalSeconds);
-      const sessionDuration = totalSeconds / 60;
-      console.log('Session Duration:handleTimerEnd  ===', sessionDuration);
-  
-      addMeditationTime(sessionDuration);
-      setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
-      resetTimer();
-      setSliderDisabled(false);
-      incrementSessionCount();
-      setSessionCompleted(true);
-      setSessionInProgress(false);
-    };
-  
-    // Function to calculate randomized duration
-    const calculateRandomizedDuration = () => {
-      const randomAdjustment = adjustmentSwitchState
-        ? (Math.random() * 0.5 - 0.3) * selectedDuration
-        : 0;
-      return selectedDuration + randomAdjustment;
-    };
-  
-    const stopMusic = () => {
-      const currentSound = soundRef.current;
-      if (currentSound) {
-        currentSound.stop();
-        currentSound.release();
-        soundRef.current = null;
-        setIsMusicPlaying(false);
-        console.log('stopMusicFunction ran');
-      }
-    };
-  
-    const resetTimer = () => {
-      console.log('resetTimer');
-      setSessionInProgress(false);
-      setRemainingSeconds(0);
-      stopMusic();
-    };
-  
-    const handleTimerChange = value => {
-      if (!sessionInProgress) {
-        setSelectedDuration(value);
-      }
-    };
-  
-    const handleButtonLongPress = buttonKey => {
-      Alert.alert(
-        'Confirmation:',
-        `Are you sure you want to set this button's duration to ${selectedDuration} minutes?`,
-        [
-          {text: 'Cancel', style: 'cancel'},
-          {
-            text: 'OK',
-            onPress: async () => {
-              await AsyncStorage.setItem(buttonKey, selectedDuration.toString());
-              setButtonSelectedDuration(prev => ({
-                ...prev,
-                [buttonKey]: selectedDuration,
-              }));
-            },
-          },
-        ],
-        {cancelable: false},
-      );
-    };
-  
-    const beginSession = () => {
-      const randomizedDuration = calculateRandomizedDuration();
-      console.log('randomizedduration in begin session: ', randomizedDuration);
-  
-      const totalSeconds = Math.round(randomizedDuration * 60);
-      const initialMinutes = Math.floor(totalSeconds / 60);
-      const initialSeconds = totalSeconds % 60;
-  
-      console.log(
-        `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`,
-      );
-      playTone();
-      resetTimer();
-      setSessionInProgress(true);
-      setSliderDisabled(true);
-      if (musicSwitchState) {
-        playMusic();
-        setIsMusicPlaying(true);
-      }
-      console.log('beginSession total seconds: ', totalSeconds);
-      startTimer(totalSeconds);
-    };
-  
-    const playMusic = () => {
-      if (musicSwitchState) {
-        const newSound = new Sound('now.mp3', null, error => {
-          if (error) {
-            console.error('Error:', error);
-          } else {
-            newSound.play(() => {
-              newSound.release();
-            });
-            soundRef.current = newSound;
-          }
-        });
-      }
-    };
-  
-    return (
-      <View style={styles.container}>
-        {/* <TouchableOpacity disabled={sliderDisabled} onPress={() => navigation.navigate('Home')} style={{ position: 'absolute', top: 0, right: 16 }}>
-       <Text style={{color: '#74aff7', fontSize: 10}}>Options</Text>   
-          </TouchableOpacity>    */}
-  
-        <TouchableOpacity
-          disabled={sliderDisabled}
-          onPress={() => navigation.navigate('Options')}>
-          <Image source={GoToStatsImage} style={styles.goToStatsImage} />
-        </TouchableOpacity>
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.headerText}>Simply Meditation</Text>
-          {/* <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text>  */}
-  
-          {sentenceVisible && (
-            <Animatable.Text
-              style={styles.instructions}
-              animation={animation}
-              duration={1000} // Adjust the duration for smoother transitions
-            >
-              {currentSentence}
-            </Animatable.Text>
-          )}
-  
-          <ProgressCircle
-            percent={
-              sessionInProgress
-                ? (remainingSeconds / (selectedDuration * 60)) * 100
-                : 0
-            }
-            radius={80}
-            borderWidth={10}
-            color="#74aff7"
-            shadowColor="#101010"
-            bgColor="#212121">
-            <TouchableOpacity
-              onPress={sessionInProgress ? stopSession : beginSession}
-              style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
-              {sessionInProgress ? (
-                <Text style={styles.countdown}>
-                  {Math.floor(remainingSeconds / 60)
-                    .toString()
-                    .padStart(2, '0')}
-                  :{(remainingSeconds % 60).toString().padStart(2, '0')}
-                </Text>
-              ) : (
-                <Text style={styles.duration}>
-                  {selectedDuration.toString().padStart(2, '0')}:00
-                </Text>
-              )}
-            </TouchableOpacity>
-          </ProgressCircle>
-        </View>
-  
-        <Text style={styles.slidertext}>Choose your session length</Text>
-        <View style={styles.sliderContainer}>
-          <Slider
-            style={styles.slider}
-            minimumValue={1}
-            maximumValue={60}
-            step={1}
-            value={selectedDuration}
-            onValueChange={handleTimerChange}
-            minimumTrackTintColor="#97d2f7"
-            maximumTrackTintColor="white"
-            thumbTintColor="#97d2f7"
-            thumbStyle={styles.sliderThumb}
-            trackStyle={styles.sliderTrack}
-            disabled={sliderDisabled}
-          />
-        </View>
-        <View style={[styles.timerButtonsContainer, {marginTop: -27}]}>
-          <TouchableOpacity
-            style={[styles.button, styles.timerButton]}
-            onLongPress={() => handleButtonLongPress('button5Mins')}
-            onPress={() => handleTimerChange(buttonSelectedDuration.button5Mins)}>
-            <Text style={styles.colorBlack}>
-              {buttonSelectedDuration.button5Mins} Mins
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.timerButton]}
-            onLongPress={() => handleButtonLongPress('button10Mins')}
-            onPress={() =>
-              handleTimerChange(buttonSelectedDuration.button10Mins)
-            }>
-            <Text style={styles.colorBlack}>
-              {buttonSelectedDuration.button10Mins} Mins
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={[styles.timerButtonsContainer, {marginTop: -27}]}>
-          <TouchableOpacity
-            style={[styles.button, styles.timerButton]}
-            onLongPress={() => handleButtonLongPress('button15Mins')}
-            onPress={() =>
-              handleTimerChange(buttonSelectedDuration.button15Mins)
-            }>
-            <Text style={styles.colorBlack}>
-              {buttonSelectedDuration.button15Mins} Mins
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.timerButton]}
-            onLongPress={() => handleButtonLongPress('button20Mins')}
-            onPress={() =>
-              handleTimerChange(buttonSelectedDuration.button20Mins)
-            }>
-            <Text style={styles.colorBlack}>
-              {buttonSelectedDuration.button20Mins} Mins
-            </Text>
-          </TouchableOpacity>
-        </View>
-  
-        <View style={styles.beginEndContainer}>
-          {!sessionInProgress ? (
-            <TouchableOpacity
-              style={[styles.button, styles.beginButton]}
-              onPress={beginSession}>
-              <Text style={styles.colorBlack}>Begin Session</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[styles.button, styles.stopButton]}
-              onPress={stopSession}>
-              <Text style={styles.colorBlack}>Stop Session</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    );
-  }
+  const navigation = useNavigation();
+  const [sessionInProgress, setSessionInProgress] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [selectedDuration, setSelectedDuration] = useState(15);
+  const {addMeditationTime, incrementSessionCount} = useSessionContext();
+  const [sound, setSound] = useState(null);
+  const {
+    musicSwitchState,
+    setMusicSwitchState,
+    intervalBellsSwitchState,
+    setIntervalBellsSwitchState,
+    interval25Active,
+    interval50Active,
+    interval75Active,
+    interval90Active,
+    toggleAdjustmentSwitch,
+    adjustmentSwitchState,
+    adjustmentValue,
+  } = useMusicSwitchContext();
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const appState = useRef(AppState.currentState);
+  const timerRef = useRef();
+  const timerDurations = [5, 10, 15, 20];
+  const [sliderDisabled, setSliderDisabled] = useState(false);
+  const soundRef = useRef(null);
+  const [randomizedDuration, setRandomizedDuration] = useState(0);
+  const [totalMeditationTime, setTotalMeditationTime] = useState(0);
+  const [adjustedSessionDuration, setAdjustedSessionDuration] = useState(0);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#212121',
-    },
-    headerText: {
-      fontSize: 24,
-      color: '#74aff7',
-      paddingTop: 1,
-      paddingLeft: 10,
-      textAlign: 'center',
-    },
-    timerContainer: {
-      alignItems: 'center',
-      marginBottom: 30,
-    },
-    circleContent: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flex: 1,
-    },
-    countdown: {
-      fontSize: 20,
-      color: '#ededed',
-      fontWeight: 'bold',
-    },
-    duration: {
-      fontSize: 29,
-      color: '#ededed',
-      fontWeight: 'bold',
-    },
-    instructions: {
-      height: 40,
-      textAlign: 'center',
-      color: '#ededed',
-      marginBottom: 25,
-      marginTop: 5,
-      paddingHorizontal: 10,
-    },
-    button: {
-      margin: 10,
-      padding: 10,
-      width: '70%',
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 35,
-    },
-    beginButton: {
-      backgroundColor: '#74aff7',
-      marginTop: 55,
-    },
-    stopButton: {
-      backgroundColor: '#717171',
-      marginTop: 35,
-    },
-    colorBlack: {
-      textAlign: 'center',
-      color: '#ededed',
-      fontSize: 18,
-    },
-    header: {
-      position: 'absolute',
-      top: 0,
-      height: 60,
-      width: '100%',
-      backgroundColor: '#79a3b1',
-    },
-    bold: {
-      fontWeight: 'bold',
-    },
-    slider: {
-      width: '100%',
-      height: 40,
-      marginTop: 0,
-      backgroundColor: '#74aff7',
-      borderRadius: 20,
-    },
-    slidertext: {
-      marginTop: 40,
-      textAlign: 'center',
-      color: '#74aff7',
-      marginBottom: 5,
-    },
-    sliderThumb: {
-      width: 5,
-      height: 5,
-      borderRadius: 15,
-      backgroundColor: '#74aff7',
-    },
-    sliderContainer: {
-      width: '80%',
-      height: 40,
-      marginTop: 0,
-      marginBottom: 20,
-      backgroundColor: '#74aff7',
-      borderRadius: 20,
-      overflow: 'hidden',
-    },
-    sliderTrack: {
-      height: 10,
-      borderRadius: 5,
-      backgroundColor: '#97d2f7',
-    },
-    timerButtonsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '80%',
-      marginBottom: 0,
-      marginTop: 0,
-    },
-    timerButton: {
-      flex: 1,
-      margin: 5,
-      borderRadius: 8,
-      paddingVertical: 15,
-      paddingHorizontal: 10,
-      backgroundColor: '#74aff7',
-    },
-    timerButtonWrapper: {
-      flex: 1,
-      margin: 1,
-    },
-    beginEndContainer: {
-      paddingBottom: 0,
-      bottom: 0,
-      width: '80%',
-      alignItems: 'center',
-    },
-    goToStatsImage: {
-      width: 160,
-      height: 160,
-      marginTop: -30,
-      marginBottom: -18,
-    },
+  // Initialize buttonSelectedDuration default
+  const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
+    button5Mins: 5,
+    button10Mins: 10,
+    button15Mins: 15,
+    button20Mins: 20,
   });
+ 
+  useEffect(() => {
+    const loadMusicSwitchState = async () => {
+      try {
+        const value = await AsyncStorage.getItem('musicSwitchState');
+        if (value !== null) {
+          setMusicSwitchState(JSON.parse(value));
+        }
+      } catch (error) {
+        console.error('Error loading musicSwitchState:', error);
+      }
+    };
 
-  export default HomeScreen;
+    loadMusicSwitchState();
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    // Retrieve the saved selected durations from AsyncStorage
+    const retrieveSelectedDurations = async () => {
+      try {
+        const storedDurations = await AsyncStorage.getItem('selectedDurations');
+        if (storedDurations) {
+          const parsedDurations = JSON.parse(storedDurations);
+          setButtonSelectedDuration(parsedDurations);
+        } else {
+          // Apply initial values if no stored durations are found
+          setButtonSelectedDuration({
+            button5Mins: 5,
+            button10Mins: 10,
+            button15Mins: 15,
+            button20Mins: 20,
+          });
+        }
+      } catch (error) {
+        console.error('Error retrieving selected durations:', error);
+      }
+    };
+
+    retrieveSelectedDurations();
+
+    return () => {
+      subscription.remove('change', handleAppStateChange);
+      BackgroundTimer.stopBackgroundTimer();
+    };
+  }, []);
+
+  // Save the selected durations to AsyncStorage whenever they change
+  useEffect(() => {
+    try {
+      AsyncStorage.setItem(
+        'selectedDurations',
+        JSON.stringify(buttonSelectedDuration),
+      );
+    } catch (error) {
+      console.error('Error saving selected durations:', error);
+    }
+  }, [buttonSelectedDuration]);
+
+  useEffect(() => {
+    const randomAdjustment = adjustmentSwitchState
+      ? (Math.random() * 0.5 - 0.3) * selectedDuration
+      : 0;
+    const newRandomizedDuration = selectedDuration + randomAdjustment;
+    setRandomizedDuration(newRandomizedDuration);
+  }, [selectedDuration, adjustmentSwitchState]);
+
+  const handleAppStateChange = nextAppState => {
+    if (
+      appState.current.match(/active/) &&
+      nextAppState === 'active' &&
+      sessionInProgress &&
+      remainingSeconds > 0
+    ) {
+      // App is back to foreground, and the session is in progress with remaining time
+      startTimer(remainingSeconds);
+    }
+
+    appState.current = nextAppState;
+  };
+
+  const playTone = () => {
+    const sound = new Sound('audio_file.mp3', null, error => {
+      if (error) {
+        alert('Error', JSON.stringify(error));
+      }
+      sound.play(() => sound.release());
+    });
+  };
+
+  const playIntervalBell = percentage => {
+    const sound = new Sound('intervalbell.mp3', null, error => {
+      if (error) {
+        alert(`Interval bell ${percentage}% ALERT`, JSON.stringify(error));
+      }
+      sound.play(() => sound.release());
+    });
+  };
+
+  const startTimer = totalSeconds => {
+    setRemainingSeconds(totalSeconds);
+
+    timerRef.current = BackgroundTimer.setInterval(() => {
+      setRemainingSeconds(prevRemainingSeconds => {
+        const seconds = prevRemainingSeconds - 1;
+        const interval25 = Math.floor(totalSeconds * 0.25);
+        const interval50 = Math.floor(totalSeconds * 0.5);
+        const interval75 = Math.floor(totalSeconds * 0.75);
+        const interval90 = Math.floor(totalSeconds * 0.1);
+
+        if (
+          intervalBellsSwitchState &&
+          interval25Active &&
+          seconds === interval25
+        ) {
+          playIntervalBell(25);
+        } else if (
+          intervalBellsSwitchState &&
+          interval50Active &&
+          seconds === interval50
+        ) {
+          playIntervalBell(50);
+        } else if (
+          intervalBellsSwitchState &&
+          interval75Active &&
+          seconds === interval75
+        ) {
+          playIntervalBell(75);
+        } else if (
+          intervalBellsSwitchState &&
+          interval90Active &&
+          seconds === interval90
+        ) {
+          playIntervalBell(90);
+        }
+
+        if (seconds === 0) {
+          handleTimerEnd(totalSeconds);
+          playTone();
+          BackgroundTimer.clearInterval(timerRef.current);
+          stopMusic();
+        }
+        return seconds;
+      });
+    }, 1);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopMusic();
+    };
+  }, [sound]);
+
+  const stopSession = () => {
+    console.log('stop session by user');
+    setSliderDisabled(false);
+    if (timerRef.current) {
+      BackgroundTimer.clearInterval(timerRef.current);
+    }
+    stopMusic();
+    setSessionInProgress(false);
+  };
+
+  const handleTimerEnd = totalSeconds => {
+    console.log('handletimerend totalsecondsPASSED:', totalSeconds);
+    const sessionDuration = totalSeconds / 60;
+    console.log('Session Duration:handleTimerEnd  ===', sessionDuration);
+
+    addMeditationTime(sessionDuration);
+    setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
+    resetTimer();
+    setSliderDisabled(false);
+    incrementSessionCount();
+    setSessionCompleted(true);
+    setSessionInProgress(false);
+  };
+
+  // Function to calculate randomized duration
+  const calculateRandomizedDuration = () => {
+    const randomAdjustment = adjustmentSwitchState
+      ? (Math.random() * 0.5 - 0.3) * selectedDuration
+      : 0;
+    return selectedDuration + randomAdjustment;
+  };
+
+  const stopMusic = () => {
+    const currentSound = soundRef.current;
+    if (currentSound) {
+      currentSound.stop();
+      currentSound.release();
+      soundRef.current = null;
+      setIsMusicPlaying(false);
+      console.log('stopMusicFunction ran');
+    }
+  };
+
+  const resetTimer = () => {
+    console.log('resetTimer');
+    setSessionInProgress(false);
+    setRemainingSeconds(0);
+    stopMusic();
+  };
+
+  const handleTimerChange = value => {
+    if (!sessionInProgress) {
+      setSelectedDuration(value);
+    }
+  };
+
+  const handleButtonLongPress = buttonKey => {
+    Alert.alert(
+      'Confirmation:',
+      `Are you sure you want to set this button's duration to ${selectedDuration} minutes?`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'OK',
+          onPress: async () => {
+            await AsyncStorage.setItem(buttonKey, selectedDuration.toString());
+            setButtonSelectedDuration(prev => ({
+              ...prev,
+              [buttonKey]: selectedDuration,
+            }));
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
+
+  const beginSession = () => {
+    const randomizedDuration = calculateRandomizedDuration();
+    console.log('randomizedduration in begin session: ', randomizedDuration);
+
+    const totalSeconds = Math.round(randomizedDuration * 60);
+    const initialMinutes = Math.floor(totalSeconds / 60);
+    const initialSeconds = totalSeconds % 60;
+
+    console.log(
+      `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`,
+    );
+    playTone();
+    resetTimer();
+    setSessionInProgress(true);
+    setSliderDisabled(true);
+    if (musicSwitchState) {
+      playMusic();
+      setIsMusicPlaying(true);
+    }
+    console.log('beginSession total seconds: ', totalSeconds);
+    startTimer(totalSeconds);
+  };
+
+  const playMusic = () => {
+    if (musicSwitchState) {
+      const newSound = new Sound('now.mp3', null, error => {
+        if (error) {
+          console.error('Error:', error);
+        } else {
+          newSound.play(() => {
+            newSound.release();
+          });
+          soundRef.current = newSound;
+        }
+      });
+    }
+  };
+
+  return (
+    <View style={styles.container}> 
+
+      <TouchableOpacity
+        disabled={sliderDisabled}
+        onPress={() => navigation.navigate('Options')}>
+        <Image source={GoToStatsImage} style={styles.goToStatsImage} />
+      </TouchableOpacity>
+      <View style={{alignItems: 'center'}}>
+        <Text style={styles.headerText}>Simply Meditation</Text>
+        {/* <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text>  */}
+
+        
+      <Quotes/>  
+  
+
+        <ProgressCircle
+          percent={
+            sessionInProgress
+              ? (remainingSeconds / (selectedDuration * 60)) * 100
+              : 0
+          }
+          radius={80}
+          borderWidth={10}
+          color="#74aff7"
+          shadowColor="#101010"
+          bgColor="#212121">
+          <TouchableOpacity
+            onPress={sessionInProgress ? stopSession : beginSession}
+            style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
+            {sessionInProgress ? (
+              <Text style={styles.countdown}>
+                {Math.floor(remainingSeconds / 60)
+                  .toString()
+                  .padStart(2, '0')}
+                :{(remainingSeconds % 60).toString().padStart(2, '0')}
+              </Text>
+            ) : (
+              <Text style={styles.duration}>
+                {selectedDuration.toString().padStart(2, '0')}:00
+              </Text>
+            )}
+          </TouchableOpacity>
+        </ProgressCircle>
+      </View>
+
+      <Text style={styles.slidertext}>Choose your session length</Text>
+      <View style={styles.sliderContainer}>
+        <Slider
+          style={styles.slider}
+          minimumValue={1}
+          maximumValue={60}
+          step={1}
+          value={selectedDuration}
+          onValueChange={handleTimerChange}
+          minimumTrackTintColor="#97d2f7"
+          maximumTrackTintColor="white"
+          thumbTintColor="#97d2f7"
+          thumbStyle={styles.sliderThumb}
+          trackStyle={styles.sliderTrack}
+          disabled={sliderDisabled}
+        />
+      </View>
+      <View style={[styles.timerButtonsContainer, {marginTop: -27}]}>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button5Mins')}
+          onPress={() => handleTimerChange(buttonSelectedDuration.button5Mins)}>
+          <Text style={styles.colorBlack}>
+            {buttonSelectedDuration.button5Mins} Mins
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button10Mins')}
+          onPress={() =>
+            handleTimerChange(buttonSelectedDuration.button10Mins)
+          }>
+          <Text style={styles.colorBlack}>
+            {buttonSelectedDuration.button10Mins} Mins
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <View style={[styles.timerButtonsContainer, {marginTop: -27}]}>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button15Mins')}
+          onPress={() =>
+            handleTimerChange(buttonSelectedDuration.button15Mins)
+          }>
+          <Text style={styles.colorBlack}>
+            {buttonSelectedDuration.button15Mins} Mins
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.timerButton]}
+          onLongPress={() => handleButtonLongPress('button20Mins')}
+          onPress={() =>
+            handleTimerChange(buttonSelectedDuration.button20Mins)
+          }>
+          <Text style={styles.colorBlack}>
+            {buttonSelectedDuration.button20Mins} Mins
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.beginEndContainer}>
+        {!sessionInProgress ? (
+          <TouchableOpacity
+            style={[styles.button, styles.beginButton]}
+            onPress={beginSession}>
+            <Text style={styles.colorBlack}>Begin Session</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={[styles.button, styles.stopButton]}
+            onPress={stopSession}>
+            <Text style={styles.colorBlack}>Stop Session</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#212121',
+  },
+  headerText: {
+    fontSize: 24,
+    color: '#74aff7',
+    paddingTop: 1,
+    paddingLeft: 10,
+    textAlign: 'center',
+  },
+  timerContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  circleContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  countdown: {
+    fontSize: 20,
+    color: '#ededed',
+    fontWeight: 'bold',
+  },
+  duration: {
+    fontSize: 29,
+    color: '#ededed',
+    fontWeight: 'bold',
+  }, 
+  button: {
+    margin: 10,
+    padding: 10,
+    width: '70%',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 35,
+  },
+  beginButton: {
+    backgroundColor: '#74aff7',
+    marginTop: 55,
+  },
+  stopButton: {
+    backgroundColor: '#717171',
+    marginTop: 35,
+  },
+  colorBlack: {
+    textAlign: 'center',
+    color: '#ededed',
+    fontSize: 18,
+  },
+  header: {
+    position: 'absolute',
+    top: 0,
+    height: 60,
+    width: '100%',
+    backgroundColor: '#79a3b1',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+    marginTop: 0,
+    backgroundColor: '#74aff7',
+    borderRadius: 20,
+  },
+  slidertext: {
+    marginTop: 40,
+    textAlign: 'center',
+    color: '#74aff7',
+    marginBottom: 5,
+  },
+  sliderThumb: {
+    width: 5,
+    height: 5,
+    borderRadius: 15,
+    backgroundColor: '#74aff7',
+  },
+  sliderContainer: {
+    width: '80%',
+    height: 40,
+    marginTop: 0,
+    marginBottom: 20,
+    backgroundColor: '#74aff7',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  sliderTrack: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#97d2f7',
+  },
+  timerButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '80%',
+    marginBottom: 0,
+    marginTop: 0,
+  },
+  timerButton: {
+    flex: 1,
+    margin: 5,
+    borderRadius: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    backgroundColor: '#74aff7',
+  },
+  timerButtonWrapper: {
+    flex: 1,
+    margin: 1,
+  },
+  beginEndContainer: {
+    paddingBottom: 0,
+    bottom: 0,
+    width: '80%',
+    alignItems: 'center',
+  },
+  goToStatsImage: {
+    width: 160,
+    height: 160,
+    marginTop: -30,
+    marginBottom: -18,
+  },
+});
+
+export default HomeScreen;

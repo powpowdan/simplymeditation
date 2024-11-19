@@ -8,17 +8,16 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer';
 import ProgressCircle from 'react-native-progress-circle';
 import GoToStatsImage from '../../android/app/src/img/QQ4.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Animatable from 'react-native-animatable';
 import {useMusicSwitchContext} from '../MusicSwitchContext';
 import {useSessionContext} from '../SessionContext';
 import {useNavigation} from '@react-navigation/native';
 import Quotes from '../components/Quotes';
+import DurationSelector from '../components/DurationSelector';
 
 function HomeScreen() {
   const navigation = useNavigation();
@@ -58,7 +57,7 @@ function HomeScreen() {
     button15Mins: 15,
     button20Mins: 20,
   });
- 
+
   useEffect(() => {
     const loadMusicSwitchState = async () => {
       try {
@@ -331,8 +330,7 @@ function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}> 
-
+    <View style={styles.container}>
       <TouchableOpacity
         disabled={sliderDisabled}
         onPress={() => navigation.navigate('Options')}>
@@ -342,9 +340,7 @@ function HomeScreen() {
         <Text style={styles.headerText}>Simply Meditation</Text>
         {/* <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text>  */}
 
-        
-      <Quotes/>  
-  
+        <Quotes />
 
         <ProgressCircle
           percent={
@@ -375,67 +371,14 @@ function HomeScreen() {
           </TouchableOpacity>
         </ProgressCircle>
       </View>
-
-      <Text style={styles.slidertext}>Choose your session length</Text>
-      <View style={styles.sliderContainer}>
-        <Slider
-          style={styles.slider}
-          minimumValue={1}
-          maximumValue={60}
-          step={1}
-          value={selectedDuration}
-          onValueChange={handleTimerChange}
-          minimumTrackTintColor="#97d2f7"
-          maximumTrackTintColor="white"
-          thumbTintColor="#97d2f7"
-          thumbStyle={styles.sliderThumb}
-          trackStyle={styles.sliderTrack}
-          disabled={sliderDisabled}
-        />
-      </View>
-      <View style={[styles.timerButtonsContainer, {marginTop: -27}]}>
-        <TouchableOpacity
-          style={[styles.button, styles.timerButton]}
-          onLongPress={() => handleButtonLongPress('button5Mins')}
-          onPress={() => handleTimerChange(buttonSelectedDuration.button5Mins)}>
-          <Text style={styles.colorBlack}>
-            {buttonSelectedDuration.button5Mins} Mins
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.timerButton]}
-          onLongPress={() => handleButtonLongPress('button10Mins')}
-          onPress={() =>
-            handleTimerChange(buttonSelectedDuration.button10Mins)
-          }>
-          <Text style={styles.colorBlack}>
-            {buttonSelectedDuration.button10Mins} Mins
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={[styles.timerButtonsContainer, {marginTop: -27}]}>
-        <TouchableOpacity
-          style={[styles.button, styles.timerButton]}
-          onLongPress={() => handleButtonLongPress('button15Mins')}
-          onPress={() =>
-            handleTimerChange(buttonSelectedDuration.button15Mins)
-          }>
-          <Text style={styles.colorBlack}>
-            {buttonSelectedDuration.button15Mins} Mins
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.timerButton]}
-          onLongPress={() => handleButtonLongPress('button20Mins')}
-          onPress={() =>
-            handleTimerChange(buttonSelectedDuration.button20Mins)
-          }>
-          <Text style={styles.colorBlack}>
-            {buttonSelectedDuration.button20Mins} Mins
-          </Text>
-        </TouchableOpacity>
-      </View>
-
+      <DurationSelector
+        selectedDuration={selectedDuration}
+        handleTimerChange={handleTimerChange}
+        handleButtonLongPress={handleButtonLongPress}
+        buttonSelectedDuration={buttonSelectedDuration}
+        sliderDisabled={sliderDisabled}
+        styles={styles}
+      /> 
       <View style={styles.beginEndContainer}>
         {!sessionInProgress ? (
           <TouchableOpacity
@@ -469,15 +412,11 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     textAlign: 'center',
   },
-  timerContainer: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
   circleContent: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-  },
+  }, 
   countdown: {
     fontSize: 20,
     color: '#ededed',
@@ -487,11 +426,11 @@ const styles = StyleSheet.create({
     fontSize: 29,
     color: '#ededed',
     fontWeight: 'bold',
-  }, 
+  },
   button: {
     margin: 10,
     padding: 10,
-    width: '70%',
+    width: '76%',
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
@@ -519,59 +458,6 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-    marginTop: 0,
-    backgroundColor: '#74aff7',
-    borderRadius: 20,
-  },
-  slidertext: {
-    marginTop: 40,
-    textAlign: 'center',
-    color: '#74aff7',
-    marginBottom: 5,
-  },
-  sliderThumb: {
-    width: 5,
-    height: 5,
-    borderRadius: 15,
-    backgroundColor: '#74aff7',
-  },
-  sliderContainer: {
-    width: '80%',
-    height: 40,
-    marginTop: 0,
-    marginBottom: 20,
-    backgroundColor: '#74aff7',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  sliderTrack: {
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#97d2f7',
-  },
-  timerButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '80%',
-    marginBottom: 0,
-    marginTop: 0,
-  },
-  timerButton: {
-    flex: 1,
-    margin: 5,
-    borderRadius: 8,
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    backgroundColor: '#74aff7',
-  },
-  timerButtonWrapper: {
-    flex: 1,
-    margin: 1,
   },
   beginEndContainer: {
     paddingBottom: 0,

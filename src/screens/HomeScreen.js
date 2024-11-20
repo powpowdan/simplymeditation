@@ -2,15 +2,13 @@ import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   AppState,
-  TouchableOpacity,
-  Image,
+  TouchableOpacity, 
   Text,
   StyleSheet,
   Alert,
 } from 'react-native';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer'; 
-import GoToStatsImage from '../../android/app/src/img/QQ4.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useMusicSwitchContext} from '../MusicSwitchContext';
 import {useSessionContext} from '../SessionContext';
@@ -18,6 +16,7 @@ import {useNavigation} from '@react-navigation/native';
 import Quotes from '../components/Quotes';
 import DurationSelector from '../components/DurationSelector';
 import SessionProgress from '../components/SessionProgress';
+import Logo from '../components/Logo';
 
 function HomeScreen() {
   const navigation = useNavigation();
@@ -41,7 +40,7 @@ function HomeScreen() {
   } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
-  const timerRef = useRef(); 
+  const timerRef = useRef();
   const [sliderDisabled, setSliderDisabled] = useState(false);
   const soundRef = useRef(null);
   const [randomizedDuration, setRandomizedDuration] = useState(0);
@@ -327,26 +326,24 @@ function HomeScreen() {
       });
     }
   };
-
+ 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        disabled={sliderDisabled}
-        onPress={() => navigation.navigate('Options')}>
-        <Image source={GoToStatsImage} style={styles.goToStatsImage} />
-      </TouchableOpacity>
-      <View style={{alignItems: 'center'}}>
-        <Text style={styles.headerText}>Simply Meditation</Text> 
+      <Logo
+        sliderDisabled={false}
+        onPress={() => navigation.navigate('Options')} 
+        headerText="Simply Meditation"
+      />
 
-        <Quotes />
+      <Quotes />
 
-        <SessionProgress
+      <SessionProgress
         sessionInProgress={sessionInProgress}
         remainingSeconds={remainingSeconds}
         selectedDuration={selectedDuration}
         onPress={sessionInProgress ? stopSession : beginSession}
       />
-      </View>
+
       <DurationSelector
         selectedDuration={selectedDuration}
         handleTimerChange={handleTimerChange}
@@ -354,7 +351,7 @@ function HomeScreen() {
         buttonSelectedDuration={buttonSelectedDuration}
         sliderDisabled={sliderDisabled}
         styles={styles}
-      /> 
+      />
       <View style={styles.beginEndContainer}>
         {!sessionInProgress ? (
           <TouchableOpacity
@@ -381,13 +378,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#212121',
   },
-  headerText: {
-    fontSize: 24,
-    color: '#74aff7',
-    paddingTop: 1,
-    paddingLeft: 10,
-    textAlign: 'center',
-  },  
   button: {
     margin: 10,
     padding: 10,
@@ -410,13 +400,6 @@ const styles = StyleSheet.create({
     color: '#ededed',
     fontSize: 18,
   },
-  header: {
-    position: 'absolute',
-    top: 0,
-    height: 60,
-    width: '100%',
-    backgroundColor: '#79a3b1',
-  },
   bold: {
     fontWeight: 'bold',
   },
@@ -425,12 +408,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '80%',
     alignItems: 'center',
-  },
-  goToStatsImage: {
-    width: 160,
-    height: 160,
-    marginTop: -30,
-    marginBottom: -18,
   },
 });
 

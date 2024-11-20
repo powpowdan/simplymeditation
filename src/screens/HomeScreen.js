@@ -9,8 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import Sound from 'react-native-sound';
-import BackgroundTimer from 'react-native-background-timer';
-import ProgressCircle from 'react-native-progress-circle';
+import BackgroundTimer from 'react-native-background-timer'; 
 import GoToStatsImage from '../../android/app/src/img/QQ4.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useMusicSwitchContext} from '../MusicSwitchContext';
@@ -18,6 +17,7 @@ import {useSessionContext} from '../SessionContext';
 import {useNavigation} from '@react-navigation/native';
 import Quotes from '../components/Quotes';
 import DurationSelector from '../components/DurationSelector';
+import SessionProgress from '../components/SessionProgress';
 
 function HomeScreen() {
   const navigation = useNavigation();
@@ -41,8 +41,7 @@ function HomeScreen() {
   } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const appState = useRef(AppState.currentState);
-  const timerRef = useRef();
-  const timerDurations = [5, 10, 15, 20];
+  const timerRef = useRef(); 
   const [sliderDisabled, setSliderDisabled] = useState(false);
   const soundRef = useRef(null);
   const [randomizedDuration, setRandomizedDuration] = useState(0);
@@ -337,39 +336,16 @@ function HomeScreen() {
         <Image source={GoToStatsImage} style={styles.goToStatsImage} />
       </TouchableOpacity>
       <View style={{alignItems: 'center'}}>
-        <Text style={styles.headerText}>Simply Meditation</Text>
-        {/* <Text>Music Switch State: {musicSwitchState ? 'ON' : 'OFF'}</Text>  */}
+        <Text style={styles.headerText}>Simply Meditation</Text> 
 
         <Quotes />
 
-        <ProgressCircle
-          percent={
-            sessionInProgress
-              ? (remainingSeconds / (selectedDuration * 60)) * 100
-              : 0
-          }
-          radius={80}
-          borderWidth={10}
-          color="#74aff7"
-          shadowColor="#101010"
-          bgColor="#212121">
-          <TouchableOpacity
-            onPress={sessionInProgress ? stopSession : beginSession}
-            style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
-            {sessionInProgress ? (
-              <Text style={styles.countdown}>
-                {Math.floor(remainingSeconds / 60)
-                  .toString()
-                  .padStart(2, '0')}
-                :{(remainingSeconds % 60).toString().padStart(2, '0')}
-              </Text>
-            ) : (
-              <Text style={styles.duration}>
-                {selectedDuration.toString().padStart(2, '0')}:00
-              </Text>
-            )}
-          </TouchableOpacity>
-        </ProgressCircle>
+        <SessionProgress
+        sessionInProgress={sessionInProgress}
+        remainingSeconds={remainingSeconds}
+        selectedDuration={selectedDuration}
+        onPress={sessionInProgress ? stopSession : beginSession}
+      />
       </View>
       <DurationSelector
         selectedDuration={selectedDuration}
@@ -411,22 +387,7 @@ const styles = StyleSheet.create({
     paddingTop: 1,
     paddingLeft: 10,
     textAlign: 'center',
-  },
-  circleContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-  }, 
-  countdown: {
-    fontSize: 20,
-    color: '#ededed',
-    fontWeight: 'bold',
-  },
-  duration: {
-    fontSize: 29,
-    color: '#ededed',
-    fontWeight: 'bold',
-  },
+  },  
   button: {
     margin: 10,
     padding: 10,

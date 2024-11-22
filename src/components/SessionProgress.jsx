@@ -1,5 +1,5 @@
 import React from 'react';
-import {TouchableOpacity, Text, StyleSheet} from 'react-native';
+import {TouchableOpacity, Text, StyleSheet, View} from 'react-native';
 import ProgressCircle from 'react-native-progress-circle';
 
 const SessionProgress = ({
@@ -21,12 +21,13 @@ const SessionProgress = ({
     : `${selectedDuration.toString().padStart(2, '0')}:00`;
 
   return (
+    <View style={styles.progressCircleWrapper}>
     <ProgressCircle
       percent={progress}
-      radius={80}
-      borderWidth={10}
-      color="#74aff7"
-      shadowColor="#101010"
+      radius={85}
+      borderWidth={7} 
+      color={progress > 0 ? "#74aff7" : "transparent"}
+      shadowColor="#1A1A1A" 
       bgColor="#212121">
       <TouchableOpacity onPress={onPress} style={styles.circleContent}>
         {sessionInProgress ? (
@@ -36,6 +37,7 @@ const SessionProgress = ({
         )}
       </TouchableOpacity>
     </ProgressCircle>
+    </View>
   );
 };
 
@@ -43,18 +45,25 @@ const styles = StyleSheet.create({
   circleContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
+    flex: 1,   
   },
   countdown: {
-    fontSize: 20,
-    color: '#ededed',
-    fontWeight: 'bold',
+    fontSize: 29,
+    color: '#ededed', 
   },
   duration: {
     fontSize: 29,
     color: '#ededed',
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
   },
+  // progressCircleWrapper: {
+  //   borderWidth: .2,  
+  //   borderColor: '#74aff7',  
+  //   borderRadius: 90, 
+  //   padding: 0,  
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  // },
 });
 
 export default SessionProgress;

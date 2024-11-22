@@ -203,7 +203,7 @@ function HomeScreen() {
         }
         return seconds;
       });
-    }, 1);
+    }, 1000); //debug time here
   };
 
   useEffect(() => {
@@ -363,7 +363,7 @@ function HomeScreen() {
           <TouchableOpacity
             style={[styles.button, styles.stopButton]}
             onPress={stopSession}>
-            <Text style={styles.colorBlack}>Stop Session</Text>
+            <Text style={styles.colorBlack2}>Stop Session</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -392,12 +392,17 @@ const styles = StyleSheet.create({
     marginTop: 55,
   },
   stopButton: {
-    backgroundColor: '#717171',
+    backgroundColor: '#A7C8E7', 
     marginTop: 35,
   },
   colorBlack: {
     textAlign: 'center',
-    color: '#ededed',
+    color: '#1A1F26', 
+    fontSize: 18,
+  },
+  colorBlack2: {
+    textAlign: 'center',
+    color: '#1A1F26',
     fontSize: 18,
   },
   bold: {

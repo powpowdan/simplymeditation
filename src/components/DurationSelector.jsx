@@ -77,9 +77,11 @@ const styles = StyleSheet.create({
   sliderBackground: {
     width: '100%',
     height: 40,
-    backgroundColor: '#74aff7',
+    backgroundColor: '#1A1A1A',
     borderRadius: 20,
     justifyContent: 'center',
+    borderWidth: .5, //  outline
+    borderColor: '#74aff7', 
   },
   slider: {
     width: '100%',
@@ -88,7 +90,7 @@ const styles = StyleSheet.create({
   colorBlack: {
     textAlign: 'center',
     color: 'white',
-    fontSize: 18,
+    fontSize: 15,
   },
   buttonGrid: {
     flexDirection: 'row',
@@ -104,10 +106,13 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 8,
     paddingVertical: 15,
-    backgroundColor: '#74aff7',
+    backgroundColor: '#1A1A1A',
+
+    borderWidth: .5, //  outline
+  borderColor: '#74aff7', 
   },
   colorBlackDisabled: {
-    color: '#B0B0B0', // Disabled text color
+    color: '#A7C8E7',  
   },
   //    timerButtonDisabled: {
   //     backgroundColor: '#97c2f7',

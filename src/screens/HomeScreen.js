@@ -330,7 +330,7 @@ function HomeScreen() {
   return (
     <View style={styles.container}>
       <Logo
-        sliderDisabled={false}
+        sliderDisabled={sessionInProgress}
         onPress={() => navigation.navigate('Options')} 
         headerText="Simply Meditation"
       />

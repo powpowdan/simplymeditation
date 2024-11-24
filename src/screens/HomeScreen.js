@@ -1,14 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {
-  View,
-  AppState,
-  TouchableOpacity, 
-  Text,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import {View, TouchableOpacity, Text, StyleSheet, Alert} from 'react-native';
 import Sound from 'react-native-sound';
-import BackgroundTimer from 'react-native-background-timer'; 
+import BackgroundTimer from 'react-native-background-timer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useMusicSwitchContext} from '../MusicSwitchContext';
 import {useSessionContext} from '../SessionContext';
@@ -17,22 +10,21 @@ import Quotes from '../components/Quotes';
 import DurationSelector from '../components/DurationSelector';
 import SessionProgress from '../components/SessionProgress';
 import Logo from '../components/Logo';
-import useAppStateListener  from '../hooks/useAppStateListener';
+import useAppStateListener from '../hooks/useAppStateListener';
 import useMusic from '../hooks/useMusic';
 
 function HomeScreen() {
-  const navigation = useNavigation();
-  
+  // State Declarations
   const [sessionInProgress, setSessionInProgress] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [selectedDuration, setSelectedDuration] = useState(15);
   const {addMeditationTime, incrementSessionCount} = useSessionContext();
-  const [sound, setSound] = useState(null);
+
   const {
     musicSwitchState,
     setMusicSwitchState,
     intervalBellsSwitchState,
-    setIntervalBellsSwitchState, 
+    setIntervalBellsSwitchState,
     interval25Active,
     interval50Active,
     interval75Active,
@@ -41,18 +33,19 @@ function HomeScreen() {
     adjustmentSwitchState,
     adjustmentValue,
   } = useMusicSwitchContext();
-  
- //not actually using isMusicPlaying for now.
-  const { playMusic, stopMusic, isMusicPlaying } = useMusic(); 
+
+  // Refs
   const timerRef = useRef();
-  const [sliderDisabled, setSliderDisabled] = useState(false);
-  const soundRef = useRef(null);
-  const [randomizedDuration, setRandomizedDuration] = useState(0);
+
+  // Derived States, nothing set by users but from state changes
+  const {playMusic, stopMusic, isMusicPlaying} = useMusic(); //custom hook
+  const [sliderDisabled, setSliderDisabled] = useState(false); //disable slider or not
+  const [randomizedDuration, setRandomizedDuration] = useState(0); //musicswitchcontext
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [adjustedSessionDuration, setAdjustedSessionDuration] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
 
-  // Initialize buttonSelectedDuration default
+  // UI Button Duration States
   const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
     button5Mins: 5,
     button10Mins: 10,
@@ -60,11 +53,18 @@ function HomeScreen() {
     button20Mins: 20,
   });
 
-     
+  // Navigation
+  const navigation = useNavigation();
+
+  // Listening to app state changes (foreground and background)
+  // This function is triggered when the app comes to the foreground after being paused
   useAppStateListener({
     onForegroundResume: elapsedTime => {
       if (sessionInProgress && remainingSeconds > 0) {
-        const adjustedRemainingSeconds = Math.max(remainingSeconds - elapsedTime, 0);
+        const adjustedRemainingSeconds = Math.max(
+          remainingSeconds - elapsedTime,
+          0,
+        );
         if (adjustedRemainingSeconds > 0) {
           startTimer(adjustedRemainingSeconds); // Resume timer
         } else {
@@ -74,54 +74,32 @@ function HomeScreen() {
     },
     onBackgroundPause: () => {
       if (sessionInProgress) {
-        console.log("App moved to the background during a session.");
+        console.log('App moved to the background during a session.');
       }
     },
   });
 
-  const beginSession = () => {
-    const randomizedDuration = calculateRandomizedDuration(); 
-    const totalSeconds = Math.round(randomizedDuration * 60); 
-    playTone(); 
-    setSessionInProgress(true);
-    setSliderDisabled(true);
-    if (musicSwitchState) {
-      playMusic(); 
-    } 
-    startTimer(totalSeconds);
-  }; 
- 
+  //EVENTS
 
-    //get saved button times when app mounts
-    useEffect(() => {
-      const retrieveSelectedDurations = async () => {
-        try {
-          const storedDurations = await AsyncStorage.getItem('selectedDurations');
-          if (storedDurations) {
-            const parsedDurations = JSON.parse(storedDurations);
-            setButtonSelectedDuration(parsedDurations);
-          }
-        } catch (error) {
-          console.error('Error retrieving selected durations:', error);
-        }
-      };
-  
-      retrieveSelectedDurations();
-    }, []); // This will only run once when the component mounts
-  
-    // Save the selected durations whenever they change
-    useEffect(() => {
-      const saveSelectedDurations = async () => {
-        try {
-          await AsyncStorage.setItem('selectedDurations', JSON.stringify(buttonSelectedDuration));
-        } catch (error) {
-          console.error('Error saving selected durations:', error);
-        }
-      };
-  
-      saveSelectedDurations();
-    }, [buttonSelectedDuration]); // This will run whenever buttonSelectedDuration changes
+  //get saved button times when app mounts
+  useEffect(() => {
+    const loadSelectedDurations  = async () => {
+      const storedDurations = await AsyncStorage.getItem('selectedDurations');
+      if (storedDurations)
+        setButtonSelectedDuration(JSON.parse(storedDurations));
+    };
+    loadSelectedDurations ();
+  }, []);
 
+  // Save the selected durations whenever they change
+  useEffect(() => {
+    AsyncStorage.setItem(
+      'selectedDurations',
+      JSON.stringify(buttonSelectedDuration),
+    );
+  }, [buttonSelectedDuration]);
+
+  //loadMusicSwitchState
   useEffect(() => {
     const loadMusicSwitchState = async () => {
       try {
@@ -137,7 +115,14 @@ function HomeScreen() {
     loadMusicSwitchState();
   }, []);
 
- 
+  //create the random adjustment 
+  useEffect(() => {
+    const randomAdjustment = adjustmentSwitchState
+      ? (Math.random() * 0.5 - 0.3) * selectedDuration
+      : 0;
+    const newRandomizedDuration = selectedDuration + randomAdjustment;
+    setRandomizedDuration(newRandomizedDuration);
+  }, [selectedDuration, adjustmentSwitchState]);
 
   // Save the selected durations to AsyncStorage whenever they change
   useEffect(() => {
@@ -151,87 +136,77 @@ function HomeScreen() {
     }
   }, [buttonSelectedDuration]);
 
-  useEffect(() => {
-    const randomAdjustment = adjustmentSwitchState
-      ? (Math.random() * 0.5 - 0.3) * selectedDuration
-      : 0;
-    const newRandomizedDuration = selectedDuration + randomAdjustment;
-    setRandomizedDuration(newRandomizedDuration);
-  }, [selectedDuration, adjustmentSwitchState]);
+  // FUNCTIONS
 
- 
-
-  const playTone = () => {
-    const sound = new Sound('audio_file.mp3', null, error => {
-      if (error) {
-        alert('Error', JSON.stringify(error));
-      }
-      sound.play(() => sound.release());
-    });
+  //when user starts a session this is where it starts
+  const beginSession = () => {
+    //adjusts the time for timer if randomtime
+    const randomizedDuration = calculateRandomizedDuration();
+    const totalSeconds = Math.round(randomizedDuration * 60);
+    playTone();
+    setSessionInProgress(true);
+    setSliderDisabled(true);
+    if (musicSwitchState) {
+      playMusic(); //from useMusic.js
+    }
+    startTimer(totalSeconds);
   };
 
-  const playIntervalBell = percentage => {
-    const sound = new Sound('intervalbell.mp3', null, error => {
-      if (error) {
-        alert(`Interval bell ${percentage}% ALERT`, JSON.stringify(error));
-      }
-      sound.play(() => sound.release());
-    });
-  };
-
+  //next stage after beginSession
   const startTimer = totalSeconds => {
-    setRemainingSeconds(totalSeconds); 
-    // Clear any existing timer, this is if app is minimized while session is going
+    setRemainingSeconds(totalSeconds);
+
+    // Clear any existing timer
     if (timerRef.current) {
-      BackgroundTimer.clearInterval(timerRef.current); 
+      BackgroundTimer.clearInterval(timerRef.current);
     }
 
     timerRef.current = BackgroundTimer.setInterval(() => {
       setRemainingSeconds(prevRemainingSeconds => {
         const seconds = prevRemainingSeconds - 1;
+
+        // Define intervals
         const interval25 = Math.floor(totalSeconds * 0.25);
         const interval50 = Math.floor(totalSeconds * 0.5);
         const interval75 = Math.floor(totalSeconds * 0.75);
         const interval90 = Math.floor(totalSeconds * 0.1);
 
-        if (
-          intervalBellsSwitchState &&
-          interval25Active &&
-          seconds === interval25
-        ) {
-          playIntervalBell(25);
-        } else if (
-          intervalBellsSwitchState &&
-          interval50Active &&
-          seconds === interval50
-        ) {
-          playIntervalBell(50);
-        } else if (
-          intervalBellsSwitchState &&
-          interval75Active &&
-          seconds === interval75
-        ) {
-          playIntervalBell(75);
-        } else if (
-          intervalBellsSwitchState &&
-          interval90Active &&
-          seconds === interval90
-        ) {
-          playIntervalBell(90);
-        } 
+        // Play interval bell at specific times
+        if (intervalBellsSwitchState) {
+          if (interval25Active && seconds === interval25) {
+            playIntervalBell(25);
+          } else if (interval50Active && seconds === interval50) {
+            playIntervalBell(50);
+          } else if (interval75Active && seconds === interval75) {
+            playIntervalBell(75);
+          } else if (interval90Active && seconds === interval90) {
+            playIntervalBell(90);
+          }
+        }
 
         if (seconds === 0) {
-          handleTimerEnd(totalSeconds);
+          handleTimerEnd(totalSeconds); //next stage
           playTone();
           BackgroundTimer.clearInterval(timerRef.current);
-          stopMusic();
         }
+
         return seconds;
       });
-    }, 1); //debug time here
-  };  
+    }, 1); // debug time here
+  };
 
-  //this runs if user stops a session early. if natural, handleTimerEnd runs instead
+  //when we get to a natural ending of sessions we want to do some unique stuff and THEN stopSession
+  const handleTimerEnd = totalSeconds => {
+    const sessionDuration = totalSeconds / 60;
+    addMeditationTime(sessionDuration);
+    setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
+    stopSession();
+    setSliderDisabled(false);
+    incrementSessionCount();
+    setSessionCompleted(true);
+  };
+
+  //can run if user stops session or after natural session is done and handTimer is called
   const stopSession = () => {
     console.log('stop session by user');
     setSliderDisabled(false);
@@ -242,39 +217,31 @@ function HomeScreen() {
     setSessionInProgress(false);
   };
 
-
-  //when we get to a natural ending of sessions we want to do some unique stuff
-  const handleTimerEnd = totalSeconds => { 
-    const sessionDuration = totalSeconds / 60; 
-    addMeditationTime(sessionDuration);
-    setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
-    resetTimer();
-    setSliderDisabled(false);
-    incrementSessionCount();
-    setSessionCompleted(true);
-    setSessionInProgress(false);
-  };
-
-  // Function to calculate randomized duration
-  const calculateRandomizedDuration = () => {
-    const randomAdjustment = adjustmentSwitchState
+  // Function to calculate randomized duration if needed
+  // if adjustmentSwitchState is true do the math otherwise 0, no adjustment to the time
+  const calculateRandomizedDuration = () =>
+    selectedDuration +
+    (adjustmentSwitchState
       ? (Math.random() * 0.5 - 0.3) * selectedDuration
-      : 0;
-    return selectedDuration + randomAdjustment;
-  };
+      : 0);
 
- 
-  const resetTimer = () => {
-    console.log('resetTimer');
-    setSessionInProgress(false);
-    setRemainingSeconds(0);
-    stopMusic();
-  };
-
+  ///used in DurationSelector
   const handleTimerChange = value => {
     if (!sessionInProgress) {
       setSelectedDuration(value);
     }
+  };
+
+  const playTone = () => {
+    const sound = new Sound('audio_file.mp3', null, error => {
+      sound.play(() => sound.release());
+    });
+  };
+
+  const playIntervalBell = percentage => {
+    const sound = new Sound('intervalbell.mp3', null, error => {
+      sound.play(() => sound.release());
+    });
   };
 
   const handleButtonLongPress = buttonKey => {
@@ -296,15 +263,13 @@ function HomeScreen() {
       ],
       {cancelable: false},
     );
-  }; 
+  };
 
- 
- 
   return (
     <View style={styles.container}>
       <Logo
         sliderDisabled={sessionInProgress}
-        onPress={() => navigation.navigate('Options')} 
+        onPress={() => navigation.navigate('Options')}
         headerText="Simply Meditation"
       />
 
@@ -327,12 +292,12 @@ function HomeScreen() {
       />
       <View style={styles.beginEndContainer}>
         {!sessionInProgress ? (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.button, styles.beginButton]}
             onPress={beginSession}>
             <Text style={styles.colorBlack}>Begin Session</Text>
           </TouchableOpacity>
-        ) : ( 
+        ) : (
           <TouchableOpacity
             style={[styles.button, styles.stopButton]}
             onPress={stopSession}>
@@ -365,12 +330,12 @@ const styles = StyleSheet.create({
     marginTop: 55,
   },
   stopButton: {
-    backgroundColor: '#A7C8E7', 
+    backgroundColor: '#A7C8E7',
     marginTop: 35,
   },
   colorBlack: {
     textAlign: 'center',
-    color: '#1A1F26', 
+    color: '#1A1F26',
     fontSize: 18,
   },
   colorBlack2: {

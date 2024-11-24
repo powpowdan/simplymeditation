@@ -18,9 +18,11 @@ import DurationSelector from '../components/DurationSelector';
 import SessionProgress from '../components/SessionProgress';
 import Logo from '../components/Logo';
 import useAppStateListener  from '../hooks/useAppStateListener';
+import useMusic from '../hooks/useMusic';
 
 function HomeScreen() {
   const navigation = useNavigation();
+  
   const [sessionInProgress, setSessionInProgress] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [selectedDuration, setSelectedDuration] = useState(15);
@@ -39,8 +41,9 @@ function HomeScreen() {
     adjustmentSwitchState,
     adjustmentValue,
   } = useMusicSwitchContext();
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const appState = useRef(AppState.currentState);
+  
+ //not actually using isMusicPlaying for now.
+  const { playMusic, stopMusic, isMusicPlaying } = useMusic(); 
   const timerRef = useRef();
   const [sliderDisabled, setSliderDisabled] = useState(false);
   const soundRef = useRef(null);
@@ -75,6 +78,18 @@ function HomeScreen() {
       }
     },
   });
+
+  const beginSession = () => {
+    const randomizedDuration = calculateRandomizedDuration(); 
+    const totalSeconds = Math.round(randomizedDuration * 60); 
+    playTone(); 
+    setSessionInProgress(true);
+    setSliderDisabled(true);
+    if (musicSwitchState) {
+      playMusic(); 
+    } 
+    startTimer(totalSeconds);
+  }; 
  
 
     //get saved button times when app mounts
@@ -166,8 +181,9 @@ function HomeScreen() {
 
   const startTimer = totalSeconds => {
     setRemainingSeconds(totalSeconds); 
+    // Clear any existing timer, this is if app is minimized while session is going
     if (timerRef.current) {
-      BackgroundTimer.clearInterval(timerRef.current); // Clear any existing timer
+      BackgroundTimer.clearInterval(timerRef.current); 
     }
 
     timerRef.current = BackgroundTimer.setInterval(() => {
@@ -212,15 +228,10 @@ function HomeScreen() {
         }
         return seconds;
       });
-    }, 1000); //debug time here
-  };
+    }, 1); //debug time here
+  };  
 
-  useEffect(() => {
-    return () => {
-      stopMusic();
-    };
-  }, [sound]);
-
+  //this runs if user stops a session early. if natural, handleTimerEnd runs instead
   const stopSession = () => {
     console.log('stop session by user');
     setSliderDisabled(false);
@@ -231,11 +242,10 @@ function HomeScreen() {
     setSessionInProgress(false);
   };
 
-  const handleTimerEnd = totalSeconds => {
-    console.log('handletimerend totalsecondsPASSED:', totalSeconds);
-    const sessionDuration = totalSeconds / 60;
-    console.log('Session Duration:handleTimerEnd  ===', sessionDuration);
 
+  //when we get to a natural ending of sessions we want to do some unique stuff
+  const handleTimerEnd = totalSeconds => { 
+    const sessionDuration = totalSeconds / 60; 
     addMeditationTime(sessionDuration);
     setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
     resetTimer();
@@ -253,17 +263,7 @@ function HomeScreen() {
     return selectedDuration + randomAdjustment;
   };
 
-  const stopMusic = () => {
-    const currentSound = soundRef.current;
-    if (currentSound) {
-      currentSound.stop();
-      currentSound.release();
-      soundRef.current = null;
-      setIsMusicPlaying(false);
-      console.log('stopMusicFunction ran');
-    }
-  };
-
+ 
   const resetTimer = () => {
     console.log('resetTimer');
     setSessionInProgress(false);
@@ -296,45 +296,9 @@ function HomeScreen() {
       ],
       {cancelable: false},
     );
-  };
-
-  const beginSession = () => {
-    const randomizedDuration = calculateRandomizedDuration();
-    console.log('randomizedduration in begin session: ', randomizedDuration);
-
-    const totalSeconds = Math.round(randomizedDuration * 60);
-    const initialMinutes = Math.floor(totalSeconds / 60);
-    const initialSeconds = totalSeconds % 60;
-
-    console.log(
-      `Beginning countdown for ${initialMinutes} minutes and ${initialSeconds} seconds`,
-    );
-    playTone();
-    resetTimer();
-    setSessionInProgress(true);
-    setSliderDisabled(true);
-    if (musicSwitchState) {
-      playMusic();
-      setIsMusicPlaying(true);
-    }
-    console.log('beginSession total seconds: ', totalSeconds);
-    startTimer(totalSeconds);
-  };
-
-  const playMusic = () => {
-    if (musicSwitchState) {
-      const newSound = new Sound('now.mp3', null, error => {
-        if (error) {
-          console.error('Error:', error);
-        } else {
-          newSound.play(() => {
-            newSound.release();
-          });
-          soundRef.current = newSound;
-        }
-      });
-    }
   }; 
+
+ 
  
   return (
     <View style={styles.container}>

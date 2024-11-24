@@ -17,6 +17,7 @@ import Quotes from '../components/Quotes';
 import DurationSelector from '../components/DurationSelector';
 import SessionProgress from '../components/SessionProgress';
 import Logo from '../components/Logo';
+import useAppStateListener  from '../hooks/useAppStateListener';
 
 function HomeScreen() {
   const navigation = useNavigation();
@@ -29,7 +30,7 @@ function HomeScreen() {
     musicSwitchState,
     setMusicSwitchState,
     intervalBellsSwitchState,
-    setIntervalBellsSwitchState,
+    setIntervalBellsSwitchState, 
     interval25Active,
     interval50Active,
     interval75Active,
@@ -56,6 +57,56 @@ function HomeScreen() {
     button20Mins: 20,
   });
 
+     
+  useAppStateListener({
+    onForegroundResume: elapsedTime => {
+      if (sessionInProgress && remainingSeconds > 0) {
+        const adjustedRemainingSeconds = Math.max(remainingSeconds - elapsedTime, 0);
+        if (adjustedRemainingSeconds > 0) {
+          startTimer(adjustedRemainingSeconds); // Resume timer
+        } else {
+          stopTimer(); // Timer has expired
+        }
+      }
+    },
+    onBackgroundPause: () => {
+      if (sessionInProgress) {
+        console.log("App moved to the background during a session.");
+      }
+    },
+  });
+ 
+
+    //get saved button times when app mounts
+    useEffect(() => {
+      const retrieveSelectedDurations = async () => {
+        try {
+          const storedDurations = await AsyncStorage.getItem('selectedDurations');
+          if (storedDurations) {
+            const parsedDurations = JSON.parse(storedDurations);
+            setButtonSelectedDuration(parsedDurations);
+          }
+        } catch (error) {
+          console.error('Error retrieving selected durations:', error);
+        }
+      };
+  
+      retrieveSelectedDurations();
+    }, []); // This will only run once when the component mounts
+  
+    // Save the selected durations whenever they change
+    useEffect(() => {
+      const saveSelectedDurations = async () => {
+        try {
+          await AsyncStorage.setItem('selectedDurations', JSON.stringify(buttonSelectedDuration));
+        } catch (error) {
+          console.error('Error saving selected durations:', error);
+        }
+      };
+  
+      saveSelectedDurations();
+    }, [buttonSelectedDuration]); // This will run whenever buttonSelectedDuration changes
+
   useEffect(() => {
     const loadMusicSwitchState = async () => {
       try {
@@ -71,40 +122,7 @@ function HomeScreen() {
     loadMusicSwitchState();
   }, []);
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
-
-    // Retrieve the saved selected durations from AsyncStorage
-    const retrieveSelectedDurations = async () => {
-      try {
-        const storedDurations = await AsyncStorage.getItem('selectedDurations');
-        if (storedDurations) {
-          const parsedDurations = JSON.parse(storedDurations);
-          setButtonSelectedDuration(parsedDurations);
-        } else {
-          // Apply initial values if no stored durations are found
-          setButtonSelectedDuration({
-            button5Mins: 5,
-            button10Mins: 10,
-            button15Mins: 15,
-            button20Mins: 20,
-          });
-        }
-      } catch (error) {
-        console.error('Error retrieving selected durations:', error);
-      }
-    };
-
-    retrieveSelectedDurations();
-
-    return () => {
-      subscription.remove('change', handleAppStateChange);
-      BackgroundTimer.stopBackgroundTimer();
-    };
-  }, []);
+ 
 
   // Save the selected durations to AsyncStorage whenever they change
   useEffect(() => {
@@ -126,19 +144,7 @@ function HomeScreen() {
     setRandomizedDuration(newRandomizedDuration);
   }, [selectedDuration, adjustmentSwitchState]);
 
-  const handleAppStateChange = nextAppState => {
-    if (
-      appState.current.match(/active/) &&
-      nextAppState === 'active' &&
-      sessionInProgress &&
-      remainingSeconds > 0
-    ) {
-      // App is back to foreground, and the session is in progress with remaining time
-      startTimer(remainingSeconds);
-    }
-
-    appState.current = nextAppState;
-  };
+ 
 
   const playTone = () => {
     const sound = new Sound('audio_file.mp3', null, error => {
@@ -159,7 +165,10 @@ function HomeScreen() {
   };
 
   const startTimer = totalSeconds => {
-    setRemainingSeconds(totalSeconds);
+    setRemainingSeconds(totalSeconds); 
+    if (timerRef.current) {
+      BackgroundTimer.clearInterval(timerRef.current); // Clear any existing timer
+    }
 
     timerRef.current = BackgroundTimer.setInterval(() => {
       setRemainingSeconds(prevRemainingSeconds => {
@@ -193,7 +202,7 @@ function HomeScreen() {
           seconds === interval90
         ) {
           playIntervalBell(90);
-        }
+        } 
 
         if (seconds === 0) {
           handleTimerEnd(totalSeconds);
@@ -325,7 +334,7 @@ function HomeScreen() {
         }
       });
     }
-  };
+  }; 
  
   return (
     <View style={styles.container}>
@@ -354,12 +363,12 @@ function HomeScreen() {
       />
       <View style={styles.beginEndContainer}>
         {!sessionInProgress ? (
-          <TouchableOpacity
+          <TouchableOpacity 
             style={[styles.button, styles.beginButton]}
             onPress={beginSession}>
             <Text style={styles.colorBlack}>Begin Session</Text>
           </TouchableOpacity>
-        ) : (
+        ) : ( 
           <TouchableOpacity
             style={[styles.button, styles.stopButton]}
             onPress={stopSession}>

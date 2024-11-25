@@ -18,18 +18,15 @@ const DurationSelector = ({
   selectedDuration,
   handleTimerChange,
   handleButtonLongPress,
-  buttonSelectedDuration,
+  buttonSelectedDuration, //comes from sessioncontext now
   sliderDisabled,
 }) => {
-  const {button5Mins, button10Mins, button15Mins, button20Mins} =
-    buttonSelectedDuration;
-
-  const buttonConfig = [
-    {duration: button5Mins, key: 'button5Mins'},
-    {duration: button10Mins, key: 'button10Mins'},
-    {duration: button15Mins, key: 'button15Mins'},
-    {duration: button20Mins, key: 'button20Mins'},
-  ];
+ // Extract the button durations and their keys dynamically from the prop
+ const buttonConfig = Object.entries(buttonSelectedDuration).map(([key, duration]) => ({
+  key,
+  duration,
+}));
+ 
 
   return (
     <View style={styles.sliderContainer}>
@@ -49,13 +46,13 @@ const DurationSelector = ({
         />
       </View>
       <View style={styles.buttonGrid}>
-        {buttonConfig.map((button, index) => (
+        {buttonConfig.map((button) => (
           <TimerButton
             key={button.key}
             duration={button.duration}
             onPress={() => handleTimerChange(button.duration)}
             onLongPress={() => handleButtonLongPress(button.key)}
-            disabled={sliderDisabled} // Pass the disabled state
+            disabled={sliderDisabled} 
           />
         ))}
       </View>

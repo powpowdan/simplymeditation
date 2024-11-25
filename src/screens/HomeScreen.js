@@ -2,7 +2,6 @@ import React, {useState, useEffect, useRef} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, Alert} from 'react-native';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useMusicSwitchContext} from '../MusicSwitchContext';
 import {useSessionContext} from '../SessionContext';
 import {useNavigation} from '@react-navigation/native';
@@ -21,18 +20,16 @@ function HomeScreen() {
   const {addMeditationTime, incrementSessionCount} = useSessionContext();
 
   const {
-    musicSwitchState,
-    setMusicSwitchState,
-    intervalBellsSwitchState,
-    setIntervalBellsSwitchState,
+    musicSwitchState, 
+    intervalBellsSwitchState, 
     interval25Active,
     interval50Active,
     interval75Active,
-    interval90Active,
-    toggleAdjustmentSwitch,
-    adjustmentSwitchState,
-    adjustmentValue,
+    interval90Active, 
+    adjustmentSwitchState, 
   } = useMusicSwitchContext();
+
+  const {buttonDurations, setButtonSelectedDuration} = useSessionContext();
 
   // Refs
   const timerRef = useRef();
@@ -44,14 +41,6 @@ function HomeScreen() {
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [adjustedSessionDuration, setAdjustedSessionDuration] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-
-  // UI Button Duration States
-  const [buttonSelectedDuration, setButtonSelectedDuration] = useState({
-    button5Mins: 5,
-    button10Mins: 10,
-    button15Mins: 15,
-    button20Mins: 20,
-  });
 
   // Navigation
   const navigation = useNavigation();
@@ -79,43 +68,8 @@ function HomeScreen() {
     },
   });
 
-  //EVENTS
-
-  //get saved button times when app mounts
-  useEffect(() => {
-    const loadSelectedDurations  = async () => {
-      const storedDurations = await AsyncStorage.getItem('selectedDurations');
-      if (storedDurations)
-        setButtonSelectedDuration(JSON.parse(storedDurations));
-    };
-    loadSelectedDurations ();
-  }, []);
-
-  // Save the selected durations whenever they change
-  useEffect(() => {
-    AsyncStorage.setItem(
-      'selectedDurations',
-      JSON.stringify(buttonSelectedDuration),
-    );
-  }, [buttonSelectedDuration]);
-
-  //loadMusicSwitchState
-  useEffect(() => {
-    const loadMusicSwitchState = async () => {
-      try {
-        const value = await AsyncStorage.getItem('musicSwitchState');
-        if (value !== null) {
-          setMusicSwitchState(JSON.parse(value));
-        }
-      } catch (error) {
-        console.error('Error loading musicSwitchState:', error);
-      }
-    };
-
-    loadMusicSwitchState();
-  }, []);
-
-  //create the random adjustment 
+   
+  //create the random adjustment timer or have 0 adjustment
   useEffect(() => {
     const randomAdjustment = adjustmentSwitchState
       ? (Math.random() * 0.5 - 0.3) * selectedDuration
@@ -123,18 +77,6 @@ function HomeScreen() {
     const newRandomizedDuration = selectedDuration + randomAdjustment;
     setRandomizedDuration(newRandomizedDuration);
   }, [selectedDuration, adjustmentSwitchState]);
-
-  // Save the selected durations to AsyncStorage whenever they change
-  useEffect(() => {
-    try {
-      AsyncStorage.setItem(
-        'selectedDurations',
-        JSON.stringify(buttonSelectedDuration),
-      );
-    } catch (error) {
-      console.error('Error saving selected durations:', error);
-    }
-  }, [buttonSelectedDuration]);
 
   // FUNCTIONS
 
@@ -252,12 +194,8 @@ function HomeScreen() {
         {text: 'Cancel', style: 'cancel'},
         {
           text: 'OK',
-          onPress: async () => {
-            await AsyncStorage.setItem(buttonKey, selectedDuration.toString());
-            setButtonSelectedDuration(prev => ({
-              ...prev,
-              [buttonKey]: selectedDuration,
-            }));
+          onPress: () => {
+            setButtonSelectedDuration(buttonKey, selectedDuration);
           },
         },
       ],
@@ -272,9 +210,7 @@ function HomeScreen() {
         onPress={() => navigation.navigate('Options')}
         headerText="Simply Meditation"
       />
-
       <Quotes />
-
       <SessionProgress
         sessionInProgress={sessionInProgress}
         remainingSeconds={remainingSeconds}
@@ -286,7 +222,7 @@ function HomeScreen() {
         selectedDuration={selectedDuration}
         handleTimerChange={handleTimerChange}
         handleButtonLongPress={handleButtonLongPress}
-        buttonSelectedDuration={buttonSelectedDuration}
+        buttonSelectedDuration={buttonDurations}
         sliderDisabled={sliderDisabled}
         styles={styles}
       />

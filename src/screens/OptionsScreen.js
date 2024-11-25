@@ -1,10 +1,16 @@
-import React, { useEffect } from 'react';
-import { View, Text, Switch, Button, Alert, TouchableOpacity, StyleSheet } from 'react-native';
-import { useSessionContext } from '../SessionContext'; 
-import { useMusicSwitchContext } from '../MusicSwitchContext'; 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React from 'react';
+import {
+  View,
+  Text,
+  Switch,
+  Button,
+  Alert, 
+  StyleSheet,
+} from 'react-native';
+import {useSessionContext} from '../SessionContext';
+import {useMusicSwitchContext} from '../MusicSwitchContext';
 
-function OptionsScreen({ navigation }) {
+function OptionsScreen({navigation}) {
   const {
     musicSwitchState,
     setMusicSwitchState,
@@ -20,8 +26,6 @@ function OptionsScreen({ navigation }) {
     toggleInterval90,
     adjustmentSwitchState,
     toggleAdjustmentSwitch,
-    adjustmentValue,
-    setAdjustmentValue,
   } = useMusicSwitchContext();
 
   const {
@@ -34,89 +38,95 @@ function OptionsScreen({ navigation }) {
   } = useSessionContext();
 
   // Utility function for formatting time
-  const formatTime = (timeInSeconds) => {
+  const formatTime = timeInSeconds => {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = Math.round(timeInSeconds % 60);
 
-    return [
-      hours && `${hours} ${hours === 1 ? 'hour' : 'hours'}`,
-      minutes && `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`,
-      seconds && `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`,
-    ]
-      .filter(Boolean)
-      .join(' and ') || '0 seconds';
-  };
-
-  // Utility function to load and save switch states
-  const loadState = async (key, setter) => {
-    try {
-      const value = await AsyncStorage.getItem(key);
-      if (value !== null) setter(JSON.parse(value));
-    } catch (error) {
-      console.error(`Error loading ${key}:`, error);
-    }
-  };
-
-  const saveState = async (key, value) => {
-    try {
-      await AsyncStorage.setItem(key, JSON.stringify(value));
-      console.log(`${key} saved`);
-    } catch (error) {
-      console.error(`Error saving ${key}:`, error);
-    }
-  };
-
-  const handleGoToHome = () => {
-    navigation.navigate('MeditationTimer');
+    return (
+      [
+        hours && `${hours} ${hours === 1 ? 'hour' : 'hours'}`,
+        minutes && `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`,
+        seconds && `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`,
+      ]
+        .filter(Boolean)
+        .join(' and ') || '0 seconds'
+    );
   };
 
   const handleResetStatistics = () => {
-    Alert.alert('Confirm Reset', 'Are you sure you want to reset all statistics?', [
-      { text: 'Do not reset', style: 'cancel' },
-      { text: 'Reset Shortest Only', onPress: resetShortestStatistics },
-      { text: 'RESET ALL', onPress: resetStatistics, style: 'destructive' },
-    ]);
+    Alert.alert(
+      'Confirm Reset',
+      'Are you sure you want to reset all statistics?',
+      [
+        {text: 'Do not reset', style: 'cancel'},
+        {text: 'Reset Shortest Only', onPress: resetShortestStatistics},
+        {text: 'RESET ALL', onPress: resetStatistics, style: 'destructive'},
+      ],
+    );
   };
 
-  const calculateAverageDuration = () => sessionCount ? totalTimeMeditated / sessionCount : 0;
-
-  // Load initial states
-  useEffect(() => {
-    loadState('musicSwitchState', setMusicSwitchState);
-    loadState('intervalBellsSwitchState', setIntervalBellsSwitchState);
-  }, []);
+  const calculateAverageDuration = () =>
+    sessionCount ? totalTimeMeditated / sessionCount : 0;
 
   return (
     <View style={styles.container}>
+      {/* Statistics Section */}
       <Text style={styles.headerText}>Statistics</Text>
-      <Text style={styles.statText}>Total Time Meditated: {formatTime(totalTimeMeditated)}</Text>
+      <Text style={styles.statText}>
+        Total Time Meditated: {formatTime(totalTimeMeditated)}
+      </Text>
       <Text style={styles.statText}>Total Sessions: {sessionCount}</Text>
-      <Text style={styles.statText}>Average Session Duration: {formatTime(calculateAverageDuration())}</Text>
-      <Text style={styles.statText}>Longest Meditation Session: {formatTime(longestTimeMeditated)}</Text>
-      <Text style={styles.statText}>Shortest Meditation Session: {formatTime(shortestTimeMeditated)}</Text>
+      <Text style={styles.statText}>
+        Average Session Duration: {formatTime(calculateAverageDuration())}
+      </Text>
+      <Text style={styles.statText}>
+        Longest Meditation Session: {formatTime(longestTimeMeditated)}
+      </Text>
+      <Text style={styles.statText}>
+        Shortest Meditation Session: {formatTime(shortestTimeMeditated)}
+      </Text>
 
+      {/* Options Section */}
       <Text style={styles.headerText}>Options</Text>
-      <TouchableOpacity>
+      <View style={styles.optionContainer}>
         <Text style={styles.options}>Monk chanting</Text>
-      </TouchableOpacity>
-      <Switch value={musicSwitchState} onValueChange={(value) => { setMusicSwitchState(value); saveState('musicSwitchState', value); }} />
+        <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} />
+      </View>
 
-      <Text style={styles.options}>Randomize timer</Text>
-      <Switch value={adjustmentSwitchState} onValueChange={toggleAdjustmentSwitch} />
+      <View style={styles.optionContainer}>
+        <Text style={styles.options}>Randomize timer</Text>
+        <Switch
+          value={adjustmentSwitchState}
+          onValueChange={toggleAdjustmentSwitch}
+        />
+      </View>
 
-      <Text style={styles.bellOptions}>Interval Bells</Text>
-      <Switch value={intervalBellsSwitchState} onValueChange={(value) => { setIntervalBellsSwitchState(value); saveState('intervalBellsSwitchState', value); }} />
+      <View style={styles.optionContainer}>
+        <Text style={styles.bellOptions}>Interval Bells</Text>
+        <Switch
+          value={intervalBellsSwitchState}
+          onValueChange={setIntervalBellsSwitchState}
+        />
+      </View>
 
       {intervalBellsSwitchState && (
         <View style={styles.bellContainer}>
           <View style={styles.rowContainer}>
             {[
-              { value: interval75Active, label: '25% of session', toggle: toggleInterval75 },
-              { value: interval50Active, label: '50% of session', toggle: toggleInterval50 },
-            ].map(({ value, label, toggle }) => (
+              {
+                active: interval25Active,
+                label: '25% of session',
+                toggle: toggleInterval25,
+              },
+              {
+                active: interval50Active,
+                label: '50% of session',
+                toggle: toggleInterval50,
+              },
+            ].map(({active, label, toggle}) => (
               <View style={styles.bellOption} key={label}>
-                <Switch value={value} onValueChange={(newValue) => { toggle(newValue); saveState(`${label}State`, newValue); }} />
+                <Switch value={active} onValueChange={toggle} />
                 <Text style={styles.switchText}>{label}</Text>
               </View>
             ))}
@@ -124,11 +134,19 @@ function OptionsScreen({ navigation }) {
 
           <View style={styles.rowContainer}>
             {[
-              { value: interval25Active, label: '75% of session', toggle: toggleInterval25 },
-              { value: interval90Active, label: '90% of session', toggle: toggleInterval90 },
-            ].map(({ value, label, toggle }) => (
+              {
+                active: interval75Active,
+                label: '75% of session',
+                toggle: toggleInterval75,
+              },
+              {
+                active: interval90Active,
+                label: '90% of session',
+                toggle: toggleInterval90,
+              },
+            ].map(({active, label, toggle}) => (
               <View style={styles.bellOption} key={label}>
-                <Switch value={value} onValueChange={(newValue) => { toggle(newValue); saveState(`${label}State`, newValue); }} />
+                <Switch value={active} onValueChange={toggle} />
                 <Text style={styles.switchText}>{label}</Text>
               </View>
             ))}
@@ -136,6 +154,7 @@ function OptionsScreen({ navigation }) {
         </View>
       )}
 
+      {/* Reset Statistics Button */}
       <View style={styles.resetButtonContainer}>
         <Button title="Reset Statistics" onPress={handleResetStatistics} />
       </View>
@@ -190,4 +209,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OptionsScreen; 
+export default OptionsScreen;

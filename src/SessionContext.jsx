@@ -1,14 +1,29 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useMemo } from 'react';
+import useAsyncStorage from './hooks/useAsyncStorage'; // Import the custom hook
 
 const SessionContext = createContext();
 
 export function SessionProvider({ children }) {
-  const [totalTimeMeditated, setTotalTimeMeditated] = useState(0);
-  const [sessionCount, setSessionCount] = useState(0);
-  const [longestTimeMeditated, setLongestTimeMeditated] = useState(0);
-  const [shortestTimeMeditated, setShortestTimeMeditated] = useState(0);
+  const [totalTimeMeditated, setTotalTimeMeditated] = useAsyncStorage('totalTimeMeditated', 0);
+  const [sessionCount, setSessionCount] = useAsyncStorage('sessionCount', 0);
+  const [longestTimeMeditated, setLongestTimeMeditated] = useAsyncStorage('longestTimeMeditated', 0);
+  const [shortestTimeMeditated, setShortestTimeMeditated] = useAsyncStorage('shortestTimeMeditated', 0);
 
+  const [buttonDurations, setButtonDurations] = useAsyncStorage('buttonDurations', {
+    button5Mins: 5,
+    button10Mins: 10,
+    button15Mins: 15,
+    button20Mins: 20, 
+  }); 
+
+  
+  const setButtonSelectedDuration = (key, duration) => {
+    setButtonDurations(prev => ({
+      ...prev,
+      [key]: duration, 
+    }));
+  };
+ 
   const addMeditationTime = (minutes) => {
     const totalTimeInSeconds = totalTimeMeditated + minutes * 60;
     setTotalTimeMeditated(totalTimeInSeconds);
@@ -28,150 +43,18 @@ export function SessionProvider({ children }) {
     setSessionCount((prevCount) => prevCount + 1);
   };
 
-  const resetStatistics = async () => {
-    try {
-      await AsyncStorage.setItem('sessionCount', '0');
-      await AsyncStorage.setItem('totalTimeMeditated', '0');
-      await AsyncStorage.setItem('longestTimeMeditated', '0');
-      await AsyncStorage.setItem('shortestTimeMeditated', '0');
-
+  const resetStatistics = async () => { 
       setSessionCount(0);
       setTotalTimeMeditated(0);
       setLongestTimeMeditated(0);
-      setShortestTimeMeditated(0); 
-    } catch (error) {
-      console.error('Error resetting statistics:', error);
-    }
+      setShortestTimeMeditated(0);  
   };
 
   const resetShortestStatistics = async () => {
-    try { 
-      await AsyncStorage.setItem('shortestTimeMeditated', '0'); 
-      setShortestTimeMeditated(0); 
-    } catch (error) {
-      console.error('Error resetting statistics:', error);
-    }
+    setShortestTimeMeditated(0);
   };
 
-  // load session count
-  useEffect(() => {
-    const loadSessionCount = async () => {
-      try {
-        const value = await AsyncStorage.getItem('sessionCount');
-        if (value !== null) {
-          setSessionCount(parseInt(value, 10));
-        }
-      } catch (error) {
-        console.error('Error loading sessionCount:', error);
-      }
-    };
-
-    loadSessionCount();
-  }, []);
-
-
-// load total time meditated
-useEffect(() => {
-  const loadTotalTimeMeditated = async () => {
-    try {
-      const storedTotalTimeSeconds = await AsyncStorage.getItem('totalTimeMeditated');
-      if (storedTotalTimeSeconds !== null) {
-        setTotalTimeMeditated(parseInt(storedTotalTimeSeconds));
-      }
-    } catch (error) {
-      console.error('Error loading totalTimeMeditated:', error);
-    }
-  };
-
-  loadTotalTimeMeditated();
-}, []);
-
-
-//store total time meditated
-useEffect(() => {
-  const storeTotalTimeMeditated = async () => {
-    try {
-      await AsyncStorage.setItem('totalTimeMeditated', totalTimeMeditated.toString());
-    } catch (error) {
-      console.error('Error storing totalTimeMeditated:', error);
-    }
-  };
-
-  storeTotalTimeMeditated();
-}, [totalTimeMeditated]);
-
-  //total session count
-  useEffect(() => {
-    const saveSessionCount = async () => {
-      try {
-        await AsyncStorage.setItem('sessionCount', sessionCount.toString());
-      } catch (error) {
-        console.error('Error saving sessionCount:', error);
-      }
-    };
-
-    saveSessionCount();
-  }, [sessionCount]);
-
-  // load longest time meditated
-  useEffect(() => {
-    const loadLongestTimeMeditated = async () => {
-      try {
-        const storedLongestTimeSeconds = await AsyncStorage.getItem('longestTimeMeditated');
-        if (storedLongestTimeSeconds !== null) {
-          setLongestTimeMeditated(parseInt(storedLongestTimeSeconds));
-        }
-      } catch (error) {
-        console.error('Error loading longestTimeMeditated:', error);
-      }
-    };
   
-    loadLongestTimeMeditated();
-  }, []);
-
-  //store longest time
-  useEffect(() => {
-    const storeLongestTimeMeditated = async () => {
-      try {
-        await AsyncStorage.setItem('longestTimeMeditated', longestTimeMeditated.toString());
-      } catch (error) {
-        console.error('Error storing longestTimeMeditated:', error);
-      }
-    };
-  
-    storeLongestTimeMeditated();
-  }, [longestTimeMeditated]);
-
-  // Load shortest time meditated
-  useEffect(() => {
-    const loadShortestTimeMeditated = async () => {
-      try {
-        const storedShortestTimeSeconds = await AsyncStorage.getItem('shortestTimeMeditated');
-        if (storedShortestTimeSeconds !== null) {
-          setShortestTimeMeditated(parseInt(storedShortestTimeSeconds));
-        }
-      } catch (error) {
-        console.error('Error loading shortestTimeMeditated:', error);
-      }
-    };
-  
-    loadShortestTimeMeditated();
-  }, []);
-
-// Store shortest time meditated
-useEffect(() => {
-  const storeShortestTimeMeditated = async () => {
-    try {
-      await AsyncStorage.setItem('shortestTimeMeditated', shortestTimeMeditated.toString());
-    } catch (error) {
-      console.error('Error storing shortestTimeMeditated:', error);
-    }
-  };
-
-  storeShortestTimeMeditated();
-}, [shortestTimeMeditated]);
-
-
   const contextValue = useMemo(() => {
     return {
       totalTimeMeditated,
@@ -182,15 +65,17 @@ useEffect(() => {
       resetShortestStatistics,
       longestTimeMeditated,
       shortestTimeMeditated,
+      buttonDurations,
+      setButtonSelectedDuration ,
     };
-  }, [totalTimeMeditated, longestTimeMeditated, shortestTimeMeditated]);
+  }, [totalTimeMeditated, longestTimeMeditated, shortestTimeMeditated, buttonDurations, ]);
 
   return (
     <SessionContext.Provider value={contextValue}>
       {children}
     </SessionContext.Provider>
   );
-}
+} 
 
 export function useSessionContext() {
   const context = useContext(SessionContext);

@@ -20,13 +20,13 @@ function HomeScreen() {
   const {addMeditationTime, incrementSessionCount} = useSessionContext();
 
   const {
-    musicSwitchState, 
-    intervalBellsSwitchState, 
+    musicSwitchState,
+    intervalBellsSwitchState,
     interval25Active,
     interval50Active,
     interval75Active,
-    interval90Active, 
-    adjustmentSwitchState, 
+    interval90Active,
+    adjustmentSwitchState,
   } = useMusicSwitchContext();
 
   const {buttonDurations, setButtonSelectedDuration} = useSessionContext();
@@ -37,9 +37,7 @@ function HomeScreen() {
   // Derived States, nothing set by users but from state changes
   const {playMusic, stopMusic, isMusicPlaying} = useMusic(); //custom hook
   const [sliderDisabled, setSliderDisabled] = useState(false); //disable slider or not
-  const [randomizedDuration, setRandomizedDuration] = useState(0); //musicswitchcontext
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
-  const [adjustedSessionDuration, setAdjustedSessionDuration] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
 
   // Navigation
@@ -68,18 +66,9 @@ function HomeScreen() {
     },
   });
 
-   
-  //create the random adjustment timer or have 0 adjustment
-  useEffect(() => {
-    const randomAdjustment = adjustmentSwitchState
-      ? (Math.random() * 0.5 - 0.3) * selectedDuration
-      : 0;
-    const newRandomizedDuration = selectedDuration + randomAdjustment;
-    setRandomizedDuration(newRandomizedDuration);
-  }, [selectedDuration, adjustmentSwitchState]);
+ 
 
-  // FUNCTIONS
-
+  // FUNCTIONS 
   //when user starts a session this is where it starts
   const beginSession = () => {
     //adjusts the time for timer if randomtime
@@ -134,7 +123,7 @@ function HomeScreen() {
 
         return seconds;
       });
-    }, 1); // debug time here
+    }, 1000); // debug time here
   };
 
   //when we get to a natural ending of sessions we want to do some unique stuff and THEN stopSession

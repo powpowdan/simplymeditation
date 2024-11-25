@@ -32,44 +32,41 @@ const sentences = [
   'Worry pretends to be necessary but serves no useful purpose',
 ];
 
+
 const Quotes = () => {
-  // Generate a random index excluding certain indexes
-  const getRandomSentenceIndex = excludeIndexes => {
-    const availableIndexes = sentences
-      .map((_, index) => index)
-      .filter(index => !excludeIndexes.includes(index));
-
-    return availableIndexes[
-      Math.floor(Math.random() * availableIndexes.length)
-    ];
-  };
-
-  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(
-    getRandomSentenceIndex([-1]),
-  );
-  const [lastSentenceIndex, setLastSentenceIndex] = useState(-1);
+  const [availableIndexes, setAvailableIndexes] = useState([...Array(sentences.length).keys()]);
+  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(null);
+  const [lastSentenceIndex, setLastSentenceIndex] = useState(null);
   const [animation, setAnimation] = useState('fadeIn');
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setAnimation('fadeOut'); // Start the fade out animation
+    // Select a random index from availableIndexes
+    const getRandomSentenceIndex = () => {
+      if (availableIndexes.length === 0) {
+        // Refresh the list when all quotes have been shown
+        setAvailableIndexes([...Array(sentences.length).keys()]);
+      }
+ 
+      const randomIndex = Math.floor(Math.random() * availableIndexes.length);
+      const index = availableIndexes[randomIndex];
+      setAvailableIndexes(prev => prev.filter(i => i !== index)); // Remove selected index
+      return index;
+    };
 
-      // Delay the quote change for a smoother transition
+    const timer = setInterval(() => {
+      setAnimation('fadeOut'); // Fade out first
       setTimeout(() => {
         setCurrentSentenceIndex(prevCurrentIndex => {
-          const newIndex = getRandomSentenceIndex([
-            prevCurrentIndex,
-            lastSentenceIndex,
-          ]);
-          setLastSentenceIndex(prevCurrentIndex); // Update the last sentence index
-          setAnimation('fadeIn'); // Reset to fadeIn for the next quote
+          const newIndex = getRandomSentenceIndex();
+          setLastSentenceIndex(prevCurrentIndex);
+          setAnimation('fadeIn'); // Reset to fadeIn
           return newIndex;
         });
-      }, 1000); // Smooth transition time (1 second)
+      }, 1000); // Smoother transition time
     }, 7000); // Change quote every 7 seconds
 
-    return () => clearInterval(timer); // Cleanup interval on unmount
-  }, [lastSentenceIndex]); // Dependency only on lastSentenceIndex
+    return () => clearInterval(timer); // Cleanup on unmount
+  }, [availableIndexes]);
 
   const currentSentence = sentences[currentSentenceIndex];
 

@@ -7,8 +7,8 @@ import {
   Alert, 
   StyleSheet,
 } from 'react-native';
-import {useSessionContext} from '../SessionContext';
-import {useMusicSwitchContext} from '../MusicSwitchContext';
+import {useSessionContext} from '../context/SessionContext';
+import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 
 function OptionsScreen({navigation}) {
   const {

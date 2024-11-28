@@ -1,8 +1,8 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {MusicSwitchProvider} from './MusicSwitchContext';
-import {SessionProvider} from './SessionContext';
+import {MusicSwitchProvider} from './context/MusicSwitchContext';
+import {SessionProvider} from './context/SessionContext';
 import OptionsScreen from './screens/OptionsScreen';
 import HomeScreen from './screens/HomeScreen';
 

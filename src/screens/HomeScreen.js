@@ -1,9 +1,9 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useRef} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, Alert} from 'react-native';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer';
-import {useMusicSwitchContext} from '../MusicSwitchContext';
-import {useSessionContext} from '../SessionContext';
+import {useMusicSwitchContext} from '../context/MusicSwitchContext';
+import {useSessionContext} from '../context/SessionContext';
 import {useNavigation} from '@react-navigation/native';
 import Quotes from '../components/Quotes';
 import DurationSelector from '../components/DurationSelector';

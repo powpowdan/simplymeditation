@@ -1,17 +1,47 @@
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react'; 
+import React, {
+  createContext,
+  useContext, 
+  useMemo, 
+} from 'react';
 import useAsyncStorage from '../hooks/useAsyncStorage'; // Import the custom hook
 
 const MusicSwitchContext = createContext();
 
-export function MusicSwitchProvider({ children }) {
-  const [musicSwitchState, setMusicSwitchState] = useAsyncStorage('musicSwitchState', false);
-  const [intervalBellsSwitchState, setIntervalBellsSwitchState] = useAsyncStorage('intervalBellsSwitchState', false);
-  const [interval25Active, setInterval25Active] = useAsyncStorage('interval25Active', false);
-  const [interval50Active, setInterval50Active] = useAsyncStorage('interval50Active', false);
-  const [interval75Active, setInterval75Active] = useAsyncStorage('interval75Active', false);
-  const [interval90Active, setInterval90Active] = useAsyncStorage('interval90Active', false);
-  const [adjustmentSwitchState, setAdjustmentSwitchState] = useAsyncStorage('adjustmentSwitchState', false);
-  const [adjustmentValue, setAdjustmentValue] = useAsyncStorage('adjustmentValue', 0);
+export function MusicSwitchProvider({children}) {
+  const [musicSwitchState, setMusicSwitchState] = useAsyncStorage(
+    'musicSwitchState',
+    false,
+  );
+  const [intervalBellsSwitchState, setIntervalBellsSwitchState] =
+    useAsyncStorage('intervalBellsSwitchState', false);
+  const [interval25Active, setInterval25Active] = useAsyncStorage(
+    'interval25Active',
+    false,
+  );
+  const [interval50Active, setInterval50Active] = useAsyncStorage(
+    'interval50Active',
+    false,
+  );
+  const [interval75Active, setInterval75Active] = useAsyncStorage(
+    'interval75Active',
+    false,
+  );
+  const [interval90Active, setInterval90Active] = useAsyncStorage(
+    'interval90Active',
+    false,
+  );
+  const [adjustmentSwitchState, setAdjustmentSwitchState] = useAsyncStorage(
+    'adjustmentSwitchState',
+    false,
+  );
+  const [adjustmentValue, setAdjustmentValue] = useAsyncStorage(
+    'adjustmentValue',
+    0,
+  );
+  const [selectedTone, setSelectedTone] = useAsyncStorage(
+    'selectedTone',
+    'audio_file.mp3',
+  ); 
  
 
   const toggleInterval25 = () => {
@@ -30,15 +60,13 @@ export function MusicSwitchProvider({ children }) {
     setInterval90Active(!interval90Active);
   };
 
-  
   const toggleAdjustmentSwitch = () => {
     setAdjustmentSwitchState(!adjustmentSwitchState);
   };
 
-  const setAdjustment = (value) => {
+  const setAdjustment = value => {
     setAdjustmentValue(value);
   };
- 
 
   const contextValue = useMemo(() => {
     return {
@@ -58,22 +86,34 @@ export function MusicSwitchProvider({ children }) {
       toggleAdjustmentSwitch,
       adjustmentValue,
       setAdjustment,
-    }; 
-  }, [musicSwitchState, intervalBellsSwitchState, interval25Active, interval50Active, interval75Active, interval90Active, adjustmentSwitchState,
-    adjustmentValue,]);
+      selectedTone,
+      setSelectedTone, 
+    };
+  }, [
+    musicSwitchState,
+    intervalBellsSwitchState,
+    interval25Active,
+    interval50Active,
+    interval75Active,
+    interval90Active,
+    adjustmentSwitchState,
+    adjustmentValue,
+    selectedTone,
+  ]);
 
- 
   return (
     <MusicSwitchContext.Provider value={contextValue}>
       {children}
     </MusicSwitchContext.Provider>
   );
-} 
+}
 
 export function useMusicSwitchContext() {
   const context = useContext(MusicSwitchContext);
   if (!context) {
-    throw new Error('useMusicSwitchContext must be used within a MusicSwitchProvider');
+    throw new Error(
+      'useMusicSwitchContext must be used within a MusicSwitchProvider',
+    );
   }
   return context;
-} 
+}

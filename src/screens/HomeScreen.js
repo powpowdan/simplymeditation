@@ -27,6 +27,7 @@ function HomeScreen() {
     interval75Active,
     interval90Active,
     adjustmentSwitchState,
+    selectedTone, 
   } = useMusicSwitchContext();
 
   const {buttonDurations, setButtonSelectedDuration} = useSessionContext();
@@ -74,10 +75,10 @@ function HomeScreen() {
     //adjusts the time for timer if randomtime
     const randomizedDuration = calculateRandomizedDuration();
     const totalSeconds = Math.round(randomizedDuration * 60);
-    playTone();
+    playTone(selectedTone);
     setSessionInProgress(true);
     setSliderDisabled(true);
-    if (musicSwitchState) {
+    if (musicSwitchState) { 
       playMusic(); //from useMusic.js
     }
     startTimer(totalSeconds);
@@ -117,7 +118,7 @@ function HomeScreen() {
 
         if (seconds === 0) {
           handleTimerEnd(totalSeconds); //next stage
-          playTone();
+          playTone(selectedTone);
           BackgroundTimer.clearInterval(timerRef.current);
         }
 
@@ -163,8 +164,14 @@ function HomeScreen() {
     }
   };
 
-  const playTone = () => {
-    const sound = new Sound('audio_file.mp3', null, error => {
+
+  //this function is here and in chime selector, can always make it a seperate shared utility
+  const playTone = (fileName) => {
+    const sound = new Sound(fileName, null, error => {
+      if (error) {
+        console.error('Sound error:', error);
+        return;
+      }
       sound.play(() => sound.release());
     });
   };

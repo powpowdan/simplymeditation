@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import {useSessionContext} from '../context/SessionContext';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
+import ChimeSelector from '../components/ChimeSelector';
 
 function OptionsScreen({navigation}) {
   const {
     musicSwitchState,
     setMusicSwitchState,
-    intervalBellsSwitchState,
+    intervalBellsSwitchState, 
     setIntervalBellsSwitchState,
     interval25Active,
     toggleInterval25,
@@ -89,11 +90,16 @@ function OptionsScreen({navigation}) {
 
       {/* Options Section */}
       <Text style={styles.headerText}>Options</Text>
+
       <View style={styles.optionContainer}>
-        <Text style={styles.options}>Monk chanting</Text>
-        <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} />
+        <ChimeSelector/> 
       </View>
 
+      <View style={styles.optionContainer}>
+        <Text style={styles.options}>Monk chanting</Text>
+        <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} /> 
+      </View>
+      
       <View style={styles.optionContainer}>
         <Text style={styles.options}>Randomize timer</Text>
         <Switch
@@ -110,8 +116,10 @@ function OptionsScreen({navigation}) {
         />
       </View>
 
+      {/* if true show the bell switches */}
       {intervalBellsSwitchState && (
         <View style={styles.bellContainer}>
+        <ChimeSelector/>
           <View style={styles.rowContainer}>
             {[
               {
@@ -181,6 +189,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   options: {
+    fontSize: 15, 
     paddingTop: 20,
     marginBottom: 10,
   },

@@ -10,6 +10,7 @@ import {
 import {useSessionContext} from '../context/SessionContext';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import ChimeSelector from '../components/ChimeSelector';
+import IntervalBellSelector from '../components/IntervalBellSelector';
 
 function OptionsScreen({navigation}) {
   const {
@@ -114,12 +115,10 @@ function OptionsScreen({navigation}) {
           value={intervalBellsSwitchState}
           onValueChange={setIntervalBellsSwitchState}
         />
-      </View>
-
+      </View> 
       {/* if true show the bell switches */}
       {intervalBellsSwitchState && (
-        <View style={styles.bellContainer}>
-        <ChimeSelector/>
+        <View style={styles.bellContainer}> 
           <View style={styles.rowContainer}>
             {[
               {
@@ -157,8 +156,9 @@ function OptionsScreen({navigation}) {
                 <Switch value={active} onValueChange={toggle} />
                 <Text style={styles.switchText}>{label}</Text>
               </View>
-            ))}
+            ))} 
           </View>
+          <IntervalBellSelector/>
         </View>
       )}
 

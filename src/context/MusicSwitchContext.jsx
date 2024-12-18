@@ -42,6 +42,10 @@ export function MusicSwitchProvider({children}) {
     'selectedTone',
     'audio_file.mp3',
   ); 
+  const [selectedIntervalTone, setIntervalSelectedTone] = useAsyncStorage(
+    'selectedIntervalTone',
+    'intervalbell.mp3',
+  ); 
  
 
   const toggleInterval25 = () => {
@@ -88,6 +92,8 @@ export function MusicSwitchProvider({children}) {
       setAdjustment,
       selectedTone,
       setSelectedTone, 
+      selectedIntervalTone,
+      setIntervalSelectedTone,
     };
   }, [
     musicSwitchState,
@@ -99,6 +105,7 @@ export function MusicSwitchProvider({children}) {
     adjustmentSwitchState,
     adjustmentValue,
     selectedTone,
+    selectedIntervalTone,
   ]);
 
   return (

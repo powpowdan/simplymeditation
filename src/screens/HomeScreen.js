@@ -28,6 +28,7 @@ function HomeScreen() {
     interval90Active,
     adjustmentSwitchState,
     selectedTone, 
+    selectedIntervalTone,
   } = useMusicSwitchContext();
 
   const {buttonDurations, setButtonSelectedDuration} = useSessionContext();
@@ -106,13 +107,13 @@ function HomeScreen() {
         // Play interval bell at specific times
         if (intervalBellsSwitchState) {
           if (interval25Active && seconds === interval25) {
-            playIntervalBell(25);
+            playIntervalBell();
           } else if (interval50Active && seconds === interval50) {
-            playIntervalBell(50);
+            playIntervalBell();
           } else if (interval75Active && seconds === interval75) {
-            playIntervalBell(75);
+            playIntervalBell();
           } else if (interval90Active && seconds === interval90) {
-            playIntervalBell(90);
+            playIntervalBell();
           }
         }
 
@@ -176,8 +177,13 @@ function HomeScreen() {
     });
   };
 
-  const playIntervalBell = percentage => {
-    const sound = new Sound('intervalbell.mp3', null, error => {
+  //this could also be in the shared utility.
+  const playIntervalBell = () => {
+    const sound = new Sound(selectedIntervalTone, null, error => {
+      if (error) {
+        console.error('Sound error:', error);
+        return;
+      }
       sound.play(() => sound.release());
     });
   };

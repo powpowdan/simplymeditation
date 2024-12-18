@@ -98,13 +98,15 @@ function OptionsScreen({navigation}) {
         <ChimeSelector/> 
       </View>
 
-      <View style={styles.optionContainer}>
+      <View>
         <Text style={styles.options}>Meditation Music</Text>
-        <BackgroundMusicSelector/>
         <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} /> 
+        {musicSwitchState && (
+        <BackgroundMusicSelector/>
+        )}
       </View>
       
-      <View style={styles.optionContainer}>
+      <View>
         <Text style={styles.options}>Randomize timer</Text>
         <Switch
           value={adjustmentSwitchState}
@@ -112,7 +114,7 @@ function OptionsScreen({navigation}) {
         />
       </View>
 
-      <View style={styles.optionContainer}>
+      <View>
         <Text style={styles.bellOptions}>Interval Bells</Text>
         <Switch
           value={intervalBellsSwitchState}
@@ -191,7 +193,7 @@ const styles = StyleSheet.create({
   statText: {
     marginTop: 10,
   },
-  options: {
+  options: { 
     fontSize: 15, 
     paddingTop: 20,
     marginBottom: 10,

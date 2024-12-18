@@ -90,6 +90,10 @@ const BackgroundMusicSelector = () => {
   const [items, setItems] = useState(soundOptions); // Items for dropdown
  
 
+  //temporary adjustment for dropdown window height hardcoded
+  const { intervalBellsSwitchState } = useMusicSwitchContext();  
+  const maxDropdownHeight = intervalBellsSwitchState ? 451 : 530;
+
   let currentSound = null;
   // Play the selected tone
   const playTone = () => {
@@ -126,6 +130,7 @@ const BackgroundMusicSelector = () => {
   DropDownPicker.setTheme('DARK');
   return (
     <View>
+    
       <Text style={styles.heading}>Choose background music</Text> 
       <View style={styles.row}> 
         <DropDownPicker
@@ -135,14 +140,18 @@ const BackgroundMusicSelector = () => {
           setOpen={setOpen}
           setValue={setBgSelectedTone}
           setItems={setItems}
-          placeholder="Select Interval Bell"
+          placeholder="Select Music"
           style={styles.dropdown}
-          dropDownContainerStyle={styles.dropdownContainer}
+          dropDownContainerStyle={{
+          ...styles.dropdownContainer,
+          zIndex: open ? 9000 : 1000,
+          position: 'absolute'
+        }}
           textStyle={styles.dropdownText}
           placeholderStyle={styles.placeholderStyle}
-          maxHeight={450}
+          maxHeight={maxDropdownHeight}
           searchable={true}
-          closeOnBackPressed={true} 
+          closeOnBackPressed={true}  
           zIndex={2000}
           zIndexInverse={1000}
             // autoScroll={true}
@@ -189,8 +198,7 @@ const styles = StyleSheet.create({
     borderColor: '#74aff7',  
     marginLeft: '-15%'
   },
-  dropdown: {
-    
+  dropdown: { 
     backgroundColor: '#1A1F26',
     width: 154,
     borderColor: '#74aff7',

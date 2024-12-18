@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {View, TouchableOpacity, StyleSheet, Text} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import Sound from 'react-native-sound';
 
@@ -65,6 +64,10 @@ const IntervalBellSelector = () => {
   const [open, setOpen] = useState(false); // Control dropdown visibility
   const [items, setItems] = useState(soundOptions); // Items for dropdown
 
+    //temporary adjustment for dropdown window height hardcoded
+    const { musicSwitchState } = useMusicSwitchContext();  
+    const maxDropdownHeight = musicSwitchState ? 779 : 730;
+
   // Play the selected tone
   const playTone = () => {
     if (!selectedIntervalTone) return;
@@ -80,10 +83,7 @@ const IntervalBellSelector = () => {
   return (
     <View>
       <Text style={styles.heading}>Choose a Tone</Text>
-      <View style={styles.row}>
-        <TouchableOpacity style={styles.button} onPress={playTone}>
-          <Text style={styles.buttonText}>Test Sound</Text>
-        </TouchableOpacity>
+      <View style={styles.row}> 
         <DropDownPicker
           open={open}
           value={selectedIntervalTone}
@@ -96,7 +96,7 @@ const IntervalBellSelector = () => {
           dropDownContainerStyle={styles.dropdownContainer}
           textStyle={styles.dropdownText}
           placeholderStyle={styles.placeholderStyle}
-          maxHeight={320}
+          maxHeight={maxDropdownHeight}
           searchable={true}
           closeOnBackPressed={true}
           //   autoScroll={true}
@@ -111,6 +111,9 @@ const IntervalBellSelector = () => {
           }}
           searchPlaceholder="Search for sounds"
         />
+           <TouchableOpacity style={styles.button} onPress={playTone}>
+          <Text style={styles.buttonText}>Test Sound</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -125,9 +128,9 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '70%',
+    alignItems: 'center',  
+    width: '55%', 
+    marginRight: '24%',
   },
   picker: {
     width: 150,
@@ -137,24 +140,25 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#74aff7',
-    marginRight: 10,
+    borderColor: '#74aff7',  
+    marginLeft: '-15%'
   },
-  buttonText: {
-    color: '#FFFFFF',
-  },
-  dropdown: {
+  dropdown: { 
     backgroundColor: '#1A1F26',
-    width: 254,
+    width: 154,
     borderColor: '#74aff7',
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 0,  
   },
   dropdownContainer: {
     backgroundColor: '#1A1F26',
     borderColor: '#74aff7',
-    width: 254,
+    width: 380,
   },
+  buttonText: {
+    color: '#FFFFFF', 
+  },
+
   dropdownText: {
     color: '#FFFFFF',
     fontSize: 15,

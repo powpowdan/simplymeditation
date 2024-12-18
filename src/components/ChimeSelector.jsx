@@ -63,6 +63,20 @@ const ChimeSelector = () => {
   const [open, setOpen] = useState(false); // Control dropdown visibility
   const [items, setItems] = useState(soundOptions); // Items for dropdown
 
+  //temporary adjustment for dropdown window height hardcoded
+  const { intervalBellsSwitchState, musicSwitchState } = useMusicSwitchContext(); 
+  let maxDropdownHeight;
+
+  if (intervalBellsSwitchState && musicSwitchState) {
+    maxDropdownHeight = 475;  // Both states are true
+  } else if (intervalBellsSwitchState && !musicSwitchState) {
+    maxDropdownHeight = 435;  // Only intervalBellsSwitchState is open
+  } else if (!intervalBellsSwitchState && musicSwitchState) {
+    maxDropdownHeight = 380;  // Only musicSwitchState is open
+  } else {
+    maxDropdownHeight = 380;  // Neither state is active
+  }
+ 
   // Play the selected tone
   const playTone = () => {
     if (!selectedTone) return;
@@ -77,13 +91,10 @@ const ChimeSelector = () => {
 
   DropDownPicker.setTheme('DARK');
   return (
-    <View>
+    <View > 
       <Text style={styles.heading}>Choose a Tone</Text>
 
-      <View style={styles.row}>
-        <TouchableOpacity style={styles.button} onPress={playTone}>
-          <Text style={styles.buttonText}>Test Sound</Text>
-        </TouchableOpacity>
+      <View style={styles.row} > 
         <DropDownPicker
           open={open}
           value={selectedTone}
@@ -93,12 +104,16 @@ const ChimeSelector = () => {
           setItems={setItems}
           placeholder="Select a tone"
           style={styles.dropdown}
-          dropDownContainerStyle={styles.dropdownContainer}
+        dropDownContainerStyle={{
+          ...styles.dropdownContainer,
+          zIndex: open ? 9000 : 1000,
+          position: 'absolute'
+        }}
           textStyle={styles.dropdownText}
           placeholderStyle={styles.placeholderStyle}
-          maxHeight={320}
+          maxHeight={maxDropdownHeight}
           searchable={true}
-          closeOnBackPressed={true}
+          closeOnBackPressed={true} 
           // autoScroll={true}
           itemSeparator={true}
           stickyHeader={true}
@@ -111,6 +126,9 @@ const ChimeSelector = () => {
           }}
           searchPlaceholder="Search for sounds"
         />
+          <TouchableOpacity style={styles.button} onPress={playTone}>
+          <Text style={styles.buttonText}>Test Sound</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -127,7 +145,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '70%',
+    width: '55%', 
+    marginRight: '24%',
+    
   },
   picker: {
     width: 150,
@@ -138,22 +158,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#74aff7',
-    marginRight: 10,
+    marginLeft: '-15%'
   },
   buttonText: {
     color: '#FFFFFF',
   },
   dropdown: {
     backgroundColor: '#1A1F26',
-    width: 254,
+    width: 154,
     borderColor: '#74aff7',
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 0, 
   },
   dropdownContainer: {
     backgroundColor: '#1A1F26',
     borderColor: '#74aff7',
-    width: 254,
+    width: 380,
   },
   dropdownText: {
     color: '#FFFFFF',

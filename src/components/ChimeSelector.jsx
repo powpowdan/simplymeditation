@@ -99,7 +99,7 @@ const ChimeSelector = () => {
           maxHeight={320}
           searchable={true}
           closeOnBackPressed={true}
-          autoScroll={true}
+          // autoScroll={true}
           itemSeparator={true}
           stickyHeader={true}
           categorySelectable={false}

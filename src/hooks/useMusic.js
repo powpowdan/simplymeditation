@@ -1,26 +1,23 @@
 import { useState, useRef, useEffect } from 'react';
 import Sound from 'react-native-sound';
+import { useMusicSwitchContext } from '../context/MusicSwitchContext';
 
 const useMusic = () => {
+  const { selectedBgTone } = useMusicSwitchContext();
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const soundRef = useRef(null);
 
-  const playMusic = (fileName = 'audio_file45.mp3') => {
-    if (isMusicPlaying) return;
+  const playMusic = () => {
+    if (isMusicPlaying || !selectedBgTone) return;
 
-    const newSound = new Sound(fileName, null, error => {
+    const sound = new Sound(selectedBgTone, Sound.MAIN_BUNDLE, error => {
       if (error) {
-        console.error('Error loading sound:', error);
+        console.error('Music Playback Error:', error);
         return;
       }
-
-      newSound.setNumberOfLoops(-1); // Loop the sound infinitely
-
-      newSound.play(success => {
-        if (!success) console.error('Playback error');
-      });
-
-      soundRef.current = newSound;
+      sound.setNumberOfLoops(-1); // Loop indefinitely
+      sound.play(() => console.log('Background music playing'));
+      soundRef.current = sound;
       setIsMusicPlaying(true);
     });
   };
@@ -35,9 +32,7 @@ const useMusic = () => {
     }
   };
 
-  useEffect(() => {
-    return () => stopMusic(); // Cleanup when component unmounts
-  }, []);
+  useEffect(() => stopMusic, [selectedBgTone]);
 
   return { playMusic, stopMusic, isMusicPlaying };
 };

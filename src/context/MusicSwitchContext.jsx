@@ -5,6 +5,7 @@ import React, {
 } from 'react';
 import useAsyncStorage from '../hooks/useAsyncStorage'; // Import the custom hook
 
+
 const MusicSwitchContext = createContext();
 
 export function MusicSwitchProvider({children}) {
@@ -46,7 +47,11 @@ export function MusicSwitchProvider({children}) {
     'selectedIntervalTone',
     'intervalbell.mp3',
   ); 
- 
+
+  const [selectedBgTone, setBgSelectedTone] = useAsyncStorage(
+    'selectedBgTone',
+    'audio_file45.mp3',
+  );  
 
   const toggleInterval25 = () => {
     setInterval25Active(!interval25Active);
@@ -94,6 +99,8 @@ export function MusicSwitchProvider({children}) {
       setSelectedTone, 
       selectedIntervalTone,
       setIntervalSelectedTone,
+      selectedBgTone,
+      setBgSelectedTone,
     };
   }, [
     musicSwitchState,
@@ -106,6 +113,7 @@ export function MusicSwitchProvider({children}) {
     adjustmentValue,
     selectedTone,
     selectedIntervalTone,
+    selectedBgTone,
   ]);
 
   return (

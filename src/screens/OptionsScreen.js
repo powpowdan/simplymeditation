@@ -11,6 +11,8 @@ import {useSessionContext} from '../context/SessionContext';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import ChimeSelector from '../components/ChimeSelector';
 import IntervalBellSelector from '../components/IntervalBellSelector';
+import BackgroundMusicSelector from '../components/BackgroundMusicSelector';
+ 
 
 function OptionsScreen({navigation}) {
   const {
@@ -97,7 +99,8 @@ function OptionsScreen({navigation}) {
       </View>
 
       <View style={styles.optionContainer}>
-        <Text style={styles.options}>Monk chanting</Text>
+        <Text style={styles.options}>Meditation Music</Text>
+        <BackgroundMusicSelector/>
         <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} /> 
       </View>
       

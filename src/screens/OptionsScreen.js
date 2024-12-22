@@ -1,24 +1,16 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  Switch,
-  Button,
-  Alert, 
-  StyleSheet,
-} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, Switch, Button, Alert, StyleSheet} from 'react-native';
 import {useSessionContext} from '../context/SessionContext';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
-import ChimeSelector from '../components/ChimeSelector';
-import IntervalBellSelector from '../components/IntervalBellSelector';
-import BackgroundMusicSelector from '../components/BackgroundMusicSelector';
- 
+import ChimeSelector2 from '../components/ChimeSelector2';
+import BgMusicSelector from '../components/BgMusicSelector';
+import IntervalBellSelector2 from '../components/IntervalBellSelector2';
 
 function OptionsScreen({navigation}) {
   const {
     musicSwitchState,
     setMusicSwitchState,
-    intervalBellsSwitchState, 
+    intervalBellsSwitchState,
     setIntervalBellsSwitchState,
     interval25Active,
     toggleInterval25,
@@ -72,6 +64,7 @@ function OptionsScreen({navigation}) {
 
   const calculateAverageDuration = () =>
     sessionCount ? totalTimeMeditated / sessionCount : 0;
+ 
 
   return (
     <View style={styles.container}>
@@ -93,25 +86,20 @@ function OptionsScreen({navigation}) {
 
       {/* Options Section */}
       <Text style={styles.headerText}>Options</Text>
-
       <View style={styles.optionContainer}>
-        <ChimeSelector/> 
+        <Text style={styles.options}>Select your beginning/end chime</Text>
+        <ChimeSelector2 />
       </View>
 
       <View>
         <Text style={styles.options}>Meditation Music</Text>
-        <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} /> 
+        <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} />
         {musicSwitchState && (
-        <BackgroundMusicSelector/>
+          <View>
+            <Text style={styles.options}>Choose your meditation music</Text>
+            <BgMusicSelector />
+          </View>
         )}
-      </View>
-      
-      <View>
-        <Text style={styles.options}>Randomize timer</Text>
-        <Switch
-          value={adjustmentSwitchState}
-          onValueChange={toggleAdjustmentSwitch}
-        />
       </View>
 
       <View>
@@ -120,10 +108,10 @@ function OptionsScreen({navigation}) {
           value={intervalBellsSwitchState}
           onValueChange={setIntervalBellsSwitchState}
         />
-      </View> 
+      </View>
       {/* if true show the bell switches */}
       {intervalBellsSwitchState && (
-        <View style={styles.bellContainer}> 
+        <View style={styles.bellContainer}>
           <View style={styles.rowContainer}>
             {[
               {
@@ -161,11 +149,21 @@ function OptionsScreen({navigation}) {
                 <Switch value={active} onValueChange={toggle} />
                 <Text style={styles.switchText}>{label}</Text>
               </View>
-            ))} 
+            ))}
           </View>
-          <IntervalBellSelector/>
+          {/* <IntervalBellSelector/> */}
+          <Text style={styles.options}>Select your Interval bell sounds</Text>
+          <IntervalBellSelector2 />
         </View>
       )}
+
+      <View>
+        <Text style={styles.options}>Randomize timer</Text>
+        <Switch
+          value={adjustmentSwitchState}
+          onValueChange={toggleAdjustmentSwitch}
+        />
+      </View>
 
       {/* Reset Statistics Button */}
       <View style={styles.resetButtonContainer}>
@@ -193,8 +191,8 @@ const styles = StyleSheet.create({
   statText: {
     marginTop: 10,
   },
-  options: { 
-    fontSize: 15, 
+  options: {
+    fontSize: 15,
     paddingTop: 20,
     marginBottom: 10,
   },

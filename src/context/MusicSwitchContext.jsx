@@ -45,13 +45,83 @@ export function MusicSwitchProvider({children}) {
   ); 
   const [selectedIntervalTone, setIntervalSelectedTone] = useAsyncStorage(
     'selectedIntervalTone',
-    'intervalbell.mp3',
+    'intervalbell.mp3', 
   ); 
 
   const [selectedBgTone, setBgSelectedTone] = useAsyncStorage(
     'selectedBgTone',
-    'audio_file45.mp3',
+    'intervalbell.mp3',
   );  
+
+  //Chime, combine!
+  const [selectedChimePath, setSelectedChimePath] = useAsyncStorage(
+    'selectedChimePath',
+    'Default',
+  ); 
+
+  const [selectedChimeName, setSelectedChimeName] = useAsyncStorage(
+    'selectedChimeName',
+    'Default',
+  );   
+
+  const [volume, setVolume] = useAsyncStorage(
+    'volume',
+      1,
+  ); 
+ 
+  const [savedChime, setSavedChime] = useAsyncStorage(
+    'savedChime',
+    JSON.stringify({ chime: 'empty', volume: 0.8 }), // To store the saved chime(path) and volume
+  );
+
+    //bgMusicSelector
+
+    const [selectedSongPathBg, setselectedSongPathBg] = useAsyncStorage(
+      'selectedSongPathBg',
+      "empty",
+    ); 
+ 
+    const [selectedChimeNameBg, setSelectedChimeNameBg] = useAsyncStorage(
+      'selectedChimeNameBg',
+      'None',
+    );   
+  
+    const [volumeBg, setVolumeBg] = useAsyncStorage(
+      'volumeBg',
+        1,
+    ); 
+   
+    const [savedChimeBg, setSavedChimeBg] = useAsyncStorage(
+      'savedChimeBg',
+      JSON.stringify({ chime: 'empty', volume: 0.8 }), // To store the saved chime(path) and volume
+    );
+
+     //intervalSelector
+
+     const [savedChimeIsouPath, setSavedChimeIsouPath] = useAsyncStorage(
+      'savedChimeIsouPath',
+      'empty'
+    );
+
+     const [selectedChimeNameIsou, setSelectedChimeNameIsou] = useAsyncStorage(
+      'selectedChimeNameBg',
+      'None',
+    );   
+  
+    const [volumeIsou, setVolumeIsou] = useAsyncStorage(
+      'volumeIsou',
+        1,
+    ); 
+   
+    const [savedChimeIsou, setSavedChimeIsou] = useAsyncStorage(
+      'savedChimeIsou',
+      JSON.stringify({ chime: 'DefaultISOU', volume: 0.8 }), // To store the saved chime(path) and volume
+    );
+
+    
+  
+    
+  
 
   const toggleInterval25 = () => {
     setInterval25Active(!interval25Active);
@@ -101,6 +171,37 @@ export function MusicSwitchProvider({children}) {
       setIntervalSelectedTone,
       selectedBgTone,
       setBgSelectedTone,
+
+      selectedChimeName,
+      setSelectedChimeName,
+      volume,
+      setVolume,
+      savedChime,
+      setSavedChime,
+
+      selectedChimePath,
+      setSelectedChimePath,
+
+      selectedSongPathBg,
+      setselectedSongPathBg,
+
+      selectedChimeNameBg,
+      setSelectedChimeNameBg,
+      volumeBg,
+      setVolumeBg,
+      savedChimeBg,
+      setSavedChimeBg,
+
+      
+      selectedChimeNameIsou,
+      setSelectedChimeNameIsou,
+      volumeIsou,
+      setVolumeIsou,
+      savedChimeIsou,
+      setSavedChimeIsou,
+
+      savedChimeIsouPath,
+      setSavedChimeIsouPath,
     };
   }, [
     musicSwitchState,
@@ -114,6 +215,22 @@ export function MusicSwitchProvider({children}) {
     selectedTone,
     selectedIntervalTone,
     selectedBgTone,
+
+    selectedChimePath,
+    selectedChimeName, 
+    volume,
+    savedChime,
+     
+    selectedSongPathBg,
+    volumeBg,
+    savedChimeBg,
+    selectedChimeNameBg,
+
+    savedChimeIsouPath,
+    volumeIsou,
+    savedChimeIsou,
+    selectedChimeNameIsou,
+
   ]);
 
   return (

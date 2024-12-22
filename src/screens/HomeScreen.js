@@ -24,13 +24,17 @@ function HomeScreen() {
     intervalBellsSwitchState,
     interval25Active,
     interval50Active,
-    interval75Active,
+    interval75Active, 
     interval90Active,
-    adjustmentSwitchState,
-    selectedTone, 
-    selectedIntervalTone,
-  } = useMusicSwitchContext();
+    adjustmentSwitchState, 
 
+    //paths for passing music and volume, background is in useffect
+    selectedChimePath,
+    savedChimeIsouPath,
+    volume,
+    volumeIsou, 
+  } = useMusicSwitchContext(); 
+ 
   const {buttonDurations, setButtonSelectedDuration} = useSessionContext();
 
   // Refs
@@ -42,7 +46,7 @@ function HomeScreen() {
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
 
-  // Navigation
+ 
   const navigation = useNavigation();
 
   // Listening to app state changes (foreground and background)
@@ -57,7 +61,7 @@ function HomeScreen() {
         if (adjustedRemainingSeconds > 0) {
           startTimer(adjustedRemainingSeconds); // Resume timer
         } else {
-          stopTimer(); // Timer has expired
+          stopTimer();  
         }
       }
     },
@@ -66,7 +70,7 @@ function HomeScreen() {
         console.log('App moved to the background during a session.');
       }
     },
-  });
+  }); 
 
  
 
@@ -76,7 +80,7 @@ function HomeScreen() {
     //adjusts the time for timer if randomtime
     const randomizedDuration = calculateRandomizedDuration();
     const totalSeconds = Math.round(randomizedDuration * 60);
-    playTone(selectedTone);
+    playTone(selectedChimePath);
     setSessionInProgress(true);
     setSliderDisabled(true);
     if (musicSwitchState) { 
@@ -106,11 +110,11 @@ function HomeScreen() {
 
         // Play interval bell at specific times
         if (intervalBellsSwitchState) {
-          if (interval25Active && seconds === interval25) {
-            playIntervalBell();
+          if (interval75Active && seconds === interval25) {
+            playIntervalBell(); 
           } else if (interval50Active && seconds === interval50) {
             playIntervalBell();
-          } else if (interval75Active && seconds === interval75) {
+          } else if (interval25Active && seconds === interval75) {
             playIntervalBell();
           } else if (interval90Active && seconds === interval90) {
             playIntervalBell();
@@ -119,10 +123,9 @@ function HomeScreen() {
 
         if (seconds === 0) {
           handleTimerEnd(totalSeconds); //next stage
-          playTone(selectedTone);
+          playTone(selectedChimePath);
           BackgroundTimer.clearInterval(timerRef.current);
-        }
-
+        } 
         return seconds;
       });
     }, 1000); // debug time here
@@ -167,23 +170,27 @@ function HomeScreen() {
 
 
   //this function is here and in chime selector, can always make it a seperate shared utility
+  //now in selector has preview window of time
   const playTone = (fileName) => {
     const sound = new Sound(fileName, null, error => {
       if (error) {
         console.error('Sound error:', error);
         return;
       }
+      sound.setVolume(volume);
       sound.play(() => sound.release());
     });
   };
 
   //this could also be in the shared utility.
   const playIntervalBell = () => {
-    const sound = new Sound(selectedIntervalTone, null, error => {
+    const sound = new Sound(savedChimeIsouPath, null, error => { 
+      console.log("savedChimeIsouPath"+ savedChimeIsouPath)
       if (error) {
         console.error('Sound error:', error);
         return;
       }
+      sound.setVolume(volumeIsou);
       sound.play(() => sound.release());
     });
   };

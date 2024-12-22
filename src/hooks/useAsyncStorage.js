@@ -5,6 +5,17 @@ function useAsyncStorage(key, defaultValue) {
   const [value, setValue] = useState(defaultValue);
   const hasChanged = useRef(false); // Track if the value has changed
 
+
+  // FOR DEBUG
+  // const clearAppData = async () => {
+  //   await AsyncStorage.clear();
+  //   console.log('App data cleared');
+  // };
+  
+  // useEffect(() => {
+  //   clearAppData();
+  // }, []);
+
   // Load value from AsyncStorage
   useEffect(() => {
     const loadValue = async () => {

@@ -1,12 +1,11 @@
-import React, {useState} from 'react';
-import {View, Text, Switch, Button, Alert, StyleSheet} from 'react-native';
-import {useSessionContext} from '../context/SessionContext';
+import React from 'react';
+import {View, Text, Switch, StyleSheet} from 'react-native'; 
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import ChimeSelector2 from '../components/ChimeSelector2';
 import BgMusicSelector from '../components/BgMusicSelector';
 import IntervalBellSelector2 from '../components/IntervalBellSelector2';
 
-function OptionsScreen({navigation}) {
+function OptionsScreen() {
   const {
     musicSwitchState,
     setMusicSwitchState,
@@ -24,67 +23,8 @@ function OptionsScreen({navigation}) {
     toggleAdjustmentSwitch,
   } = useMusicSwitchContext();
 
-  const {
-    totalTimeMeditated,
-    sessionCount,
-    resetStatistics,
-    resetShortestStatistics,
-    longestTimeMeditated,
-    shortestTimeMeditated,
-  } = useSessionContext();
-
-  // Utility function for formatting time
-  const formatTime = timeInSeconds => {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = Math.round(timeInSeconds % 60);
-
-    return (
-      [
-        hours && `${hours} ${hours === 1 ? 'hour' : 'hours'}`,
-        minutes && `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`,
-        seconds && `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`,
-      ]
-        .filter(Boolean)
-        .join(' and ') || '0 seconds'
-    );
-  };
-
-  const handleResetStatistics = () => {
-    Alert.alert(
-      'Confirm Reset',
-      'Are you sure you want to reset all statistics?',
-      [
-        {text: 'Do not reset', style: 'cancel'},
-        {text: 'Reset Shortest Only', onPress: resetShortestStatistics},
-        {text: 'RESET ALL', onPress: resetStatistics, style: 'destructive'},
-      ],
-    );
-  };
-
-  const calculateAverageDuration = () =>
-    sessionCount ? totalTimeMeditated / sessionCount : 0;
- 
-
   return (
     <View style={styles.container}>
-      {/* Statistics Section */}
-      <Text style={styles.headerText}>Statistics</Text>
-      <Text style={styles.statText}>
-        Total Time Meditated: {formatTime(totalTimeMeditated)}
-      </Text>
-      <Text style={styles.statText}>Total Sessions: {sessionCount}</Text>
-      <Text style={styles.statText}>
-        Average Session Duration: {formatTime(calculateAverageDuration())}
-      </Text>
-      <Text style={styles.statText}>
-        Longest Meditation Session: {formatTime(longestTimeMeditated)}
-      </Text>
-      <Text style={styles.statText}>
-        Shortest Meditation Session: {formatTime(shortestTimeMeditated)}
-      </Text>
-
-      {/* Options Section */}
       <Text style={styles.headerText}>Options</Text>
       <View style={styles.optionContainer}>
         <Text style={styles.options}>Select your beginning/end chime</Text>
@@ -151,7 +91,7 @@ function OptionsScreen({navigation}) {
               </View>
             ))}
           </View>
-          {/* <IntervalBellSelector/> */}
+
           <Text style={styles.options}>Select your Interval bell sounds</Text>
           <IntervalBellSelector2 />
         </View>
@@ -163,11 +103,6 @@ function OptionsScreen({navigation}) {
           value={adjustmentSwitchState}
           onValueChange={toggleAdjustmentSwitch}
         />
-      </View>
-
-      {/* Reset Statistics Button */}
-      <View style={styles.resetButtonContainer}>
-        <Button title="Reset Statistics" onPress={handleResetStatistics} />
       </View>
     </View>
   );

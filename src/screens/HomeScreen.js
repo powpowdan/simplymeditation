@@ -128,7 +128,7 @@ function HomeScreen() {
         } 
         return seconds;
       });
-    }, 1000); // debug time here
+    }, 1); // debug time here
   };
 
   //when we get to a natural ending of sessions we want to do some unique stuff and THEN stopSession

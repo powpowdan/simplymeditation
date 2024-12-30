@@ -128,7 +128,7 @@ function HomeScreen() {
         } 
         return seconds;
       });
-    }, 1); // debug time here
+    }, 1000); // debug time here
   };
 
   //when we get to a natural ending of sessions we want to do some unique stuff and THEN stopSession
@@ -214,10 +214,10 @@ function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Logo
-        sliderDisabled={sessionInProgress}
-        onPress={() => navigation.navigate('Options')}
+      <Logo 
+        sliderDisabled={sessionInProgress} 
         headerText="Simply Meditation"
+        style={{ marginTop: 20 }}
       />
       <Quotes />
       <SessionProgress
@@ -272,11 +272,11 @@ const styles = StyleSheet.create({
   },
   beginButton: {
     backgroundColor: '#74aff7',
-    marginTop: 55,
+    marginTop: 25,
   },
   stopButton: {
     backgroundColor: '#A7C8E7',
-    marginTop: 35,
+    marginTop: 15,
   },
   colorBlack: {
     textAlign: 'center',

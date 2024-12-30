@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Switch, StyleSheet} from 'react-native'; 
+import {View, Text, Switch, StyleSheet} from 'react-native';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import ChimeSelector2 from '../components/ChimeSelector2';
 import BgMusicSelector from '../components/BgMusicSelector';
@@ -26,32 +26,43 @@ function OptionsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Options</Text>
+
       <View style={styles.optionContainer}>
         <Text style={styles.options}>Select your beginning/end chime</Text>
         <ChimeSelector2 />
       </View>
 
-      <View>
-        <Text style={styles.options}>Meditation Music</Text>
-        <Switch value={musicSwitchState} onValueChange={setMusicSwitchState} />
+      <View style={styles.optionContainer}>
+        <View style={styles.rowContainer}>
+          <Text style={styles.options}>Meditation Music</Text>
+          <Switch
+            value={musicSwitchState}
+            onValueChange={setMusicSwitchState}
+          />
+        </View>
         {musicSwitchState && (
-          <View>
+          <View style={styles.innerContainer}>
             <Text style={styles.options}>Choose your meditation music</Text>
             <BgMusicSelector />
           </View>
         )}
       </View>
 
-      <View>
-        <Text style={styles.bellOptions}>Interval Bells</Text>
-        <Switch
-          value={intervalBellsSwitchState}
-          onValueChange={setIntervalBellsSwitchState}
-        />
+      <View style={styles.optionContainer}>
+        <View style={styles.rowContainer}>
+          <Text style={styles.bellOptions}>Interval Bells</Text>
+          <Switch
+            value={intervalBellsSwitchState}
+            onValueChange={setIntervalBellsSwitchState}
+          />
+        </View>
       </View>
-      {/* if true show the bell switches */}
+
       {intervalBellsSwitchState && (
         <View style={styles.bellContainer}>
+          <Text style={styles.options}>Select your Interval bell sounds</Text>
+
+          <IntervalBellSelector2 />
           <View style={styles.rowContainer}>
             {[
               {
@@ -91,65 +102,69 @@ function OptionsScreen() {
               </View>
             ))}
           </View>
-
-          <Text style={styles.options}>Select your Interval bell sounds</Text>
-          <IntervalBellSelector2 />
         </View>
       )}
 
-      <View>
-        <Text style={styles.options}>Randomize timer</Text>
-        <Switch
-          value={adjustmentSwitchState}
-          onValueChange={toggleAdjustmentSwitch}
-        />
+      <View style={styles.optionContainer}>
+        <View style={styles.rowContainer}>
+          <Text style={styles.options}>Randomize timer</Text>
+          <Switch
+            value={adjustmentSwitchState}
+            onValueChange={toggleAdjustmentSwitch}
+          />
+        </View>
       </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#212121',
-    padding: 10,
+    padding: 30, // Increased padding for better spacing
   },
   headerText: {
     fontSize: 24,
     color: '#74aff7',
     paddingTop: 50,
-    paddingBottom: 10,
+    paddingBottom: 20,
     textAlign: 'center',
   },
-  statText: {
-    marginTop: 10,
+  optionContainer: {
+    width: '100%', // Ensure container stretches to the screen width
+    marginBottom: 20, // Consistent bottom margin for all sections
   },
   options: {
     fontSize: 15,
-    paddingTop: 20,
+    color: '#fff', // Ensures text is visible on dark background
     marginBottom: 10,
   },
   bellOptions: {
-    paddingTop: 20,
+    fontSize: 15,
+    color: '#fff',
     marginBottom: 10,
   },
-  bellContainer: {
-    marginTop: 20,
+  innerContainer: {
+    marginTop: 10, // Add some space for nested components
   },
+  bellContainer: {},
   rowContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center', // Ensures text and switches are vertically aligned
+    marginBottom: 15, // Added bottom margin to give space between rows
   },
   bellOption: {
+    marginTop: 20,
     flexDirection: 'row',
     alignItems: 'center',
+    width: '50%', // Adjust width to ensure no overflow
   },
   switchText: {
     color: '#ffffff',
     marginLeft: 10,
+    fontSize: 14, // Ensure text size is readable and consistent
   },
   resetButtonContainer: {
     marginTop: 20,

@@ -74,7 +74,7 @@ function StatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    // justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#212121',
     padding: 10,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   resetButtonContainer: {
-    marginTop: 20,
+    marginTop: 40,
   },
 });
 

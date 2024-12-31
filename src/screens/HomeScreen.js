@@ -14,27 +14,32 @@ import useMusic from '../hooks/useMusic';
 
 function HomeScreen() {
   // State Declarations
-  const [sessionInProgress, setSessionInProgress] = useState(false);
+
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [selectedDuration, setSelectedDuration] = useState(15);
-  const {addMeditationTime, incrementSessionCount} = useSessionContext();
+  const {
+    addMeditationTime,
+    incrementSessionCount,
+    setSessionInProgress,
+    sessionInProgress,
+  } = useSessionContext();
 
   const {
     musicSwitchState,
     intervalBellsSwitchState,
     interval25Active,
     interval50Active,
-    interval75Active, 
+    interval75Active,
     interval90Active,
-    adjustmentSwitchState, 
+    adjustmentSwitchState,
 
     //paths for passing music and volume, background is in useffect
     selectedChimePath,
     savedChimeIsouPath,
     volume,
-    volumeIsou, 
-  } = useMusicSwitchContext(); 
- 
+    volumeIsou,
+  } = useMusicSwitchContext();
+
   const {buttonDurations, setButtonSelectedDuration} = useSessionContext();
 
   // Refs
@@ -46,7 +51,6 @@ function HomeScreen() {
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
 
- 
   const navigation = useNavigation();
 
   // Listening to app state changes (foreground and background)
@@ -61,7 +65,7 @@ function HomeScreen() {
         if (adjustedRemainingSeconds > 0) {
           startTimer(adjustedRemainingSeconds); // Resume timer
         } else {
-          stopTimer();  
+          stopTimer();
         }
       }
     },
@@ -70,11 +74,9 @@ function HomeScreen() {
         console.log('App moved to the background during a session.');
       }
     },
-  }); 
+  });
 
- 
-
-  // FUNCTIONS 
+  // FUNCTIONS
   //when user starts a session this is where it starts
   const beginSession = () => {
     //adjusts the time for timer if randomtime
@@ -83,7 +85,7 @@ function HomeScreen() {
     playTone(selectedChimePath);
     setSessionInProgress(true);
     setSliderDisabled(true);
-    if (musicSwitchState) { 
+    if (musicSwitchState) {
       playMusic(); //from useMusic.js
     }
     startTimer(totalSeconds);
@@ -111,7 +113,7 @@ function HomeScreen() {
         // Play interval bell at specific times
         if (intervalBellsSwitchState) {
           if (interval75Active && seconds === interval25) {
-            playIntervalBell(); 
+            playIntervalBell();
           } else if (interval50Active && seconds === interval50) {
             playIntervalBell();
           } else if (interval25Active && seconds === interval75) {
@@ -125,7 +127,7 @@ function HomeScreen() {
           handleTimerEnd(totalSeconds); //next stage
           playTone(selectedChimePath);
           BackgroundTimer.clearInterval(timerRef.current);
-        } 
+        }
         return seconds;
       });
     }, 1000); // debug time here
@@ -168,10 +170,9 @@ function HomeScreen() {
     }
   };
 
-
   //this function is here and in chime selector, can always make it a seperate shared utility
   //now in selector has preview window of time
-  const playTone = (fileName) => {
+  const playTone = fileName => {
     const sound = new Sound(fileName, null, error => {
       if (error) {
         console.error('Sound error:', error);
@@ -184,8 +185,8 @@ function HomeScreen() {
 
   //this could also be in the shared utility.
   const playIntervalBell = () => {
-    const sound = new Sound(savedChimeIsouPath, null, error => { 
-      console.log("savedChimeIsouPath"+ savedChimeIsouPath)
+    const sound = new Sound(savedChimeIsouPath, null, error => {
+      console.log('savedChimeIsouPath' + savedChimeIsouPath);
       if (error) {
         console.error('Sound error:', error);
         return;
@@ -214,10 +215,10 @@ function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Logo 
-        sliderDisabled={sessionInProgress} 
+      <Logo
+        sliderDisabled={sessionInProgress}
         headerText="Simply Meditation"
-        style={{ marginTop: 20 }}
+        style={{marginTop: 20}}
       />
       <Quotes />
       <SessionProgress

@@ -1,20 +1,25 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {StyleSheet, Animated} from 'react-native';
+import {StyleSheet, Animated, Pressable} from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import OptionsScreen from '../screens/OptionsScreen';
 import StatsScreen from '../screens/StatsScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {useSessionContext} from '../context/SessionContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabsNavigator() {
+  const {sessionInProgress} = useSessionContext();
+
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
         headerShown: false,
-        tabBarStyle: styles.tabBar,
-        // tabBarShowLabel: false,
+        tabBarStyle: [
+          styles.tabBar,
+          sessionInProgress && {opacity: 0.5}, // dim during session
+        ],
         tabBarActiveTintColor: styles.activeTintColor.color,
         tabBarInactiveTintColor: styles.inactiveTintColor.color,
         tabBarIcon: ({color, size, focused}) => {
@@ -34,22 +39,12 @@ export default function BottomTabsNavigator() {
             </Animated.View>
           );
         },
-        tabBarLabel: ({focused}) => {
-          return (
-            <Animated.Text
-              style={{
-                fontSize: focused ? 11 : 9, // Animate label size on focus
-                color: focused
-                  ? styles.activeTintColor.color
-                  : styles.inactiveTintColor.color,
-              }}>
-              {route.name}
-            </Animated.Text>
-          );
-        },
-        tabBarItemStyle: {
-          paddingBottom: 3,
-        },
+        tabBarButton: props => (
+          <Pressable
+            {...props}
+            disabled={sessionInProgress} // disable during session
+          />
+        ),
       })}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Statistics" component={StatsScreen} />

@@ -14,11 +14,21 @@ import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 const BgMusicSelector = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
+ 
+  const {
+    selectedSongPathBg, 
+    setselectedSongPathBg, 
+    savedChimeBg, 
+    setSavedChimeBg, 
+    selectedChimeNameBg, 
+    setSelectedChimeNameBg, 
+    volumeBg, 
+    setVolumeBg
+  } = useMusicSwitchContext();
 
-  const {selectedSongPathBg, setselectedSongPathBg} = useMusicSwitchContext(); // just a simple path for the beginsession
-  const {savedChimeBg, setSavedChimeBg} = useMusicSwitchContext(); // To store the saved chime(path) and volumeBg
-  const {selectedChimeNameBg, setSelectedChimeNameBg} = useMusicSwitchContext();
-  const {volumeBg, setVolumeBg} = useMusicSwitchContext();
+   const [soundInstance, setSoundInstance] = useState(null);
+   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+   const [previousSongPathBg, setPreviousSongPathBg] = useState(null);
 
   const availableChimes = {
     Nature: [
@@ -208,12 +218,19 @@ const BgMusicSelector = () => {
   };
 
   const closeModal = () => {
+    if (soundInstance) {
+      soundInstance.stop(() => {
+        soundInstance.release();
+      });
+    }
+
     setSavedChimeBg(
       JSON.stringify({
         chime: {label: selectedChimeNameBg, value: selectedSongPathBg},
         volumeBg,
       }),
     );
+    setIsMusicPlaying(false);
     setModalVisible(false);
   };
 
@@ -240,45 +257,51 @@ const BgMusicSelector = () => {
     return baseStyle;
   };
 
-  let currentSound = null;
-
   const playTestSound = () => {
-    if (currentSound) {
-      // If the sound is already playing, stop it
-      currentSound.stop(() => {
-        currentSound.release();
-        currentSound = null; // Reset the reference
-        console.log('Tone playback stopped');
-      });
-    } else {
-      // If the sound is not playing, start it
-      if (!selectedSongPathBg) {
-        console.error('No sound path selected.');
-        return;
+    if (!selectedSongPathBg) return;
+  
+    // If the user is trying to play the same sound again while music is playing, stop the current sound
+    if (selectedSongPathBg === previousSongPathBg && isMusicPlaying) {
+      if (soundInstance) {
+        soundInstance.stop(() => {
+          soundInstance.release();   
+          setIsMusicPlaying(false);
+        });
       }
-
-      currentSound = new Sound(selectedSongPathBg, null, error => {
+    } else {
+      // If it's a new sound, stop the current sound and play the new one
+      if (soundInstance) {
+        soundInstance.stop(() => {
+          soundInstance.release();  
+          setIsMusicPlaying(false);
+        });
+      }
+  
+      const sound = new Sound(selectedSongPathBg, null, error => {
         if (error) {
           console.error('Error loading sound:', error);
           return;
         }
-
-        currentSound.setVolume(volumeBg); // Adjust volume
-        currentSound.play(() => console.log('Tone playing for 5 seconds'));
-
+        
+        sound.setVolume(volumeBg);
+        sound.play(() => sound.release());
+        setSoundInstance(sound); 
+        setIsMusicPlaying(true);
+        
+        setPreviousSongPathBg(selectedSongPathBg); // Update the previous song path
+  
+        // Stop the sound after 8 seconds
         setTimeout(() => {
-          if (currentSound) {
-            currentSound.stop(() => {
-              currentSound.release();
-              currentSound = null; // Reset the reference
-              console.log('Sound playback completed');
-            });
-          }
-        }, 10000); // Play for 10 seconds
+          sound.stop(() => {
+            sound.release(); 
+            setIsMusicPlaying(false);
+          });
+        }, 8000); // 8-second timeout
       });
     }
   };
-
+  
+ 
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
 
@@ -356,7 +379,7 @@ const BgMusicSelector = () => {
               Volume: {Math.round(volumeBg * 100)}%
             </Text>
             <Slider
-              style={styles.slider}
+              style={styles.slider} 
               minimumValue={0}
               maximumValue={1}
               value={volumeBg}
@@ -364,6 +387,7 @@ const BgMusicSelector = () => {
               minimumTrackTintColor="#74aff7"
               maximumTrackTintColor="#ccc"
               thumbTintColor="#74aff7"
+              // disabled={isMusicPlaying}
             />
 
             {/* Test Sound Button */}

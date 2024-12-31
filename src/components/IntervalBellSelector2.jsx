@@ -21,6 +21,8 @@ const IntervalBellSelector = () => {
   const {selectedChimeNameIsou, setSelectedChimeNameIsou} = useMusicSwitchContext();
   const {volumeIsou, setVolumeIsou} = useMusicSwitchContext(); 
 
+  const [soundInstance, setSoundInstance] = useState(null);
+
 
   const availableChimes = {
     Nature: [
@@ -137,6 +139,11 @@ const IntervalBellSelector = () => {
   };
 
   const closeModal = () => { 
+    if (soundInstance) {
+      soundInstance.stop(() => {
+        soundInstance.release();
+      });
+    }
     setSavedChimeIsou(JSON.stringify({ chime: { label: selectedChimeNameIsou, value: selectedSongPathIsou }, volumeIsou })); 
     setSavedChimeIsouPath(selectedSongPathIsou);  
     setModalVisible(false);
@@ -164,17 +171,24 @@ const IntervalBellSelector = () => {
     }
     return baseStyle;
   }; 
-
+ 
   const playTestSound = () => {
     if (!selectedSongPathIsou) return;
+    // Check if soundInstance exists and is playing
+    if (soundInstance) { 
+      soundInstance.stop(() => {
+        soundInstance.release(); // Release the old sound instance
+      });
+    }
     const sound = new Sound(selectedSongPathIsou, null, error => {
       if (error) {
         console.error('Error loading sound:', error);
         return;
       }
-    //   console.log(`Playing test sound for: ${selectedSongPathIsou} at volumeIsou ${volumeIsou}`);
       sound.setVolume(volumeIsou);
       sound.play(() => sound.release());
+      setSoundInstance(sound);
+      console.log(soundInstance);
     });
   };
 

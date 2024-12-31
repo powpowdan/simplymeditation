@@ -194,12 +194,11 @@ const ChimeSelector2 = () => {
       sound.setVolume(volume);
       sound.play(() => sound.release());
       setSoundInstance(sound);
-      console.log(soundInstance);
     });
   };
 
   const chimesToDisplay =
-    availableChimes[selectedCategory] || availableChimes.All; 
+    availableChimes[selectedCategory] || availableChimes.All;
 
   useEffect(() => {
     if (savedChime) {

@@ -10,6 +10,7 @@ import {
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const ChimeSelector2 = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -221,8 +222,11 @@ const ChimeSelector2 = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => openModal()} style={styles.button}>
-        <Text style={styles.buttonText}>
-          Selected Chime: {selectedChimeName || 'None'}
+        <Text>
+          <Text style={[styles.buttonText, styles.labelText]}>
+            Selected Chime:{' '}
+          </Text>
+          <Text style={styles.buttonText}>{selectedChimeName || 'None'}</Text>
         </Text>
       </TouchableOpacity>
 
@@ -281,16 +285,30 @@ const ChimeSelector2 = () => {
             <Text style={styles.sliderLabel}>
               Volume: {Math.round(volume * 100)}%
             </Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={1}
-              value={volume}
-              onValueChange={value => setVolume(value)}
-              minimumTrackTintColor="#74aff7"
-              maximumTrackTintColor="#ccc"
-              thumbTintColor="#74aff7"
-            />
+            <View style={styles.volumeContainer}>
+              <Icon
+                name="volume-low-outline"
+                size={24}
+                color="#ffffff"
+                style={styles.icon}
+              />
+              <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={1}
+                value={volume}
+                onValueChange={value => setVolume(value)}
+                minimumTrackTintColor="#74aff7"
+                maximumTrackTintColor="#ffffff"
+                thumbTintColor="#74aff7"
+              />
+              <Icon
+                name="volume-high-outline"
+                size={24}
+                color="#ffffff"
+                style={styles.icon}
+              />
+            </View>
 
             {/* Test Sound Button */}
             <View style={styles.buttonRowContainer}>
@@ -305,7 +323,7 @@ const ChimeSelector2 = () => {
               <TouchableOpacity
                 style={styles.chooseButton}
                 onPress={closeModal}>
-                <Text style={styles.chooseButtonText}>Choose Chime</Text>
+                <Text style={styles.chooseButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -317,6 +335,7 @@ const ChimeSelector2 = () => {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: '2%',
     marginVertical: 1,
   },
   button: {
@@ -324,11 +343,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     borderColor: '#74aff7',
-    borderWidth: 1,
+    borderWidth: 0.4,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
+  },
+  labelText: {
+    color: '#74aff7', // Different color for the label
   },
   modalOverlay: {
     flex: 1,
@@ -395,9 +417,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   sliderLabel: {
-    color: '#fff',
-    marginTop: 10,
-    fontSize: 16,
+    color: '#74aff7',
+    marginTop: 15,
+    marginBottom: 5,
+    fontSize: 14,
   },
   slider: {
     width: '100%',
@@ -440,6 +463,14 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  volumeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '90%',
+    marginTop: '1%',
+    paddingRight: '6%',
   },
 });
 export default ChimeSelector2;

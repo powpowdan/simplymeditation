@@ -10,6 +10,7 @@ import {
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const IntervalBellSelector = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -205,8 +206,13 @@ const IntervalBellSelector = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => openModal()} style={styles.button}>
-        <Text style={styles.buttonText}>
-          Selected Chime: {selectedChimeNameIsou || 'None'}
+        <Text>
+          <Text style={[styles.buttonText, styles.labelText]}>
+            Selected Interval:{' '}
+          </Text>
+          <Text style={styles.buttonText}>
+            {selectedChimeNameIsou || 'None'}
+          </Text>
         </Text>
       </TouchableOpacity>
 
@@ -266,16 +272,32 @@ const IntervalBellSelector = () => {
             <Text style={styles.sliderLabel}>
               Volume: {Math.round(volumeIsou * 100)}%
             </Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={1}
-              value={volumeIsou}
-              onValueChange={value => setVolumeIsou(value)}
-              minimumTrackTintColor="#74aff7"
-              maximumTrackTintColor="#ccc"
-              thumbTintColor="#74aff7"
-            />
+
+            <View style={styles.volumeContainer}>
+              <Icon
+                name="volume-low-outline"
+                size={24}
+                color="#ffffff"
+                style={styles.icon}
+              />
+              <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={1}
+                value={volumeIsou}
+                onValueChange={value => setVolumeIsou(value)}
+                minimumTrackTintColor="#74aff7"
+                maximumTrackTintColor="#ffffff"
+                thumbTintColor="#74aff7"
+              />
+
+              <Icon
+                name="volume-high-outline"
+                size={24}
+                color="#ffffff"
+                style={styles.icon}
+              />
+            </View>
 
             {/* Test Sound Button */}
             <View style={styles.buttonRowContainer}>
@@ -303,17 +325,21 @@ const IntervalBellSelector = () => {
 const styles = StyleSheet.create({
   container: {
     marginVertical: 1,
+    marginBottom: '3%',
   },
   button: {
     backgroundColor: '#1A1F26',
     padding: 12,
     borderRadius: 8,
     borderColor: '#74aff7',
-    borderWidth: 1,
+    borderWidth: 0.4,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
+  },
+  labelText: {
+    color: '#74aff7',
   },
   modalOverlay: {
     flex: 1,
@@ -380,9 +406,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   sliderLabel: {
-    color: '#fff',
-    marginTop: 10,
-    fontSize: 16,
+    color: '#74aff7',
+    marginTop: 15,
+    marginBottom: 5,
+    fontSize: 14,
   },
   slider: {
     width: '100%',
@@ -425,6 +452,14 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  volumeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '90%',
+    marginTop: '1%',
+    paddingRight: '6%',
   },
 });
 export default IntervalBellSelector;

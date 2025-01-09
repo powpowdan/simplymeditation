@@ -10,25 +10,26 @@ import {
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const BgMusicSelector = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("All");
- 
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
   const {
-    selectedSongPathBg, 
-    setselectedSongPathBg, 
-    savedChimeBg, 
-    setSavedChimeBg, 
-    selectedChimeNameBg, 
-    setSelectedChimeNameBg, 
-    volumeBg, 
-    setVolumeBg
+    selectedSongPathBg,
+    setselectedSongPathBg,
+    savedChimeBg,
+    setSavedChimeBg,
+    selectedChimeNameBg,
+    setSelectedChimeNameBg,
+    volumeBg,
+    setVolumeBg,
   } = useMusicSwitchContext();
 
-   const [soundInstance, setSoundInstance] = useState(null);
-   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-   const [previousSongPathBg, setPreviousSongPathBg] = useState(null);
+  const [soundInstance, setSoundInstance] = useState(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [previousSongPathBg, setPreviousSongPathBg] = useState(null);
 
   const availableChimes = {
     Nature: [
@@ -240,7 +241,7 @@ const BgMusicSelector = () => {
   };
 
   const handleCategoryChange = category => {
-    setSelectedCategory(category); 
+    setSelectedCategory(category);
   };
 
   const getCategoryButtonStyle = category => {
@@ -259,12 +260,12 @@ const BgMusicSelector = () => {
 
   const playTestSound = () => {
     if (!selectedSongPathBg) return;
-  
+
     // If the user is trying to play the same sound again while music is playing, stop the current sound
     if (selectedSongPathBg === previousSongPathBg && isMusicPlaying) {
       if (soundInstance) {
         soundInstance.stop(() => {
-          soundInstance.release();   
+          soundInstance.release();
           setIsMusicPlaying(false);
         });
       }
@@ -272,36 +273,35 @@ const BgMusicSelector = () => {
       // If it's a new sound, stop the current sound and play the new one
       if (soundInstance) {
         soundInstance.stop(() => {
-          soundInstance.release();  
+          soundInstance.release();
           setIsMusicPlaying(false);
         });
       }
-  
+
       const sound = new Sound(selectedSongPathBg, null, error => {
         if (error) {
           console.error('Error loading sound:', error);
           return;
         }
-        
+
         sound.setVolume(volumeBg);
         sound.play(() => sound.release());
-        setSoundInstance(sound); 
+        setSoundInstance(sound);
         setIsMusicPlaying(true);
-        
+
         setPreviousSongPathBg(selectedSongPathBg); // Update the previous song path
-  
+
         // Stop the sound after 8 seconds
         setTimeout(() => {
           sound.stop(() => {
-            sound.release(); 
+            sound.release();
             setIsMusicPlaying(false);
           });
         }, 8000); // 8-second timeout
       });
     }
   };
-  
- 
+
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
 
@@ -317,8 +317,11 @@ const BgMusicSelector = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => openModal()} style={styles.button}>
-        <Text style={styles.buttonText}>
-          Selected Music: {selectedChimeNameBg || 'None'}
+        <Text>
+          <Text style={[styles.buttonText, styles.labelText]}>
+            Selected Music:{' '}
+          </Text>
+          <Text style={styles.buttonText}>{selectedChimeNameBg || 'None'}</Text>
         </Text>
       </TouchableOpacity>
 
@@ -378,17 +381,31 @@ const BgMusicSelector = () => {
             <Text style={styles.sliderLabel}>
               Volume: {Math.round(volumeBg * 100)}%
             </Text>
-            <Slider
-              style={styles.slider} 
-              minimumValue={0}
-              maximumValue={1}
-              value={volumeBg}
-              onValueChange={value => setVolumeBg(value)}
-              minimumTrackTintColor="#74aff7"
-              maximumTrackTintColor="#ccc"
-              thumbTintColor="#74aff7"
-              // disabled={isMusicPlaying}
-            />
+            <View style={styles.volumeContainer}>
+              <Icon
+                name="volume-low-outline"
+                size={24}
+                color="#ffffff"
+                style={styles.icon}
+              />
+              <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={1}
+                value={volumeBg}
+                onValueChange={value => setVolumeBg(value)}
+                minimumTrackTintColor="#74aff7"
+                maximumTrackTintColor="#ccc"
+                thumbTintColor="#74aff7"
+                // disabled={isMusicPlaying}
+              />
+              <Icon
+                name="volume-high-outline"
+                size={24}
+                color="#ffffff"
+                style={styles.icon}
+              />
+            </View>
 
             {/* Test Sound Button */}
             <View style={styles.buttonRowContainer}>
@@ -403,7 +420,7 @@ const BgMusicSelector = () => {
               <TouchableOpacity
                 style={styles.chooseButton}
                 onPress={closeModal}>
-                <Text style={styles.chooseButtonText}>Choose Music</Text>
+                <Text style={styles.chooseButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -422,11 +439,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     borderColor: '#74aff7',
-    borderWidth: 1,
+    borderWidth: 0.4,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
+  },
+  labelText: {
+    color: '#74aff7',
   },
   modalOverlay: {
     flex: 1,
@@ -493,9 +513,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
   sliderLabel: {
-    color: '#fff',
-    marginTop: 10,
-    fontSize: 16,
+    color: '#74aff7',
+    marginTop: 15,
+    marginBottom: 5,
+    fontSize: 14,
   },
   slider: {
     width: '100%',
@@ -538,6 +559,14 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  volumeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '90%',
+    marginTop: '1%',
+    paddingRight: '6%',
   },
 });
 export default BgMusicSelector;

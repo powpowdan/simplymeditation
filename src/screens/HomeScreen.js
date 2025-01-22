@@ -77,6 +77,10 @@ function HomeScreen() {
 
   //next stage after beginSession
   const startTimer = totalSeconds => {
+    //timer drift fix: just setinterval drifts because of systemload/js thread processing.
+    // date.now gets current system time and tracking the elapsed time calculates to how much realworld time has passed
+    //instead of just -1 from the state every interval tick we calc newremainingseconds based on elapsed time, only updating state when it has actually changed
+    const startTime = Date.now();
     setRemainingSeconds(totalSeconds);
 
     // Clear any existing timer
@@ -86,40 +90,41 @@ function HomeScreen() {
 
     timerRef.current = {
       interval: BackgroundTimer.setInterval(() => {
-        setRemainingSeconds(prevRemainingSeconds => {
-          const seconds = prevRemainingSeconds - 1;
+        //timer drift fix below
+        const elapsed = Math.floor((Date.now() - startTime) / 1000); // Elapsed time
+        const newRemainingSeconds = totalSeconds - elapsed; // Update remaining seconds
 
-          // Define intervals based on the original total duration (not recalculated)
-          const intervals = [
-            {active: interval75Active, target: Math.floor(totalSeconds * 0.25)},
-            {active: interval50Active, target: Math.floor(totalSeconds * 0.5)},
-            {active: interval25Active, target: Math.floor(totalSeconds * 0.75)},
-            {active: interval90Active, target: Math.floor(totalSeconds * 0.1)},
-          ];
+        // Only update if the new remaining seconds value has changed
+        if (newRemainingSeconds !== remainingSeconds) {
+          setRemainingSeconds(newRemainingSeconds);
+        }
 
-          // Play interval bell if conditions are met
-          if (intervalBellsSwitchState) {
-            intervals.forEach(({active, target}) => {
-              if (active && seconds === target) {
-                playIntervalBell();
-              }
-            });
-          }
+        // Define intervals based on the original total duration (not recalculated)
+        const intervals = [
+          {active: interval75Active, target: Math.floor(totalSeconds * 0.25)},
+          {active: interval50Active, target: Math.floor(totalSeconds * 0.5)},
+          {active: interval25Active, target: Math.floor(totalSeconds * 0.75)},
+          {active: interval90Active, target: Math.floor(totalSeconds * 0.1)},
+        ];
 
-          // When timer reaches 0, stop it and handle the end of the session
-          if (seconds === 0) {
-            playTone(selectedChimePath);
-            handleTimerEnd(totalSeconds);
-            BackgroundTimer.clearInterval(timerRef.current.interval);
-          }
+        // Play interval bell if conditions are met
+        if (intervalBellsSwitchState) {
+          intervals.forEach(({active, target}) => {
+            if (active && newRemainingSeconds === target) {
+              playIntervalBell();
+            }
+          });
+        } 
 
-          return seconds;
-        });
-      }, 1000), // Update every second
-      startTime: Math.floor(Date.now() / 1000), // Store the start time to adjust when the app comes to the foreground
+        // When timer reaches 0, stop it and handle the end of the session
+        if (newRemainingSeconds <= 0) {
+          playTone(selectedChimePath);
+          handleTimerEnd(totalSeconds);
+          BackgroundTimer.clearInterval(timerRef.current.interval);
+        }
+      }, 1000), // debug time
     };
-
-    // Start the background timer
+ 
     BackgroundTimer.start();
   };
 
@@ -131,12 +136,12 @@ function HomeScreen() {
     setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
 
     stopSession();
-    setSliderDisabled(false); 
+    setSliderDisabled(false);
     setSessionCompleted(true);
   };
 
   //can run if user stops session or after natural session is done and handTimer is called
-  const stopSession = () => { 
+  const stopSession = () => {
     setSliderDisabled(false);
     if (timerRef.current)
       BackgroundTimer.clearInterval(timerRef.current.interval);

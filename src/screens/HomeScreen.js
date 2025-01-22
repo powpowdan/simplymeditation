@@ -127,16 +127,16 @@ function HomeScreen() {
   const handleTimerEnd = totalSeconds => {
     const sessionDuration = totalSeconds / 60;
     addMeditationTime(sessionDuration);
-    setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
-    stopSession();
-    setSliderDisabled(false);
     incrementSessionCount();
+    setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
+
+    stopSession();
+    setSliderDisabled(false); 
     setSessionCompleted(true);
   };
 
   //can run if user stops session or after natural session is done and handTimer is called
-  const stopSession = () => {
-    console.log('Stopping session');
+  const stopSession = () => { 
     setSliderDisabled(false);
     if (timerRef.current)
       BackgroundTimer.clearInterval(timerRef.current.interval);

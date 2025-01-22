@@ -1,16 +1,15 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet, Alert} from 'react-native';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import {useSessionContext} from '../context/SessionContext';
-import {useNavigation} from '@react-navigation/native';
 import Quotes from '../components/Quotes';
 import DurationSelector from '../components/DurationSelector';
 import SessionProgress from '../components/SessionProgress';
 import Logo from '../components/Logo';
-import useAppStateListener from '../hooks/useAppStateListener';
 import useMusic from '../hooks/useMusic';
+import useAppStateTimer from '../hooks/useAppStateTimer';
 
 function HomeScreen() {
   // State Declarations
@@ -44,37 +43,22 @@ function HomeScreen() {
 
   // Refs
   const timerRef = useRef();
+  const adjustedRemainingSeconds = useAppStateTimer(
+    sessionInProgress,
+    remainingSeconds,
+  );
 
-  // Derived States, nothing set by users but from state changes
+  // Derived States, nothing set by users
   const {playMusic, stopMusic, isMusicPlaying} = useMusic(); //custom hook
   const [sliderDisabled, setSliderDisabled] = useState(false); //disable slider or not
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
 
-  const navigation = useNavigation();
-
   // Listening to app state changes (foreground and background)
-  // This function is triggered when the app comes to the foreground after being paused
-  useAppStateListener({
-    onForegroundResume: elapsedTime => {
-      if (sessionInProgress && remainingSeconds > 0) {
-        const adjustedRemainingSeconds = Math.max(
-          remainingSeconds - elapsedTime,
-          0,
-        );
-        if (adjustedRemainingSeconds > 0) {
-          startTimer(adjustedRemainingSeconds); // Resume timer
-        } else {
-          stopTimer();
-        }
-      }
-    },
-    onBackgroundPause: () => {
-      if (sessionInProgress) {
-        console.log('App moved to the background during a session.');
-      }
-    },
-  });
+  // This function is triggered when the app comes to the foreground after being in background. fixes time issue
+  useEffect(() => {
+    setRemainingSeconds(adjustedRemainingSeconds); // Set the updated time
+  }, [adjustedRemainingSeconds]);
 
   // FUNCTIONS
   //when user starts a session this is where it starts
@@ -97,40 +81,46 @@ function HomeScreen() {
 
     // Clear any existing timer
     if (timerRef.current) {
-      BackgroundTimer.clearInterval(timerRef.current);
+      BackgroundTimer.clearInterval(timerRef.current.interval);
     }
 
-    timerRef.current = BackgroundTimer.setInterval(() => {
-      setRemainingSeconds(prevRemainingSeconds => {
-        const seconds = prevRemainingSeconds - 1;
+    timerRef.current = {
+      interval: BackgroundTimer.setInterval(() => {
+        setRemainingSeconds(prevRemainingSeconds => {
+          const seconds = prevRemainingSeconds - 1;
 
-        // Define intervals
-        const interval25 = Math.floor(totalSeconds * 0.25);
-        const interval50 = Math.floor(totalSeconds * 0.5);
-        const interval75 = Math.floor(totalSeconds * 0.75);
-        const interval90 = Math.floor(totalSeconds * 0.1);
+          // Define intervals based on the original total duration (not recalculated)
+          const intervals = [
+            {active: interval75Active, target: Math.floor(totalSeconds * 0.25)},
+            {active: interval50Active, target: Math.floor(totalSeconds * 0.5)},
+            {active: interval25Active, target: Math.floor(totalSeconds * 0.75)},
+            {active: interval90Active, target: Math.floor(totalSeconds * 0.1)},
+          ];
 
-        // Play interval bell at specific times
-        if (intervalBellsSwitchState) {
-          if (interval75Active && seconds === interval25) {
-            playIntervalBell();
-          } else if (interval50Active && seconds === interval50) {
-            playIntervalBell();
-          } else if (interval25Active && seconds === interval75) {
-            playIntervalBell();
-          } else if (interval90Active && seconds === interval90) {
-            playIntervalBell();
+          // Play interval bell if conditions are met
+          if (intervalBellsSwitchState) {
+            intervals.forEach(({active, target}) => {
+              if (active && seconds === target) {
+                playIntervalBell();
+              }
+            });
           }
-        }
 
-        if (seconds === 0) {
-          handleTimerEnd(totalSeconds); //next stage
-          playTone(selectedChimePath);
-          BackgroundTimer.clearInterval(timerRef.current);
-        }
-        return seconds;
-      });
-    }, 1000); // debug time here
+          // When timer reaches 0, stop it and handle the end of the session
+          if (seconds === 0) {
+            playTone(selectedChimePath);
+            handleTimerEnd(totalSeconds);
+            BackgroundTimer.clearInterval(timerRef.current.interval);
+          }
+
+          return seconds;
+        });
+      }, 1000), // Update every second
+      startTime: Math.floor(Date.now() / 1000), // Store the start time to adjust when the app comes to the foreground
+    };
+
+    // Start the background timer
+    BackgroundTimer.start();
   };
 
   //when we get to a natural ending of sessions we want to do some unique stuff and THEN stopSession
@@ -146,11 +136,11 @@ function HomeScreen() {
 
   //can run if user stops session or after natural session is done and handTimer is called
   const stopSession = () => {
-    console.log('stop session by user');
+    console.log('Stopping session');
     setSliderDisabled(false);
-    if (timerRef.current) {
-      BackgroundTimer.clearInterval(timerRef.current);
-    }
+    if (timerRef.current)
+      BackgroundTimer.clearInterval(timerRef.current.interval);
+    BackgroundTimer.stop();
     stopMusic();
     setSessionInProgress(false);
   };

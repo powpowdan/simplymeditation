@@ -135,6 +135,11 @@ const BgMusicSelector = () => {
         parent: 'instrument',
       },
       {
+        label: 'Brown noise',
+        value: 'brownnoise',
+        parent: 'hertz',
+      },
+      {
         label: 'Placeholder1',
         value: '1',
       },
@@ -167,6 +172,11 @@ const BgMusicSelector = () => {
       {
         label: '417 hz OM Chanting',
         value: 'now.mp3',
+      },
+      {
+        label: 'Brown noise',
+        value: 'brownnoise.mp3',
+        parent: 'hertz',
       },
       {
         label: 'Calm river flowing',
@@ -348,7 +358,7 @@ const BgMusicSelector = () => {
               <TouchableOpacity
                 style={getCategoryButtonStyle('TimeOfDay')}
                 onPress={() => handleCategoryChange('TimeOfDay')}>
-                <Text style={styles.categoryButtonText}>Time of Day</Text>
+                <Text style={styles.categoryButtonText}>Hertz</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={getCategoryButtonStyle('Mood')}

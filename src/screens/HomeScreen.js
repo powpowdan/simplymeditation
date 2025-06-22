@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {View, TouchableOpacity, Text, StyleSheet, Alert} from 'react-native';
+import {View, TouchableOpacity, Text, StyleSheet, Alert, Dimensions} from 'react-native';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
@@ -250,6 +250,10 @@ function HomeScreen() {
   );
 }
 
+const { width, height } = Dimensions.get('window');
+const baseWidth = 411; // Pixel 4 XL baseline
+const scale = width / baseWidth;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -258,31 +262,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#212121',
   },
   button: {
-    margin: 10,
-    padding: 10,
+    margin: 10 * scale,
+    padding: 10 * scale,
     width: '76%',
-    borderRadius: 8,
+    borderRadius: 8 * scale,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 35,
+    marginTop: 35 * scale,
   },
   beginButton: {
     backgroundColor: '#74aff7',
-    marginTop: 25,
+    marginTop: 25 * scale,
   },
   stopButton: {
     backgroundColor: '#A7C8E7',
-    marginTop: 15,
+    marginTop: 15 * scale,
   },
   colorBlack: {
     textAlign: 'center',
     color: '#1A1F26',
-    fontSize: 18,
+    fontSize: 18 * scale,
   },
   colorBlack2: {
     textAlign: 'center',
     color: '#1A1F26',
-    fontSize: 18,
+    fontSize: 18 * scale,
   },
   bold: {
     fontWeight: 'bold',

@@ -6,6 +6,7 @@ import {
   Modal,
   StyleSheet,
   ScrollView,
+  Dimensions
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
@@ -288,7 +289,7 @@ const ChimeSelector2 = () => {
             <View style={styles.volumeContainer}>
               <Icon
                 name="volume-low-outline"
-                size={24}
+                size={iconSize}
                 color="#ffffff"
                 style={styles.icon}
               />
@@ -333,24 +334,29 @@ const ChimeSelector2 = () => {
   );
 };
 
+const { width } = Dimensions.get('window');
+const baseWidth = 411; // Pixel 4 XL baseline
+const scale = width / baseWidth;
+const iconSize = 24 * scale; // example base size 24
+
 const styles = StyleSheet.create({
   container: {
     marginTop: '2%',
-    marginVertical: 1,
+    marginVertical: 1 * scale,
   },
   button: {
     backgroundColor: '#1A1F26',
-    padding: 12,
-    borderRadius: 8,
+    padding: 12 * scale,
+    borderRadius: 8 * scale,
     borderColor: '#74aff7',
     borderWidth: 0.4,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 14 * scale,
   },
   labelText: {
-    color: '#74aff7', // Different color for the label
+    color: '#74aff7',
   },
   modalOverlay: {
     flex: 1,
@@ -360,39 +366,39 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#212121',
-    padding: 20,
-    borderRadius: 10,
+    padding: 20 * scale,
+    borderRadius: 10 * scale,
     width: '90%',
     maxHeight: '80%',
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 22 * scale,
     fontWeight: 'bold',
     color: '#74aff7',
-    marginBottom: 20,
+    marginBottom: 20 * scale,
   },
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 20,
+    marginBottom: 20 * scale,
   },
   categoryButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 8 * scale,
+    paddingHorizontal: 12 * scale,
     backgroundColor: '#1A1A1A',
     borderColor: '#74aff7',
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 5 * scale,
   },
   categoryButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 14 * scale,
   },
   optionsContainer: {
-    paddingBottom: 30,
+    paddingBottom: 30 * scale,
   },
   option: {
-    paddingVertical: 20,
+    paddingVertical: 20 * scale,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
@@ -401,11 +407,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circle: {
-    width: 15,
-    height: 15,
-    borderRadius: 10,
+    width: 15 * scale,
+    height: 15 * scale,
+    borderRadius: 10 * scale,
     backgroundColor: 'transparent',
-    marginRight: 10,
+    marginRight: 10 * scale,
     borderWidth: 1,
     borderColor: '#74aff7',
   },
@@ -414,55 +420,55 @@ const styles = StyleSheet.create({
   },
   optionText: {
     color: '#fff',
-    fontSize: 17,
+    fontSize: 17 * scale,
   },
   sliderLabel: {
     color: '#74aff7',
-    marginTop: 15,
-    marginBottom: 5,
-    fontSize: 14,
+    marginTop: 15 * scale,
+    marginBottom: 5 * scale,
+    fontSize: 14 * scale,
   },
   slider: {
     width: '100%',
-    height: 30,
+    height: 30 * scale,
   },
   buttonRowContainer: {
-    flexDirection: 'row', // Arrange buttons side by side
-    justifyContent: 'space-between', // Add space between buttons
-    marginTop: 20, // Optional: Adjust top margin to fit your design
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20 * scale,
   },
   testButton: {
-    padding: 10,
+    padding: 10 * scale,
     backgroundColor: '#74aff7',
-    borderRadius: 8,
-    flex: 1, // Make the buttons take equal width
-    marginRight: 10, // Optional: Add space between buttons
+    borderRadius: 8 * scale,
+    flex: 1,
+    marginRight: 10 * scale,
   },
   chooseButton: {
-    padding: 10,
+    padding: 10 * scale,
     backgroundColor: '#74aff7',
-    borderRadius: 8,
-    flex: 1, // Make the buttons take equal width
+    borderRadius: 8 * scale,
+    flex: 1,
   },
   testButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 16 * scale,
     textAlign: 'center',
   },
   chooseButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 16 * scale,
     textAlign: 'center',
   },
   closeButton: {
-    marginTop: 20,
-    padding: 12,
+    marginTop: 20 * scale,
+    padding: 12 * scale,
     backgroundColor: '#74aff7',
-    borderRadius: 8,
+    borderRadius: 8 * scale,
   },
   closeButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 16 * scale,
   },
   volumeContainer: {
     flexDirection: 'row',

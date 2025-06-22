@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import * as Animatable from 'react-native-animatable';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Dimensions } from 'react-native';
 
 const sentences = [
   'Be the change that you wish to see in the world',
@@ -82,14 +82,17 @@ const Quotes = () => {
   );
 };
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   instructions: {
-    height: 40,
+    height: height * 0.06,          // ~40px on typical screens
     textAlign: 'center',
     color: '#ededed',
-    marginBottom: 15,
-    marginTop: 10,
-    paddingHorizontal: 10,
+    marginBottom: height * 0.010,   // ~15px
+    marginTop: height * 0.015,      // ~10px
+    paddingHorizontal: width * 0.03, // ~10px
+    fontSize: width * 0.035,        // added for better scaling text size
   },
 });
 

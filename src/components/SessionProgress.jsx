@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View, Dimensions } from 'react-native';
 import ProgressCircle from 'react-native-progress-circle';
 
 const SessionProgress = ({
@@ -63,7 +63,7 @@ const SessionProgress = ({
     <View style={styles.progressCircleWrapper}>
       <ProgressCircle
         percent={animatedProgress}
-        radius={85}
+        radius={circleRadius}
         borderWidth={7}
         color={animatedProgress > 0 ? '#74aff7' : 'transparent'}
         shadowColor="#1A1A1A"
@@ -80,6 +80,10 @@ const SessionProgress = ({
   );
 };
 
+const { width, height } = Dimensions.get('window');
+
+const circleRadius = width * 0.21; // ~85 on 340px screen width
+
 const styles = StyleSheet.create({
   circleContent: {
     alignItems: 'center',
@@ -87,11 +91,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   countdown: {
-    fontSize: 29,
+    fontSize: width * 0.07, // ~29 on average screen
     color: '#ededed',
   },
   duration: {
-    fontSize: 29,
+    fontSize: width * 0.07,
     color: '#ededed',
   },
   progressCircleWrapper: {

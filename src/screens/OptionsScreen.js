@@ -7,6 +7,7 @@ import {
   LayoutAnimation,
   UIManager,
   Platform,
+  Dimensions
 } from 'react-native';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import ChimeSelector2 from '../components/ChimeSelector2';
@@ -175,70 +176,68 @@ function OptionsScreen() {
   );
 }
 
+const { width } = Dimensions.get('window');
+const baseWidth = 411; // Pixel 4 XL baseline
+const scale = width / baseWidth;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#212121',
-    padding: 20,
+    padding: 20 * scale,
   },
   headerText: {
-    fontSize: 27,
+    fontSize: 27 * scale,
     color: '#74aff7',
-    paddingTop: '4%',
-    paddingBottom: 20,
+    paddingTop: '4%',      // already relative — leave as-is
+    paddingBottom: 20 * scale,
     textAlign: 'center',
   },
   optionContainer: {
     width: '100%',
-    marginBottom: 20,
-    padding: 15,
+    marginBottom: 20 * scale,
+    padding: 15 * scale,
     borderWidth: 0.8,
     borderColor: '#74aff7',
-    borderRadius: 10,
+    borderRadius: 10 * scale,
     backgroundColor: '#1A1F26',
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.2,
-    // shadowRadius: 4,
-    // elevation: 5,
   },
   Titleoptions: {
-    fontSize: 18,
+    fontSize: 18 * scale,
     color: '#fff',
   },
   options: {
-    fontSize: 16,
+    fontSize: 16 * scale,
     color: '#fff',
-    marginBottom: 10,
+    marginBottom: 10 * scale,
   },
   rowContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // marginBottom: 10,
   },
   toggleLabel: {
-    fontSize: 14,
+    fontSize: 14 * scale,
     color: '#74aff7',
-    marginLeft: 10,
+    marginLeft: 10 * scale,
   },
   innerContainer: {
-    marginTop: 10,
-    padding: 10,
+    marginTop: 10 * scale,
+    padding: 10 * scale,
     borderColor: '#74aff7',
-    borderRadius: 8,
+    borderRadius: 8 * scale,
     backgroundColor: '#272B30',
   },
   bellOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 10 * scale,
   },
   switchText: {
     color: '#ffffff',
-    marginLeft: 10,
-    fontSize: 14,
+    marginLeft: 10 * scale,
+    fontSize: 14 * scale,
   },
   switchTextActive: {
     color: '#74aff7',

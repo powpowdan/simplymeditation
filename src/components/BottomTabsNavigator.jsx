@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {StyleSheet, Animated, Pressable} from 'react-native';
+import {StyleSheet, Animated, Pressable, Dimensions} from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import OptionsScreen from '../screens/OptionsScreen';
 import StatsScreen from '../screens/StatsScreen';
@@ -35,7 +35,7 @@ export default function BottomTabsNavigator() {
 
           return (
             <Animated.View style={{transform: [{scale}]}}>
-              <Icon name={iconName} size={size} color={color} />
+              <Icon name={iconName} size={size*scale} color={color} />
             </Animated.View>
           );
         },
@@ -53,10 +53,14 @@ export default function BottomTabsNavigator() {
   );
 }
 
+const { width } = Dimensions.get('window');
+const baseWidth = 411; // Pixel 4 XL baseline
+const scale = width / baseWidth;
+
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: '#1A1F26',
-    height: '7%',
+    height: 55 * scale, // scaled fixed height instead of '7%'
   },
   activeTintColor: {
     color: '#74aff7',

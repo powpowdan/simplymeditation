@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Button, Alert, StyleSheet} from 'react-native';
+import {View, Text, Button, Alert, StyleSheet, Dimensions} from 'react-native';
 import {useSessionContext} from '../context/SessionContext';
 
 function StatsScreen() {
@@ -71,40 +71,43 @@ function StatsScreen() {
   );
 }
 
+const { width } = Dimensions.get('window');
+const baseWidth = 411; // Pixel 4 XL baseline
+const scale = width / baseWidth;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#212121',
-    padding: 10,
+    padding: 10 * scale,
   },
   headerText: {
-    fontSize: 24,
+    fontSize: 24 * scale,
     color: '#74aff7',
-    paddingTop: 50,
-    paddingBottom: 10,
+    paddingTop: 50 * scale,
+    paddingBottom: 10 * scale,
     textAlign: 'center',
   },
   statText: {
-    marginTop: 10,
+    marginTop: 10 * scale,
   },
   options: {
-    fontSize: 15,
-    paddingTop: 20,
-    marginBottom: 10,
+    fontSize: 15 * scale,
+    paddingTop: 20 * scale,
+    marginBottom: 10 * scale,
   },
   bellOptions: {
-    paddingTop: 20,
-    marginBottom: 10,
+    paddingTop: 20 * scale,
+    marginBottom: 10 * scale,
   },
   bellContainer: {
-    marginTop: 20,
+    marginTop: 20 * scale,
   },
   rowContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 10 * scale,
   },
   bellOption: {
     flexDirection: 'row',
@@ -112,10 +115,10 @@ const styles = StyleSheet.create({
   },
   switchText: {
     color: '#ffffff',
-    marginLeft: 10,
+    marginLeft: 10 * scale,
   },
   resetButtonContainer: {
-    marginTop: 40,
+    marginTop: 40 * scale,
   },
 });
 

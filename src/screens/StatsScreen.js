@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   statText: {
+     color: '#ffffff',
     marginTop: 10 * scale,
   },
   options: {

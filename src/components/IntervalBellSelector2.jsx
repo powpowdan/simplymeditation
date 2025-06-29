@@ -26,108 +26,79 @@ const IntervalBellSelector = () => {
 
   const [soundInstance, setSoundInstance] = useState(null);
 
-  const availableChimes = {
+   const availableChimes = {
     Nature: [
-      {label: 'Winter gust', value: 'audio_file49.mp3'},
-      {label: 'Ocean wave slow', value: 'audio_file48.mp3'},
       {label: 'Ocean wave fast', value: 'audio_file46.mp3'},
-      {label: 'Rainfall', value: 'audio_file47.mp3'},
       {label: 'Owl', value: 'audio_file45.mp3'},
+      {label: 'Rainfall', value: 'audio_file47.mp3'},
       {label: 'Thunder', value: 'audio_file44.mp3'},
-      {label: 'palceholder1', value: 'audio_file412313.mp3'},
-      {label: 'palceholder12', value: 'audio_file41235.mp3'},
-      {label: 'palceholder13', value: 'audio_file4123134.mp3'},
+      {label: 'Winter gust', value: 'audio_file49.mp3'}
     ],
     Special: [
-      {label: 'Air Woosh', value: 'audio_file43.mp3'},
-      {label: 'Fading shimmer', value: 'audio_file39.mp3'},
+      {label: 'Air Woosh', value: 'audio_file43.mp3'}, 
       {label: 'Deep breath', value: 'audio_file32.mp3'},
-      {label: 'Quick shimmer', value: 'audio_file37.mp3'},
-      {label: 'Harp', value: 'audio_file29.mp3'},
-      {label: 'Cave notes', value: 'audio_file28.mp3'}, //delete
-      {label: 'Reverse gong', value: 'audio_file23.mp3'}, //delete
-      {label: '3 tech notes', value: 'audio_file22.mp3'}, //delete
-      {label: 'Gong shimmer bell', value: 'audio_file16.mp3'},
+      {label: 'Gong shimmer', value: 'audio_file16.mp3'},
+      {label: 'Harp', value: 'audio_file29.mp3'}, 
       {label: 'Shimmering', value: 'audio_file3.mp3'},
+      {label: 'Quick shimmer', value: 'audio_file37.mp3'}, 
     ],
     Instrument: [
-      {label: 'Gong', value: 'audio_file31.mp3'},
-      {label: 'Gong 2', value: 'audio_file24.mp3'},
-      {label: 'Gong 3', value: 'audio_file21.mp3'},
-      {label: 'Gong 4', value: 'audio_file6.mp3'},
-      {label: 'Gong - short', value: 'audio_file18.mp3'},
-      {label: 'Gong - long', value: 'audio_file41.mp3'},
-      {label: 'Gong - light', value: 'audio_file15.mp3'},
-      {label: 'Gong - light 2', value: 'audio_file14.mp3'},
-      {label: 'Gong - shallow', value: 'audio_file25.mp3'},
-      {label: 'Gong - Intense', value: 'audio_file17.mp3'},
-      {label: 'Gong - Reverberate', value: 'audio_file13.mp3'},
-      {label: 'Gong - long start', value: 'audio_file2.mp3'}, //better for chime
-      {label: 'Classic start', value: 'audio_file.mp3'}, //classic start
-
-      {label: 'Deep drum', value: 'audio_file30.mp3'},
-      {label: 'Flute - long', value: 'audio_file38.mp3'},
+      {label: 'Classic start', value: 'audio_file.mp3'},
+      {label: 'Bell', value: 'audio_file7.mp3'}, 
+      {label: 'Bell - church', value: 'audio_file27.mp3'},
+      {label: 'Bell - long', value: 'audio_file36.mp3'},
+      {label: 'Bell - quick', value: 'audio_file26.mp3'}, 
       {label: 'Chime', value: 'audio_file40.mp3'},
       {label: 'Chime 2', value: 'audio_file10.mp3'},
-      {label: 'Chime - very long', value: 'audio_file19.mp3'}, //better for chime
-      {label: 'Chime - sharp', value: 'audio_file33.mp3'},
-      {label: 'Chime - short', value: 'audio_file35.mp3'},
-      {label: 'Chimes ringing - short', value: 'audio_file34.mp3'},
-      {label: 'Bell - short', value: 'audio_file7.mp3'},
-      {label: 'Bell - long 2', value: 'audio_file36.mp3'},
-      {label: 'Bell - Church', value: 'audio_file27.mp3'},
-      {label: 'Bell - Quick', value: 'audio_file26.mp3'},
-    ],
+      {label: 'Chime - sharp', value: 'audio_file33.mp3'}, 
+      {label: 'Deep drum', value: 'audio_file30.mp3'},
+      {label: 'Flute', value: 'audio_file38.mp3'},
+      {label: 'Tiny bells', value: 'audio_file34.mp3'},
+      {label: 'Gong', value: 'audio_file24.mp3'},
+      {label: 'Gong 2', value: 'audio_file6.mp3'},
+      {label: 'Gong - intense', value: 'audio_file17.mp3'},
+      {label: 'Gong - light', value: 'audio_file14.mp3'},
+      {label: 'Gong - long', value: 'audio_file41.mp3'},
+      {label: 'Gong - Thai temple', value: 'audio_file2.mp3'},
+      {label: 'Gong - reverberate', value: 'audio_file13.mp3'},
+      {label: 'Gong - shallow', value: 'audio_file25.mp3'},
+      {label: 'Gong - short', value: 'audio_file18.mp3'}
+],
     All: [
-      {label: 'Deep drum', value: 'audio_file30.mp3'},
-      {label: 'Flute - long', value: 'audio_file38.mp3'},
+      {label: 'Classic start', value: 'audio_file.mp3'},
+      {label: 'Air Woosh', value: 'audio_file43.mp3'},
+      {label: 'Bell - Church', value: 'audio_file27.mp3'},
+      {label: 'Bell - long 2', value: 'audio_file36.mp3'},
+      {label: 'Bell - Quick', value: 'audio_file26.mp3'},
+      {label: 'Bell - short', value: 'audio_file7.mp3'},
       {label: 'Chime', value: 'audio_file40.mp3'},
       {label: 'Chime 2', value: 'audio_file10.mp3'},
-      {label: 'Chime - very long', value: 'audio_file19.mp3'}, //better for chime
       {label: 'Chime - sharp', value: 'audio_file33.mp3'},
-      {label: 'Chime - short', value: 'audio_file35.mp3'},
-      {label: 'Chimes ringing - short', value: 'audio_file34.mp3'},
-      {label: 'Bell - short', value: 'audio_file7.mp3'},
-      {label: 'Bell - long 2', value: 'audio_file36.mp3'},
-      {label: 'Bell - Church', value: 'audio_file27.mp3'},
-      {label: 'Bell - Quick', value: 'audio_file26.mp3'},
-
-      {label: 'Winter gust', value: 'audio_file49.mp3'},
-      {label: 'Ocean wave slow', value: 'audio_file48.mp3'},
-      {label: 'Ocean wave fast', value: 'audio_file46.mp3'},
-      {label: 'Rainfall', value: 'audio_file47.mp3'},
-      {label: 'Owl', value: 'audio_file45.mp3'},
-      {label: 'Thunder', value: 'audio_file44.mp3'},
-
-      {label: 'palceholder1', value: 'audio_file412313.mp3'},
-      {label: 'palceholder12', value: 'audio_file41235.mp3'},
-      {label: 'palceholder13', value: 'audio_file4123134.mp3'},
-
+      {label: 'Chimes ringing - short', value: 'audio_file34.mp3'}, 
+      {label: 'Deep breath', value: 'audio_file32.mp3'},
+      {label: 'Deep drum', value: 'audio_file30.mp3'},
+      {label: 'Flute - long', value: 'audio_file38.mp3'},
       {label: 'Gong', value: 'audio_file31.mp3'},
       {label: 'Gong 2', value: 'audio_file24.mp3'},
-      {label: 'Gong 3', value: 'audio_file21.mp3'},
       {label: 'Gong 4', value: 'audio_file6.mp3'},
-      {label: 'Gong - short', value: 'audio_file18.mp3'},
-      {label: 'Gong - long', value: 'audio_file41.mp3'},
+      {label: 'Gong - Intense', value: 'audio_file17.mp3'},
       {label: 'Gong - light', value: 'audio_file15.mp3'},
       {label: 'Gong - light 2', value: 'audio_file14.mp3'},
-      {label: 'Gong - shallow', value: 'audio_file25.mp3'},
-      {label: 'Gong - Intense', value: 'audio_file17.mp3'},
+      {label: 'Gong - long', value: 'audio_file41.mp3'},
+      {label: 'Gong - long start', value: 'audio_file2.mp3'},
       {label: 'Gong - Reverberate', value: 'audio_file13.mp3'},
-      {label: 'Gong - long start', value: 'audio_file2.mp3'}, //better for chime
-      {label: 'Classic start', value: 'audio_file.mp3'}, //classic start
-
-      {label: 'Air Woosh', value: 'audio_file43.mp3'},
-      {label: 'Fading shimmer', value: 'audio_file39.mp3'},
-      {label: 'Deep breath', value: 'audio_file32.mp3'},
-      {label: 'Quick shimmer', value: 'audio_file37.mp3'},
-      {label: 'Harp', value: 'audio_file29.mp3'},
-      {label: 'Cave notes', value: 'audio_file28.mp3'}, //delete
-      {label: 'Reverse gong', value: 'audio_file23.mp3'}, //delete
-      {label: '3 tech notes', value: 'audio_file22.mp3'}, //delete
+      {label: 'Gong - shallow', value: 'audio_file25.mp3'},
+      {label: 'Gong - short', value: 'audio_file18.mp3'},
       {label: 'Gong shimmer bell', value: 'audio_file16.mp3'},
+      {label: 'Harp', value: 'audio_file29.mp3'},
+      {label: 'Ocean wave fast', value: 'audio_file46.mp3'}, 
+      {label: 'Owl', value: 'audio_file45.mp3'}, 
+      {label: 'Quick shimmer', value: 'audio_file37.mp3'},
+      {label: 'Rainfall', value: 'audio_file47.mp3'},
       {label: 'Shimmering', value: 'audio_file3.mp3'},
-    ],
+      {label: 'Thunder', value: 'audio_file44.mp3'},
+      {label: 'Winter gust', value: 'audio_file49.mp3'}
+],
   };
 
   const openModal = () => {
@@ -195,14 +166,14 @@ const IntervalBellSelector = () => {
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
 
-  useEffect(() => {
-    if (savedChimeIsou) {
-      const savedChimeData = JSON.parse(savedChimeIsou);
-      setSelectedChimeNameIsou(savedChimeData?.chime?.label || null);
-      setselectedSongPathIsou(savedChimeData?.chime?.value || null);
-      setVolumeIsou(savedChimeData?.volumeIsou || 0.8);
-    }
-  }, [savedChimeIsou]);
+useEffect(() => {
+  if (savedChimeIsou) {
+    const savedChimeData = JSON.parse(savedChimeIsou);
+    setSelectedChimeNameIsou(savedChimeData?.chime?.label || null);
+    setselectedSongPathIsou(savedChimeData?.chime?.value || null);
+    setVolumeIsou(savedChimeData?.volumeIsou || 0.8);
+  } 
+}, [savedChimeIsou]);
 
   return (
     <View style={styles.container}>
@@ -358,7 +329,7 @@ const styles = StyleSheet.create({
     padding: 20 * scale,
     borderRadius: 10 * scale,
     width: '90%',
-    maxHeight: '80%',
+    height: '80%',
   },
   modalTitle: {
     fontSize: 22 * scale,

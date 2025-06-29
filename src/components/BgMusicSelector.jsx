@@ -34,10 +34,7 @@ const BgMusicSelector = () => {
 
   const availableChimes = {
     Nature: [
-      {
-        label: 'Relaxing meditation music',
-        value: 'relaxingmeditationmusic225173.mp3',
-      },
+   
       {
         label: 'Calm river flowing',
         value: 'calmzenriverflowing228223.mp3',
@@ -48,83 +45,67 @@ const BgMusicSelector = () => {
         parent: 'nature',
       },
       {
-        label: 'Nature forest stream birds',
+        label: 'Forest stream birds',
         value: 'natureforestbirds.mp3',
         parent: 'nature',
       },
-      {
-        label: 'Placeholder1',
-        value: '1',
+       {
+        label: 'Rain',
+        value: 'rains.mp3',
+        parent: 'nature',
       },
-      {
-        label: 'Placeholder2',
-        value: '2',
+       {
+        label: 'Storm wind chimes',
+        value: 'stormwindchimes.mp3',
+        parent: 'nature',
       },
-      {
-        label: 'Placeholder3',
-        value: '3',
+       {
+        label: 'Ocean waves',
+        value: 'oceanwaves.mp3',
+        parent: 'nature',
       },
-      {
-        label: 'Placeholder4',
-        value: '4',
+       {
+        label: 'Mountain path',
+        value: 'forest.mp3',
+        parent: 'nature',
       },
-      {
-        label: 'Placeholder5',
-        value: '5',
+        {
+        label: 'Night ambience',
+        value: 'nightambience.mp3',
+        parent: 'nature',
       },
+    
     ],
     Mood: [
       {
         label: 'Meditation hall at night',
         value: 'meditationhallatnight24956.mp3',
         parent: 'other',
-      },
-      {
-        label: 'Peaceful music meditation',
-        value: 'meditationrelax231757.mp3',
-        parent: 'other',
-      },
+      }, 
       {
         label: 'Peaceful music meditation',
         value: 'meditationrelax2317573.mp3',
         parent: 'instrument',
       },
+       {
+        label: 'Uplifting tones',
+        value: 'uplifting.mp3',
+      },
       {
         label: 'Mindfulness meditation music',
         value: 'mindful.mp3',
         parent: 'other',
-      },
-      {
-        label: 'Placeholder1',
-        value: '1',
-      },
-      {
-        label: 'Placeholder2',
-        value: '2',
-      },
-      {
-        label: 'Placeholder3',
-        value: '3',
-      },
-      {
-        label: 'Placeholder4',
-        value: '4',
-      },
-      {
-        label: 'Placeholder5',
-        value: '5',
-      },
-      {
-        label: 'DEBUG HERE',
-        value: 'audio_file39.mp3',
-        parent: 'instrument',
+      }, 
+         {
+        label: 'Relaxing meditation music',
+        value: 'relaxingmeditationmusic225173.mp3',
       },
     ],
     Frequency: [
       {
         label: '528 hz ambient music',
         value: 'hz528frequencyambientmusic',
-        parent: 'hertz',
+        parent: 'Frequency',
       },
       {
         label: '417 hz OM Chanting',
@@ -133,43 +114,19 @@ const BgMusicSelector = () => {
       {
         label: '432 hz alpha waves',
         value: 'hz432alphawaveshealtheholebodyspirit216473.mp3',
-        parent: 'hertz',
+        parent: 'Frequency',
       },
       {
         label: 'Tibetan singing bowls',
         value: 'tibetansingingbowlsbodydamagerepairhealbodysoul161797',
-        parent: 'instrument',
-      },
-      {
-        label: 'DEBUG HERE',
-        value: 'audio_file39.mp3',
-        parent: 'instrument',
+        parent: 'Frequency',
       },
       {
         label: 'Brown noise',
         value: 'brownnoise',
-        parent: 'hertz',
+        parent: 'Frequency',
       },
-      {
-        label: 'Placeholder1',
-        value: '1',
-      },
-      {
-        label: 'Placeholder2',
-        value: '2',
-      },
-      {
-        label: 'Placeholder3',
-        value: '3',
-      },
-      {
-        label: 'Placeholder4',
-        value: '4',
-      },
-      {
-        label: 'Placeholder5',
-        value: '5',
-      },
+      
     ],
     All: [
       {
@@ -187,7 +144,7 @@ const BgMusicSelector = () => {
       {
         label: 'Brown noise',
         value: 'brownnoise.mp3',
-        parent: 'hertz',
+        parent: 'Frequency',
       },
       {
         label: 'Calm river flowing',
@@ -203,15 +160,20 @@ const BgMusicSelector = () => {
         value: 'natureforestbirds.mp3',
         parent: 'nature',
       },
+       {
+        label: 'Peaceful music meditation',
+        value: 'meditationrelax2317573.mp3',
+        parent: 'instrument',
+      },
       {
         label: '528 hz ambient music',
         value: 'hz528frequencyambientmusic',
-        parent: 'hertz',
+        parent: 'Frequency',
       },
       {
         label: '432 hz alpha waves',
         value: 'hz432alphawaveshealtheholebodyspirit216473.mp3',
-        parent: 'hertz',
+        parent: 'Frequency',
       },
       {
         label: 'Tibetan singing bowls',
@@ -222,12 +184,7 @@ const BgMusicSelector = () => {
         label: 'Meditation hall at night',
         value: 'meditationhallatnight24956.mp3',
         parent: 'other',
-      },
-      {
-        label: 'Peaceful music meditation',
-        value: 'meditationrelax231757.mp3',
-        parent: 'other',
-      },
+      }, 
       {
         label: 'Mindfulness meditation music',
         value: 'mindful.mp3',
@@ -367,9 +324,9 @@ const BgMusicSelector = () => {
                 <Text style={styles.categoryButtonText}>Nature</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={getCategoryButtonStyle('TimeOfDay')}
-                onPress={() => handleCategoryChange('TimeOfDay')}>
-                <Text style={styles.categoryButtonText}>Hertz</Text>
+                style={getCategoryButtonStyle('Frequency')}
+                onPress={() => handleCategoryChange('Frequency')}>
+                <Text style={styles.categoryButtonText}>Frequency</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={getCategoryButtonStyle('Mood')}
@@ -485,7 +442,7 @@ const styles = StyleSheet.create({
     padding: 20 * scale,
     borderRadius: 10 * scale,
     width: '90%',
-    maxHeight: '80%',
+    height: '80%',
   },
   modalTitle: {
     fontSize: 22 * scale,

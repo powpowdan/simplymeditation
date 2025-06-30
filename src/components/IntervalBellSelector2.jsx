@@ -29,6 +29,7 @@ const IntervalBellSelector = () => {
     setVolumeIsou,
   } = useMusicSwitchContext();
 
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [soundInstance, setSoundInstance] = useState(null);
 
   // Preview states
@@ -123,6 +124,7 @@ const IntervalBellSelector = () => {
     setSelectedChimeNameIsou(previewChimeName);
     setSavedChimeIsouPath(previewChimePath);
     setVolumeIsou(previewVolume);
+    setIsMusicPlaying(false);
     setModalVisible(false);
   };
 
@@ -132,6 +134,7 @@ const IntervalBellSelector = () => {
         soundInstance.release();
       }); 
     }
+    setIsMusicPlaying(false);
     setModalVisible(false);
   };
 
@@ -159,22 +162,39 @@ const IntervalBellSelector = () => {
   };
 
   const playTestSound = () => {
-    if (!previewChimePath) return;
-    if (soundInstance) {
-      soundInstance.stop(() => {
-        soundInstance.release();
-      });
-    }
-    const sound = new Sound(previewChimePath, null, error => {
-      if (error) {
-        console.error('Error loading sound:', error);
-        return;
-      }
-      sound.setVolume(previewVolume);
-      sound.play(() => sound.release());
-      setSoundInstance(sound);
+  if (!previewChimePath) return;
+
+  // Stop and release any current sound before playing a new one
+  if (soundInstance) {
+    soundInstance.stop(() => {
+      soundInstance.release();
+      setSoundInstance(null); // Important: remove the reference
+      playNewSound();         // Then play the new one
     });
-  };
+  } else {
+    playNewSound();
+  }
+};
+
+const playNewSound = () => {
+  const sound = new Sound(previewChimePath, null, error => {
+    if (error) {
+      console.error('Error loading sound:', error);
+      return;
+    }
+
+    sound.setVolume(previewVolume);
+    setSoundInstance(sound);
+    setIsMusicPlaying(true); // Disable slider
+
+    sound.play(success => {
+      sound.release();
+      setIsMusicPlaying(false); // Re-enable slider after done
+      setSoundInstance(null);
+    });
+  });
+};
+
 
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
@@ -277,6 +297,7 @@ const IntervalBellSelector = () => {
                     minimumTrackTintColor="#74aff7"
                     maximumTrackTintColor="#ffffff"
                     thumbTintColor="#74aff7"
+                    disabled={isMusicPlaying}
                   />
                   <Icon
                     name="volume-high-outline"

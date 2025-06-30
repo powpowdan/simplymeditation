@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const ChimeSelector2 = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
-
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [selectedSongPath, setselectedSongPath] = useState(null); //value path to music
   const {
     savedChime,
@@ -124,6 +124,7 @@ const ChimeSelector2 = () => {
     setselectedSongPath(previewChimePath);
     setVolume(previewVolume);
     setSelectedChimePath(previewChimePath);
+    setIsMusicPlaying(false);
     setModalVisible(false);
   };
 
@@ -133,6 +134,7 @@ const ChimeSelector2 = () => {
         soundInstance.release();
       });
     }
+    setIsMusicPlaying(false);
     setModalVisible(false);
   };
 
@@ -159,24 +161,43 @@ const ChimeSelector2 = () => {
     return baseStyle;
   };
 
-  const playTestSound = () => {
-    if (!previewChimePath) return;
-    // Check if soundInstance exists and is playing
-    if (soundInstance) {
-      soundInstance.stop(() => {
-        soundInstance.release(); // Release the old sound instance
-      });
-    }
-    const sound = new Sound(previewChimePath, null, error => {
-      if (error) {
-        console.error('Error loading sound:', error);
-        return;
-      }
-      sound.setVolume(previewVolume);
-      sound.play(() => sound.release());
-      setSoundInstance(sound);
+const playTestSound = () => {
+  if (!previewChimePath) return;
+
+  // Stop any currently playing sound first
+  if (soundInstance) {
+    soundInstance.stop(() => {
+      soundInstance.release();
+      setSoundInstance(null);
+
+      // Now start the new one
+      startNewPreview();
     });
-  };
+  } else {
+    startNewPreview();
+  }
+};
+
+const startNewPreview = () => {
+  const sound = new Sound(previewChimePath, null, error => {
+    if (error) {
+      console.error('Error loading sound:', error);
+      return;
+    }
+
+    sound.setVolume(previewVolume);
+    setSoundInstance(sound);
+    setIsMusicPlaying(true);
+
+    sound.play(success => {
+      sound.release();
+      setSoundInstance(null);
+      setIsMusicPlaying(false);
+    });
+  });
+};
+
+
 
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
@@ -284,6 +305,7 @@ const ChimeSelector2 = () => {
                     minimumTrackTintColor="#74aff7"
                     maximumTrackTintColor="#ffffff"
                     thumbTintColor="#74aff7"
+                    disabled={isMusicPlaying}
                   />
                   <Icon
                     name="volume-high-outline"

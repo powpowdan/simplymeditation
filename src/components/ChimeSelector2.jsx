@@ -117,7 +117,7 @@ const ChimeSelector2 = () => {
     setSavedChime(
       JSON.stringify({
         chime: {label: previewChimeName, value: previewChimePath},
-        volume,
+        volume: previewVolume,
       }),
     );
     setSelectedChimeName(previewChimeName);
@@ -161,24 +161,22 @@ const ChimeSelector2 = () => {
     return baseStyle;
   };
 
-const playTestSound = () => {
+   const playTestSound = () => {
   if (!previewChimePath) return;
 
-  // Stop any currently playing sound first
+  // Stop and release any current sound before playing a new one
   if (soundInstance) {
     soundInstance.stop(() => {
       soundInstance.release();
-      setSoundInstance(null);
-
-      // Now start the new one
-      startNewPreview();
+      setSoundInstance(null); // Important: remove the reference
+      playNewSound();         // Then play the new one
     });
   } else {
-    startNewPreview();
+    playNewSound();
   }
 };
 
-const startNewPreview = () => {
+const playNewSound = () => {
   const sound = new Sound(previewChimePath, null, error => {
     if (error) {
       console.error('Error loading sound:', error);
@@ -187,15 +185,18 @@ const startNewPreview = () => {
 
     sound.setVolume(previewVolume);
     setSoundInstance(sound);
-    setIsMusicPlaying(true);
+    setIsMusicPlaying(true); // Disable slider
 
     sound.play(success => {
       sound.release();
+      setIsMusicPlaying(false); // Re-enable slider after done
       setSoundInstance(null);
-      setIsMusicPlaying(false);
     });
   });
 };
+
+ 
+
 
 
 
@@ -287,7 +288,7 @@ const startNewPreview = () => {
 
                 {/* Volume Slider */}
                 <Text style={styles.sliderLabel}>
-                  Volume: {Math.round(volume * 100)}%
+                  Volume: {Math.round(previewVolume  * 100)}%
                 </Text>
                 <View style={styles.volumeContainer}>
                   <Icon

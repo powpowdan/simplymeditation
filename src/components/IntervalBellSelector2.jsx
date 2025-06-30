@@ -22,13 +22,13 @@ const IntervalBellSelector = () => {
     savedChimeIsou,
     setSavedChimeIsou,
     selectedChimeNameIsou,
-    setSelectedChimeNameIsou, 
-    selectedSongPathIsou, 
+    setSelectedChimeNameIsou,  
     setSavedChimeIsouPath,
     volumeIsou,
     setVolumeIsou,
   } = useMusicSwitchContext();
 
+  const [selectedSongPathIsou, setSelectedSongPathIsou] = useState(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [soundInstance, setSoundInstance] = useState(null);
 
@@ -122,6 +122,7 @@ const IntervalBellSelector = () => {
       }),
     );
     setSelectedChimeNameIsou(previewChimeName);
+    setSelectedSongPathIsou(previewChimePath);
     setSavedChimeIsouPath(previewChimePath);
     setVolumeIsou(previewVolume);
     setIsMusicPlaying(false);
@@ -203,6 +204,7 @@ const playNewSound = () => {
     if (savedChimeIsou) {
       const savedChimeData = JSON.parse(savedChimeIsou);
       setSelectedChimeNameIsou(savedChimeData?.chime?.label || null);
+      setSelectedSongPathIsou(savedChimeData?.chime?.value || null);
       setSavedChimeIsouPath(savedChimeData?.chime?.value || null);
       setVolumeIsou(savedChimeData?.volumeIsou || 0.8);
     }
@@ -279,7 +281,7 @@ const playNewSound = () => {
 
                 {/* Volume Slider */}
                 <Text style={styles.sliderLabel}>
-                  Volume: {Math.round(volumeIsou * 100)}%
+                  Volume: {Math.round(previewVolume * 100)}%
                 </Text>
                 <View style={styles.volumeContainer}>
                   <Icon

@@ -31,6 +31,7 @@ const BgMusicSelector = () => {
 
   const [soundInstance, setSoundInstance] = useState(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isPlayingSameSong, setIsPlayingSameSong] = useState(false);
   const [previousSongPathBg, setPreviousSongPathBg] = useState(null);
 
   const [previewChimeNameBg, setPreviewChimeNameBg] = useState(null);
@@ -68,11 +69,11 @@ const BgMusicSelector = () => {
         value: 'oceanwaves.mp3',
         parent: 'nature',
       },
-        {
+      {
         label: 'Waterfall',
         value: 'waterfall.mp3',
         parent: 'nature',
-      },      
+      },
       {
         label: 'Night ambience',
         value: 'nightambience.mp3',
@@ -94,13 +95,13 @@ const BgMusicSelector = () => {
         label: 'Uplifting tones',
         value: 'uplifting.mp3',
         parent: 'Mood',
-      },  
-       {
+      },
+      {
         label: 'Tibetan singing bowls',
         value: 'tibetansingingbowls.mp3',
         parent: 'Mood',
       },
-        {
+      {
         label: 'Om ambient',
         value: 'omambient.mp3',
         parent: 'Mood',
@@ -122,32 +123,52 @@ const BgMusicSelector = () => {
         value: 'hz432.mp3',
         parent: 'Frequency',
       },
-     
+
       {
         label: 'Brown noise',
         value: 'brownnoise.mp3',
         parent: 'Frequency',
       },
     ],
-   All: [
-  { label: '417 hz OM Chanting', value: 'now.mp3', parent: 'Frequency' },
-  { label: '432 hertz - healing', value: 'hz432.mp3', parent: 'Frequency' },
-  { label: '528 hertz - love', value: 'hz528.mp3', parent: 'Frequency' },
-  { label: 'Brown noise', value: 'brownnoise.mp3', parent: 'Frequency' },
-  { label: 'Forest stream birds', value: 'natureforestbirds.mp3', parent: 'Nature' },
-  { label: 'Meditation hall at night', value: 'meditationhallatnight24956.mp3', parent: 'Mood' },
-  { label: 'Night ambience', value: 'nightambience.mp3', parent: 'Nature' },
-  { label: 'Ocean waves', value: 'oceanwaves.mp3', parent: 'Nature' },
-  { label: 'Om ambient', value: 'omambient.mp3',  parent: 'Mood' },
-  { label: 'Peaceful music meditation', value: 'meditationrelax.mp3', parent: 'Mood' },
-  { label: 'Rain', value: 'rains.mp3', parent: 'Nature' },
-  { label: 'Storm wind chimes', value: 'stormwindchimes.mp3', parent: 'Nature' },
-  { label: 'Tibetan singing bowls', value: 'tibetansingingbowls.mp3', parent: 'Mood' },
-  { label: 'Uplifting tones', value: 'uplifting.mp3', parent: 'Mood' },
-  { label: 'Waterfall', value: 'waterfall.mp3', parent: 'Nature' },
-  { label: 'Wind in trees', value: 'windtrees.mp3', parent: 'Nature' },
-  { label: 'Zen river', value: 'zenriver.mp3', parent: 'Nature' },
-],
+    All: [
+      {label: '417 hz OM Chanting', value: 'now.mp3', parent: 'Frequency'},
+      {label: '432 hertz - healing', value: 'hz432.mp3', parent: 'Frequency'},
+      {label: '528 hertz - love', value: 'hz528.mp3', parent: 'Frequency'},
+      {label: 'Brown noise', value: 'brownnoise.mp3', parent: 'Frequency'},
+      {
+        label: 'Forest stream birds',
+        value: 'natureforestbirds.mp3',
+        parent: 'Nature',
+      },
+      {
+        label: 'Meditation hall at night',
+        value: 'meditationhallatnight24956.mp3',
+        parent: 'Mood',
+      },
+      {label: 'Night ambience', value: 'nightambience.mp3', parent: 'Nature'},
+      {label: 'Ocean waves', value: 'oceanwaves.mp3', parent: 'Nature'},
+      {label: 'Om ambient', value: 'omambient.mp3', parent: 'Mood'},
+      {
+        label: 'Peaceful music meditation',
+        value: 'meditationrelax.mp3',
+        parent: 'Mood',
+      },
+      {label: 'Rain', value: 'rains.mp3', parent: 'Nature'},
+      {
+        label: 'Storm wind chimes',
+        value: 'stormwindchimes.mp3',
+        parent: 'Nature',
+      },
+      {
+        label: 'Tibetan singing bowls',
+        value: 'tibetansingingbowls.mp3',
+        parent: 'Mood',
+      },
+      {label: 'Uplifting tones', value: 'uplifting.mp3', parent: 'Mood'},
+      {label: 'Waterfall', value: 'waterfall.mp3', parent: 'Nature'},
+      {label: 'Wind in trees', value: 'windtrees.mp3', parent: 'Nature'},
+      {label: 'Zen river', value: 'zenriver.mp3', parent: 'Nature'},
+    ],
   };
 
   const openModal = () => {
@@ -183,9 +204,16 @@ const BgMusicSelector = () => {
     setModalVisible(false);
   };
 
-  const handleChimeSelection = chime => {
+  const handleChimeSelection = chime => { 
     setPreviewChimePathBg(chime.value);
     setPreviewChimeNameBg(chime.label);
+
+    // If music is playing AND selected chime is same as playing chime
+    if (isMusicPlaying && chime.value === previousSongPathBg) {
+      setIsPlayingSameSong(true);
+    } else {
+      setIsPlayingSameSong(false);
+    }
   };
 
   const handleCategoryChange = category => {
@@ -209,18 +237,20 @@ const BgMusicSelector = () => {
   const playTestSound = () => {
     if (!previewChimePathBg) return;
 
-    if (previewChimePathBg === previousSongPathBg && isMusicPlaying) {
+    if (isMusicPlaying) {
+      // If music is playing, stop it (Cancel)
       if (soundInstance) {
         soundInstance.stop(() => {
           soundInstance.release();
           setIsMusicPlaying(false);
+          setIsPlayingSameSong(false); // or set to false when stopped
         });
       }
     } else {
+      // If music is NOT playing, play the selected song
       if (soundInstance) {
         soundInstance.stop(() => {
           soundInstance.release();
-          setIsMusicPlaying(false);
         });
       }
 
@@ -231,23 +261,36 @@ const BgMusicSelector = () => {
         }
 
         sound.setVolume(previewVolumeBg);
-        sound.play(() => sound.release());
+        sound.play(() => {
+          sound.release();
+          setIsMusicPlaying(false);
+          setIsPlayingSameSong(false);
+        });
+
         setSoundInstance(sound);
         setIsMusicPlaying(true);
+        setIsPlayingSameSong(true); // <-- Always true while playing
         setPreviousSongPathBg(previewChimePathBg);
 
         setTimeout(() => {
           sound.stop(() => {
             sound.release();
             setIsMusicPlaying(false);
+            setIsPlayingSameSong(false);
           });
-        }, 8000);
+        }, 12000);
       });
     }
   };
 
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
+
+  useEffect(() => {
+    if (isMusicPlaying && previewChimePathBg !== previousSongPathBg) {
+      setIsMusicPlaying(false); // Just change the label; don’t stop the sound
+    }
+  }, [previewChimePathBg]);
 
   useEffect(() => {
     if (savedChimeBg) {
@@ -326,7 +369,7 @@ const BgMusicSelector = () => {
                 </ScrollView>
 
                 <Text style={styles.sliderLabel}>
-                  Volume: {Math.round(volumeBg * 100)}%
+                  Volume: {Math.round(previewVolumeBg * 100)}%
                 </Text>
                 <View style={styles.volumeContainer}>
                   <Icon
@@ -344,6 +387,7 @@ const BgMusicSelector = () => {
                     minimumTrackTintColor="#74aff7"
                     maximumTrackTintColor="#ccc"
                     thumbTintColor="#74aff7"
+                    disabled={isMusicPlaying}
                   />
                   <Icon
                     name="volume-high-outline"
@@ -357,7 +401,11 @@ const BgMusicSelector = () => {
                   <TouchableOpacity
                     style={styles.testButton}
                     onPress={playTestSound}>
-                    <Text style={styles.testButtonText}>Test Music</Text>
+                    <Text style={styles.testButtonText}>
+                      {isMusicPlaying && isPlayingSameSong
+                        ? 'Cancel'
+                        : 'Test Music'}
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity

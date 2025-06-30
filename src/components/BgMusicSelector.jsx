@@ -40,12 +40,12 @@ const BgMusicSelector = () => {
   const availableChimes = {
     Nature: [
       {
-        label: 'Calm river flowing',
-        value: 'calmzenriverflowing228223.mp3',
+        label: 'Zen river',
+        value: 'zenriver.mp3',
       },
       {
-        label: 'Gentle wind',
-        value: 'agentlebreezewind414681.mp3',
+        label: 'Wind in trees',
+        value: 'windtrees.mp3',
         parent: 'nature',
       },
       {
@@ -68,11 +68,11 @@ const BgMusicSelector = () => {
         value: 'oceanwaves.mp3',
         parent: 'nature',
       },
-      {
-        label: 'Mountain path',
-        value: 'forest.mp3',
+        {
+        label: 'Waterfall',
+        value: 'waterfall.mp3',
         parent: 'nature',
-      },
+      },      
       {
         label: 'Night ambience',
         value: 'nightambience.mp3',
@@ -83,115 +83,71 @@ const BgMusicSelector = () => {
       {
         label: 'Meditation hall at night',
         value: 'meditationhallatnight24956.mp3',
-        parent: 'other',
+        parent: 'Mood',
       },
       {
         label: 'Peaceful music meditation',
-        value: 'meditationrelax2317573.mp3',
-        parent: 'instrument',
+        value: 'meditationrelax.mp3',
+        parent: 'Mood',
       },
       {
         label: 'Uplifting tones',
         value: 'uplifting.mp3',
+        parent: 'Mood',
+      },  
+       {
+        label: 'Tibetan singing bowls',
+        value: 'tibetansingingbowls.mp3',
+        parent: 'Mood',
       },
-      {
-        label: 'Mindfulness meditation music',
-        value: 'mindful.mp3',
-        parent: 'other',
-      },
-      {
-        label: 'Relaxing meditation music',
-        value: 'relaxingmeditationmusic225173.mp3',
+        {
+        label: 'Om ambient',
+        value: 'omambient.mp3',
+        parent: 'Mood',
       },
     ],
     Frequency: [
       {
-        label: '528 hz ambient music',
-        value: 'hz528frequencyambientmusic',
+        label: '528 hertz - love',
+        value: 'hz528.mp3',
         parent: 'Frequency',
       },
       {
         label: '417 hz OM Chanting',
         value: 'now.mp3',
-      },
-      {
-        label: '432 hz alpha waves',
-        value: 'hz432alphawaveshealtheholebodyspirit216473.mp3',
         parent: 'Frequency',
       },
       {
-        label: 'Tibetan singing bowls',
-        value: 'tibetansingingbowlsbodydamagerepairhealbodysoul161797',
+        label: '432 hertz - healing',
+        value: 'hz432.mp3',
         parent: 'Frequency',
       },
-      {
-        label: 'Brown noise',
-        value: 'brownnoise',
-        parent: 'Frequency',
-      },
-    ],
-    All: [
-      {
-        label: 'Nothing',
-        value: null,
-      },
-      {
-        label: 'Relaxing meditation music',
-        value: 'relaxingmeditationmusic225173.mp3',
-      },
-      {
-        label: '417 hz OM Chanting',
-        value: 'now.mp3',
-      },
+     
       {
         label: 'Brown noise',
         value: 'brownnoise.mp3',
         parent: 'Frequency',
       },
-      {
-        label: 'Calm river flowing',
-        value: 'calmzenriverflowing228223.mp3',
-      },
-      {
-        label: 'Gentle wind',
-        value: 'agentlebreezewind414681.mp3',
-        parent: 'nature',
-      },
-      {
-        label: 'Nature forest stream birds',
-        value: 'natureforestbirds.mp3',
-        parent: 'nature',
-      },
-      {
-        label: 'Peaceful music meditation',
-        value: 'meditationrelax2317573.mp3',
-        parent: 'instrument',
-      },
-      {
-        label: '528 hz ambient music',
-        value: 'hz528frequencyambientmusic',
-        parent: 'Frequency',
-      },
-      {
-        label: '432 hz alpha waves',
-        value: 'hz432alphawaveshealtheholebodyspirit216473.mp3',
-        parent: 'Frequency',
-      },
-      {
-        label: 'Tibetan singing bowls',
-        value: 'tibetansingingbowlsbodydamagerepairhealbodysoul161797',
-        parent: 'instrument',
-      },
-      {
-        label: 'Meditation hall at night',
-        value: 'meditationhallatnight24956.mp3',
-        parent: 'other',
-      },
-      {
-        label: 'Mindfulness meditation music',
-        value: 'mindful.mp3',
-      },
     ],
+   All: [
+  { label: '417 hz OM Chanting', value: 'now.mp3', parent: 'Frequency' },
+  { label: '432 hertz - healing', value: 'hz432.mp3', parent: 'Frequency' },
+  { label: '528 hertz - love', value: 'hz528.mp3', parent: 'Frequency' },
+  { label: 'Brown noise', value: 'brownnoise.mp3', parent: 'Frequency' },
+  { label: 'Forest stream birds', value: 'natureforestbirds.mp3', parent: 'Nature' },
+  { label: 'Meditation hall at night', value: 'meditationhallatnight24956.mp3', parent: 'Mood' },
+  { label: 'Night ambience', value: 'nightambience.mp3', parent: 'Nature' },
+  { label: 'Ocean waves', value: 'oceanwaves.mp3', parent: 'Nature' },
+  { label: 'Om ambient', value: 'omambient.mp3',  parent: 'Mood' },
+  { label: 'Peaceful music meditation', value: 'meditationrelax.mp3', parent: 'Mood' },
+  { label: 'Rain', value: 'rains.mp3', parent: 'Nature' },
+  { label: 'Storm wind chimes', value: 'stormwindchimes.mp3', parent: 'Nature' },
+  { label: 'Tibetan singing bowls', value: 'tibetansingingbowls.mp3', parent: 'Mood' },
+  { label: 'Uplifting tones', value: 'uplifting.mp3', parent: 'Mood' },
+  { label: 'Waterfall', value: 'waterfall.mp3', parent: 'Nature' },
+  { label: 'Wind in trees', value: 'windtrees.mp3', parent: 'Nature' },
+  { label: 'Zen river', value: 'zenriver.mp3', parent: 'Nature' },
+],
   };
 
   const openModal = () => {

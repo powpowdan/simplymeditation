@@ -6,7 +6,8 @@ import {
   Modal,
   StyleSheet,
   ScrollView,
-  Dimensions
+  Dimensions,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
@@ -32,9 +33,12 @@ const BgMusicSelector = () => {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [previousSongPathBg, setPreviousSongPathBg] = useState(null);
 
+  const [previewChimeNameBg, setPreviewChimeNameBg] = useState(null);
+  const [previewChimePathBg, setPreviewChimePathBg] = useState(null);
+  const [previewVolumeBg, setPreviewVolumeBg] = useState(0.8);
+
   const availableChimes = {
     Nature: [
-   
       {
         label: 'Calm river flowing',
         value: 'calmzenriverflowing228223.mp3',
@@ -49,45 +53,44 @@ const BgMusicSelector = () => {
         value: 'natureforestbirds.mp3',
         parent: 'nature',
       },
-       {
+      {
         label: 'Rain',
         value: 'rains.mp3',
         parent: 'nature',
       },
-       {
+      {
         label: 'Storm wind chimes',
         value: 'stormwindchimes.mp3',
         parent: 'nature',
       },
-       {
+      {
         label: 'Ocean waves',
         value: 'oceanwaves.mp3',
         parent: 'nature',
       },
-       {
+      {
         label: 'Mountain path',
         value: 'forest.mp3',
         parent: 'nature',
       },
-        {
+      {
         label: 'Night ambience',
         value: 'nightambience.mp3',
         parent: 'nature',
       },
-    
     ],
     Mood: [
       {
         label: 'Meditation hall at night',
         value: 'meditationhallatnight24956.mp3',
         parent: 'other',
-      }, 
+      },
       {
         label: 'Peaceful music meditation',
         value: 'meditationrelax2317573.mp3',
         parent: 'instrument',
       },
-       {
+      {
         label: 'Uplifting tones',
         value: 'uplifting.mp3',
       },
@@ -95,8 +98,8 @@ const BgMusicSelector = () => {
         label: 'Mindfulness meditation music',
         value: 'mindful.mp3',
         parent: 'other',
-      }, 
-         {
+      },
+      {
         label: 'Relaxing meditation music',
         value: 'relaxingmeditationmusic225173.mp3',
       },
@@ -126,7 +129,6 @@ const BgMusicSelector = () => {
         value: 'brownnoise',
         parent: 'Frequency',
       },
-      
     ],
     All: [
       {
@@ -160,7 +162,7 @@ const BgMusicSelector = () => {
         value: 'natureforestbirds.mp3',
         parent: 'nature',
       },
-       {
+      {
         label: 'Peaceful music meditation',
         value: 'meditationrelax2317573.mp3',
         parent: 'instrument',
@@ -184,7 +186,7 @@ const BgMusicSelector = () => {
         label: 'Meditation hall at night',
         value: 'meditationhallatnight24956.mp3',
         parent: 'other',
-      }, 
+      },
       {
         label: 'Mindfulness meditation music',
         value: 'mindful.mp3',
@@ -193,29 +195,41 @@ const BgMusicSelector = () => {
   };
 
   const openModal = () => {
+    setPreviewChimeNameBg(selectedChimeNameBg);
+    setPreviewChimePathBg(selectedSongPathBg);
+    setPreviewVolumeBg(volumeBg);
     setModalVisible(true);
   };
 
-  const closeModal = () => {
+  const handleSave = () => {
     if (soundInstance) {
-      soundInstance.stop(() => {
-        soundInstance.release();
-      });
+      soundInstance.stop(() => soundInstance.release());
     }
 
     setSavedChimeBg(
       JSON.stringify({
-        chime: {label: selectedChimeNameBg, value: selectedSongPathBg},
-        volumeBg,
+        chime: {label: previewChimeNameBg, value: previewChimePathBg},
+        volumeBg: previewVolumeBg,
       }),
     );
+    setSelectedChimeNameBg(previewChimeNameBg);
+    setselectedSongPathBg(previewChimePathBg);
+    setVolumeBg(previewVolumeBg);
+    setIsMusicPlaying(false);
+    setModalVisible(false);
+  };
+
+  const handleCloseWithoutSaving = () => {
+    if (soundInstance) {
+      soundInstance.stop(() => soundInstance.release());
+    }
     setIsMusicPlaying(false);
     setModalVisible(false);
   };
 
   const handleChimeSelection = chime => {
-    setselectedSongPathBg(chime.value);
-    setSelectedChimeNameBg(chime.label);
+    setPreviewChimePathBg(chime.value);
+    setPreviewChimeNameBg(chime.label);
   };
 
   const handleCategoryChange = category => {
@@ -237,10 +251,9 @@ const BgMusicSelector = () => {
   };
 
   const playTestSound = () => {
-    if (!selectedSongPathBg) return;
+    if (!previewChimePathBg) return;
 
-    // If the user is trying to play the same sound again while music is playing, stop the current sound
-    if (selectedSongPathBg === previousSongPathBg && isMusicPlaying) {
+    if (previewChimePathBg === previousSongPathBg && isMusicPlaying) {
       if (soundInstance) {
         soundInstance.stop(() => {
           soundInstance.release();
@@ -248,7 +261,6 @@ const BgMusicSelector = () => {
         });
       }
     } else {
-      // If it's a new sound, stop the current sound and play the new one
       if (soundInstance) {
         soundInstance.stop(() => {
           soundInstance.release();
@@ -256,26 +268,24 @@ const BgMusicSelector = () => {
         });
       }
 
-      const sound = new Sound(selectedSongPathBg, null, error => {
+      const sound = new Sound(previewChimePathBg, null, error => {
         if (error) {
           console.error('Error loading sound:', error);
           return;
         }
 
-        sound.setVolume(volumeBg);
+        sound.setVolume(previewVolumeBg);
         sound.play(() => sound.release());
         setSoundInstance(sound);
         setIsMusicPlaying(true);
+        setPreviousSongPathBg(previewChimePathBg);
 
-        setPreviousSongPathBg(selectedSongPathBg); // Update the previous song path
-
-        // Stop the sound after 8 seconds
         setTimeout(() => {
           sound.stop(() => {
             sound.release();
             setIsMusicPlaying(false);
           });
-        }, 8000); // 8-second timeout
+        }, 8000);
       });
     }
   };
@@ -307,108 +317,109 @@ const BgMusicSelector = () => {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={closeModal}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Choose your background music</Text>
+        onRequestClose={handleCloseWithoutSaving}>
+        <TouchableWithoutFeedback onPress={handleCloseWithoutSaving}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  Choose your background music
+                </Text>
 
-            <View style={styles.categoryContainer}>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('All')}
-                onPress={() => handleCategoryChange('All')}>
-                <Text style={styles.categoryButtonText}>All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('Nature')}
-                onPress={() => handleCategoryChange('Nature')}>
-                <Text style={styles.categoryButtonText}>Nature</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('Frequency')}
-                onPress={() => handleCategoryChange('Frequency')}>
-                <Text style={styles.categoryButtonText}>Frequency</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('Mood')}
-                onPress={() => handleCategoryChange('Mood')}>
-                <Text style={styles.categoryButtonText}>Mood</Text>
-              </TouchableOpacity>
-            </View>
+                <View style={styles.categoryContainer}>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('All')}
+                    onPress={() => handleCategoryChange('All')}>
+                    <Text style={styles.categoryButtonText}>All</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('Nature')}
+                    onPress={() => handleCategoryChange('Nature')}>
+                    <Text style={styles.categoryButtonText}>Nature</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('Frequency')}
+                    onPress={() => handleCategoryChange('Frequency')}>
+                    <Text style={styles.categoryButtonText}>Frequency</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('Mood')}
+                    onPress={() => handleCategoryChange('Mood')}>
+                    <Text style={styles.categoryButtonText}>Mood</Text>
+                  </TouchableOpacity>
+                </View>
 
-            <ScrollView contentContainerStyle={styles.optionsContainer}>
-              {chimesToDisplay.map(chime => (
-                <TouchableOpacity
-                  key={chime.value || chime.label}
-                  style={styles.option}
-                  onPress={() => handleChimeSelection(chime)}>
-                  <View style={styles.iconContainer}>
-                    <View
-                      style={[
-                        styles.circle,
-                        selectedSongPathBg === chime.value &&
-                          styles.filledCircle,
-                      ]}
-                    />
-                    <Text style={styles.optionText}>{chime.label}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+                <ScrollView contentContainerStyle={styles.optionsContainer}>
+                  {chimesToDisplay.map(chime => (
+                    <TouchableOpacity
+                      key={chime.value || chime.label}
+                      style={styles.option}
+                      onPress={() => handleChimeSelection(chime)}>
+                      <View style={styles.iconContainer}>
+                        <View
+                          style={[
+                            styles.circle,
+                            previewChimePathBg === chime.value &&
+                              styles.filledCircle,
+                          ]}
+                        />
+                        <Text style={styles.optionText}>{chime.label}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
 
-            {/* Volume Slider */}
-            <Text style={styles.sliderLabel}>
-              Volume: {Math.round(volumeBg * 100)}%
-            </Text>
-            <View style={styles.volumeContainer}>
-              <Icon
-                name="volume-low-outline"
-                size={24}
-                color="#ffffff"
-                style={styles.icon}
-              />
-              <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={1}
-                value={volumeBg}
-                onValueChange={value => setVolumeBg(value)}
-                minimumTrackTintColor="#74aff7"
-                maximumTrackTintColor="#ccc"
-                thumbTintColor="#74aff7"
-                // disabled={isMusicPlaying}
-              />
-              <Icon
-                name="volume-high-outline"
-                size={iconSize}
-                color="#ffffff"
-                style={styles.icon}
-              />
-            </View>
+                <Text style={styles.sliderLabel}>
+                  Volume: {Math.round(volumeBg * 100)}%
+                </Text>
+                <View style={styles.volumeContainer}>
+                  <Icon
+                    name="volume-low-outline"
+                    size={24}
+                    color="#ffffff"
+                    style={styles.icon}
+                  />
+                  <Slider
+                    style={styles.slider}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={previewVolumeBg}
+                    onValueChange={value => setPreviewVolumeBg(value)}
+                    minimumTrackTintColor="#74aff7"
+                    maximumTrackTintColor="#ccc"
+                    thumbTintColor="#74aff7"
+                  />
+                  <Icon
+                    name="volume-high-outline"
+                    size={iconSize}
+                    color="#ffffff"
+                    style={styles.icon}
+                  />
+                </View>
 
-            {/* Test Sound Button */}
-            <View style={styles.buttonRowContainer}>
-              {/* Test Sound Button */}
-              <TouchableOpacity
-                style={styles.testButton}
-                onPress={playTestSound}>
-                <Text style={styles.testButtonText}>Test Music</Text>
-              </TouchableOpacity>
+                <View style={styles.buttonRowContainer}>
+                  <TouchableOpacity
+                    style={styles.testButton}
+                    onPress={playTestSound}>
+                    <Text style={styles.testButtonText}>Test Music</Text>
+                  </TouchableOpacity>
 
-              {/* Choose Button */}
-              <TouchableOpacity
-                style={styles.chooseButton}
-                onPress={closeModal}>
-                <Text style={styles.chooseButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
+                  <TouchableOpacity
+                    style={styles.chooseButton}
+                    onPress={handleSave}>
+                    <Text style={styles.chooseButtonText}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
 };
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 const baseWidth = 411; // Pixel 4 XL baseline
 const scale = width / baseWidth;
 const iconSize = 24 * scale;

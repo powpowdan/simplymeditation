@@ -6,7 +6,8 @@ import {
   Modal,
   StyleSheet,
   ScrollView,
-  Dimensions
+  Dimensions,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import Sound from 'react-native-sound';
@@ -30,31 +31,36 @@ const ChimeSelector2 = () => {
 
   const [soundInstance, setSoundInstance] = useState(null);
 
+    // Preview states
+  const [previewChimeName, setPreviewChimeName] = useState(null);
+  const [previewChimePath, setPreviewChimePath] = useState(null);
+  const [previewVolume, setPreviewVolume] = useState(volume); // optional
+
   const availableChimes = {
     Nature: [
       {label: 'Ocean wave fast', value: 'audio_file46.mp3'},
       {label: 'Owl', value: 'audio_file45.mp3'},
       {label: 'Rainfall', value: 'audio_file47.mp3'},
       {label: 'Thunder', value: 'audio_file44.mp3'},
-      {label: 'Winter gust', value: 'audio_file49.mp3'}
+      {label: 'Winter gust', value: 'audio_file49.mp3'},
     ],
     Special: [
-      {label: 'Air Woosh', value: 'audio_file43.mp3'}, 
+      {label: 'Air Woosh', value: 'audio_file43.mp3'},
       {label: 'Deep breath', value: 'audio_file32.mp3'},
       {label: 'Gong shimmer', value: 'audio_file16.mp3'},
-      {label: 'Harp', value: 'audio_file29.mp3'}, 
+      {label: 'Harp', value: 'audio_file29.mp3'},
       {label: 'Shimmering', value: 'audio_file3.mp3'},
-      {label: 'Quick shimmer', value: 'audio_file37.mp3'}, 
+      {label: 'Quick shimmer', value: 'audio_file37.mp3'},
     ],
     Instrument: [
       {label: 'Classic start', value: 'audio_file.mp3'},
-      {label: 'Bell', value: 'audio_file7.mp3'}, 
+      {label: 'Bell', value: 'audio_file7.mp3'},
       {label: 'Bell - church', value: 'audio_file27.mp3'},
       {label: 'Bell - long', value: 'audio_file36.mp3'},
-      {label: 'Bell - quick', value: 'audio_file26.mp3'}, 
+      {label: 'Bell - quick', value: 'audio_file26.mp3'},
       {label: 'Chime', value: 'audio_file40.mp3'},
       {label: 'Chime 2', value: 'audio_file10.mp3'},
-      {label: 'Chime - sharp', value: 'audio_file33.mp3'}, 
+      {label: 'Chime - sharp', value: 'audio_file33.mp3'},
       {label: 'Deep drum', value: 'audio_file30.mp3'},
       {label: 'Flute', value: 'audio_file38.mp3'},
       {label: 'Tiny bells', value: 'audio_file34.mp3'},
@@ -66,8 +72,8 @@ const ChimeSelector2 = () => {
       {label: 'Gong - Thai temple', value: 'audio_file2.mp3'},
       {label: 'Gong - reverberate', value: 'audio_file13.mp3'},
       {label: 'Gong - shallow', value: 'audio_file25.mp3'},
-      {label: 'Gong - short', value: 'audio_file18.mp3'}
-],
+      {label: 'Gong - short', value: 'audio_file18.mp3'},
+    ],
     All: [
       {label: 'Classic start', value: 'audio_file.mp3'},
       {label: 'Air Woosh', value: 'audio_file43.mp3'},
@@ -78,7 +84,7 @@ const ChimeSelector2 = () => {
       {label: 'Chime', value: 'audio_file40.mp3'},
       {label: 'Chime 2', value: 'audio_file10.mp3'},
       {label: 'Chime - sharp', value: 'audio_file33.mp3'},
-      {label: 'Chimes ringing - short', value: 'audio_file34.mp3'}, 
+      {label: 'Chimes ringing - short', value: 'audio_file34.mp3'},
       {label: 'Deep breath', value: 'audio_file32.mp3'},
       {label: 'Deep drum', value: 'audio_file30.mp3'},
       {label: 'Flute - long', value: 'audio_file38.mp3'},
@@ -95,21 +101,24 @@ const ChimeSelector2 = () => {
       {label: 'Gong - short', value: 'audio_file18.mp3'},
       {label: 'Gong shimmer bell', value: 'audio_file16.mp3'},
       {label: 'Harp', value: 'audio_file29.mp3'},
-      {label: 'Ocean wave fast', value: 'audio_file46.mp3'}, 
-      {label: 'Owl', value: 'audio_file45.mp3'}, 
+      {label: 'Ocean wave fast', value: 'audio_file46.mp3'},
+      {label: 'Owl', value: 'audio_file45.mp3'},
       {label: 'Quick shimmer', value: 'audio_file37.mp3'},
       {label: 'Rainfall', value: 'audio_file47.mp3'},
       {label: 'Shimmering', value: 'audio_file3.mp3'},
       {label: 'Thunder', value: 'audio_file44.mp3'},
-      {label: 'Winter gust', value: 'audio_file49.mp3'}
-],
+      {label: 'Winter gust', value: 'audio_file49.mp3'},
+    ],
   };
 
   const openModal = () => {
+    setPreviewChimeName(selectedChimeName);
+    setPreviewChimePath(selectedSongPath);
+    setPreviewVolume(volume);
     setModalVisible(true);
   };
 
-  const closeModal = () => {
+  const handleSave = () => {
     if (soundInstance) {
       soundInstance.stop(() => {
         soundInstance.release();
@@ -118,18 +127,29 @@ const ChimeSelector2 = () => {
 
     setSavedChime(
       JSON.stringify({
-        chime: {label: selectedChimeName, value: selectedSongPath},
+        chime: {label: previewChimeName, value: previewChimePath},
         volume,
       }),
     );
-    setSelectedChimePath(selectedSongPath);
+    setSelectedChimeName(previewChimeName);
+    setselectedSongPath(previewChimePath);
+    setVolume(previewVolume);
+    setSelectedChimePath(previewChimePath);
+    setModalVisible(false);
+  };
 
+  const handleCloseWithoutSaving = () => {
+    if (soundInstance) {
+      soundInstance.stop(() => {
+        soundInstance.release();
+      });
+    }
     setModalVisible(false);
   };
 
   const handleChimeSelection = chime => {
-    setselectedSongPath(chime.value);
-    setSelectedChimeName(chime.label);
+    setPreviewChimePath(chime.value);
+    setPreviewChimeName(chime.label);
   };
 
   const handleCategoryChange = category => {
@@ -151,19 +171,19 @@ const ChimeSelector2 = () => {
   };
 
   const playTestSound = () => {
-    if (!selectedSongPath) return;
+    if (!previewChimePath) return;
     // Check if soundInstance exists and is playing
     if (soundInstance) {
       soundInstance.stop(() => {
         soundInstance.release(); // Release the old sound instance
       });
     }
-    const sound = new Sound(selectedSongPath, null, error => {
+    const sound = new Sound(previewChimePath, null, error => {
       if (error) {
         console.error('Error loading sound:', error);
         return;
       }
-      sound.setVolume(volume);
+      sound.setVolume(previewVolume);
       sound.play(() => sound.release());
       setSoundInstance(sound);
     });
@@ -205,106 +225,108 @@ const ChimeSelector2 = () => {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={closeModal}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Choose a Chime</Text>
+        onRequestClose={handleCloseWithoutSaving}>
+        <TouchableWithoutFeedback onPress={handleCloseWithoutSaving}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Choose a Chime</Text>
 
-            <View style={styles.categoryContainer}>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('All')}
-                onPress={() => handleCategoryChange('All')}>
-                <Text style={styles.categoryButtonText}>All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('Nature')}
-                onPress={() => handleCategoryChange('Nature')}>
-                <Text style={styles.categoryButtonText}>Nature</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('Instrument')}
-                onPress={() => handleCategoryChange('Instrument')}>
-                <Text style={styles.categoryButtonText}>Instrument</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={getCategoryButtonStyle('Special')}
-                onPress={() => handleCategoryChange('Special')}>
-                <Text style={styles.categoryButtonText}>Special</Text>
-              </TouchableOpacity>
-            </View>
+                <View style={styles.categoryContainer}>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('All')}
+                    onPress={() => handleCategoryChange('All')}>
+                    <Text style={styles.categoryButtonText}>All</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('Nature')}
+                    onPress={() => handleCategoryChange('Nature')}>
+                    <Text style={styles.categoryButtonText}>Nature</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('Instrument')}
+                    onPress={() => handleCategoryChange('Instrument')}>
+                    <Text style={styles.categoryButtonText}>Instrument</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={getCategoryButtonStyle('Special')}
+                    onPress={() => handleCategoryChange('Special')}>
+                    <Text style={styles.categoryButtonText}>Special</Text>
+                  </TouchableOpacity>
+                </View>
 
-            <ScrollView contentContainerStyle={styles.optionsContainer}>
-              {chimesToDisplay.map(chime => (
-                <TouchableOpacity
-                  key={chime.value || chime.label}
-                  style={styles.option}
-                  onPress={() => handleChimeSelection(chime)}>
-                  <View style={styles.iconContainer}>
-                    <View
-                      style={[
-                        styles.circle,
-                        selectedSongPath === chime.value && styles.filledCircle,
-                      ]}
-                    />
-                    <Text style={styles.optionText}>{chime.label}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+                <ScrollView contentContainerStyle={styles.optionsContainer}>
+                  {chimesToDisplay.map(chime => (
+                    <TouchableOpacity
+                      key={chime.value || chime.label}
+                      style={styles.option}
+                      onPress={() => handleChimeSelection(chime)}>
+                      <View style={styles.iconContainer}>
+                        <View
+                          style={[
+                            styles.circle,
+                            previewChimePath === chime.value &&
+                              styles.filledCircle,
+                          ]}
+                        />
+                        <Text style={styles.optionText}>{chime.label}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
 
-            {/* Volume Slider */}
-            <Text style={styles.sliderLabel}>
-              Volume: {Math.round(volume * 100)}%
-            </Text>
-            <View style={styles.volumeContainer}>
-              <Icon
-                name="volume-low-outline"
-                size={iconSize}
-                color="#ffffff"
-                style={styles.icon}
-              />
-              <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={1}
-                value={volume}
-                onValueChange={value => setVolume(value)}
-                minimumTrackTintColor="#74aff7"
-                maximumTrackTintColor="#ffffff"
-                thumbTintColor="#74aff7"
-              />
-              <Icon
-                name="volume-high-outline"
-                size={24}
-                color="#ffffff"
-                style={styles.icon}
-              />
-            </View>
+                {/* Volume Slider */}
+                <Text style={styles.sliderLabel}>
+                  Volume: {Math.round(volume * 100)}%
+                </Text>
+                <View style={styles.volumeContainer}>
+                  <Icon
+                    name="volume-low-outline"
+                    size={iconSize}
+                    color="#ffffff"
+                    style={styles.icon}
+                  />
+                  <Slider
+                    style={styles.slider}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={previewVolume}
+                    onValueChange={value => setPreviewVolume(value)}
+                    minimumTrackTintColor="#74aff7"
+                    maximumTrackTintColor="#ffffff"
+                    thumbTintColor="#74aff7"
+                  />
+                  <Icon
+                    name="volume-high-outline"
+                    size={24}
+                    color="#ffffff"
+                    style={styles.icon}
+                  />
+                </View>
 
-            {/* Test Sound Button */}
-            <View style={styles.buttonRowContainer}>
-              {/* Test Sound Button */}
-              <TouchableOpacity
-                style={styles.testButton}
-                onPress={playTestSound}>
-                <Text style={styles.testButtonText}>Test Sound</Text>
-              </TouchableOpacity>
-
-              {/* Choose Button */}
-              <TouchableOpacity
-                style={styles.chooseButton}
-                onPress={closeModal}>
-                <Text style={styles.chooseButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
+                {/* Buttons */}
+                <View style={styles.buttonRowContainer}>
+                  <TouchableOpacity
+                    style={styles.testButton}
+                    onPress={playTestSound}>
+                    <Text style={styles.testButtonText}>Test Sound</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.chooseButton}
+                    onPress={handleSave}>
+                    <Text style={styles.chooseButtonText}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
 };
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 const baseWidth = 411; // Pixel 4 XL baseline
 const scale = width / baseWidth;
 const iconSize = 24 * scale; // example base size 24

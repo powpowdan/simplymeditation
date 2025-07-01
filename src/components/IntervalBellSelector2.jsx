@@ -112,6 +112,7 @@ const IntervalBellSelector = () => {
     if (soundInstance) {
       soundInstance.stop(() => {
         soundInstance.release();
+         setSoundInstance(null);
       });
     }
 
@@ -133,6 +134,7 @@ const IntervalBellSelector = () => {
     if (soundInstance) {
       soundInstance.stop(() => {
         soundInstance.release();
+         setSoundInstance(null);
       }); 
     }
     setIsMusicPlaying(false);

@@ -111,6 +111,7 @@ const ChimeSelector2 = () => {
     if (soundInstance) {
       soundInstance.stop(() => {
         soundInstance.release();
+         setSoundInstance(null);
       });
     }
 
@@ -132,6 +133,7 @@ const ChimeSelector2 = () => {
     if (soundInstance) {
       soundInstance.stop(() => {
         soundInstance.release();
+         setSoundInstance(null);
       });
     }
     setIsMusicPlaying(false);

@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import Sound from 'react-native-sound';
 import { useMusicSwitchContext } from '../context/MusicSwitchContext';
-// 1. Force Android to give this app high-priority background audio focus
+import notifee from '@notifee/react-native';
+import {
+  createNotificationChannel,
+  startNotificationService,
+  stopNotificationService,
+} from './notificationService';
 Sound.setCategory('Playback', true);
 
 const useMusic = () => {
@@ -9,14 +14,30 @@ const useMusic = () => {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const soundRef = useRef(null);
 
+  // Request permissions and initialize the channel on mount
+  useEffect(() => {
+    const setupNotifications = async () => {
+      // ⬇️ Request explicit Android permission
+      await notifee.requestPermission();
+      await createNotificationChannel();
+    };
+    
+    setupNotifications();
+  }, []);
+
+  // 2. Initialize the notification channel when the hook loads
+  useEffect(() => {
+    createNotificationChannel();
+  }, []);
+
   const playMusic = () => {
     if (isMusicPlaying || !selectedSongPathBg) return;
 
-    const sound = new Sound(selectedSongPathBg, Sound.MAIN_BUNDLE, (error) => {
+    const sound = new Sound(selectedSongPathBg, Sound.MAIN_BUNDLE, async (error) => {
       if (error) {
         console.error('Failed to load sound:', error);
         return;
-      }
+      } 
 
       soundRef.current = sound; //NEW: Establish the reference immediately, trying loop fix
 
@@ -28,9 +49,14 @@ const useMusic = () => {
           console.error('Playback failed due to decoding errors');
           // NEW : If it cuts out or stops unexpectedly, reset the state
           setIsMusicPlaying(false);
+          stopNotificationService(); // Kill notification if playback fails
         }
       });
- 
+ try {
+        await startNotificationService();
+      } catch (err) {
+        console.error('Failed to start foreground service notification:', err);
+      }
       setIsMusicPlaying(true);
     });
   };
@@ -40,7 +66,8 @@ const useMusic = () => {
       soundRef.current.stop(() => {
         soundRef.current.release();
         soundRef.current = null;
-        setIsMusicPlaying(false);
+        setIsMusicPlaying(false); 
+        stopNotificationService(); //kill foreground service
       });
     }
   };

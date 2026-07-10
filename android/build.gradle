@@ -7,7 +7,10 @@ buildscript {
         compileSdkVersion = 33
         targetSdkVersion = 33
 
-        // We use NDK 23 which has both M1 support and is the side-by-side NDK version from AGP.
+        // Kotlin version required by react-native-track-player
+        kotlinVersion = "1.8.0"
+
+        //  NDK 23 which has both M1 support and is the side-by-side NDK version from AGP.
         ndkVersion = "23.1.7779620"
     }
     repositories {
@@ -17,6 +20,7 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
     
 }

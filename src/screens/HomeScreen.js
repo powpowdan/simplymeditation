@@ -49,8 +49,8 @@ function HomeScreen() {
   );
 
   // Derived States, nothing set by users
-  const {playMusic, stopMusic, isMusicPlaying} = useMusic(); //custom hook
-  const [sliderDisabled, setSliderDisabled] = useState(false); //disable slider or not
+  const {playMusic, stopMusic, isMusicPlaying} = useMusic(); // Refactored custom hook
+  const [sliderDisabled, setSliderDisabled] = useState(false);
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
 

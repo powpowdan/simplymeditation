@@ -131,8 +131,8 @@ function HomeScreen() {
   //when we get to a natural ending of sessions we want to do some unique stuff and THEN stopSession
   const handleTimerEnd = totalSeconds => {
     const sessionDuration = totalSeconds / 60;
-    addMeditationTime(sessionDuration);
-    incrementSessionCount();
+    addMeditationTime(sessionDuration); // This adds to total time
+    incrementSessionCount(totalSeconds); // This handles streaks and history
     setTotalMeditationTime(prevTotal => prevTotal + totalSeconds);
 
     stopSession();

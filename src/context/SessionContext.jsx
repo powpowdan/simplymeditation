@@ -17,6 +17,16 @@ export function SessionProvider({children}) {
     'shortestTimeMeditated',
     0,
   );
+  const [currentStreak, setCurrentStreak] = useAsyncStorage('currentStreak', 0);
+  const [longestStreak, setLongestStreak] = useAsyncStorage('longestStreak', 0);
+  const [lastSessionDate, setLastSessionDate] = useAsyncStorage(
+    'lastSessionDate',
+    null,
+  );
+  const [meditationHistory, setMeditationHistory] = useAsyncStorage(
+    'meditationHistory',
+    {}, // Change from array to object
+  );
   const [sessionInProgress, setSessionInProgress] = useState(false);
 
   const [buttonDurations, setButtonDurations] = useAsyncStorage(
@@ -51,15 +61,44 @@ export function SessionProvider({children}) {
     }
   };
 
-  const incrementSessionCount = () => {
+  const incrementSessionCount = sessionDurationInSeconds => {
+    // This function now also handles streak logic
     setSessionCount(prevCount => prevCount + 1);
+
+    const today = new Date();
+    const todayDateString = today.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayDateString = yesterday.toISOString().split('T')[0];
+
+    if (lastSessionDate === yesterdayDateString) {
+      // Streak continues
+      const newStreak = currentStreak + 1;
+      setCurrentStreak(newStreak);
+      setLongestStreak(prevLongest => Math.max(prevLongest, newStreak));
+    } else if (lastSessionDate !== todayDateString) {
+      // Streak is broken or it's the first session of a new day
+      setCurrentStreak(1);
+      setLongestStreak(prevLongest => Math.max(prevLongest, 1));
+    }
+    // If lastSessionDate is already today, the streak doesn't change.
+
+    setLastSessionDate(todayDateString);
+    // Add today's meditation time to the history object
+    setMeditationHistory(prevHistory => {
+      const newHistory = {...prevHistory};
+      const timeToday = newHistory[todayDateString] || 0;
+      newHistory[todayDateString] = timeToday + sessionDurationInSeconds;
+      return newHistory;
+    });
   };
 
   const resetStatistics = async () => {
-    setSessionCount(0);
-    setTotalTimeMeditated(0);
-    setLongestTimeMeditated(0);
-    setShortestTimeMeditated(0);
+    // Now also resets streak data
+    [setCurrentStreak, setLongestStreak, setLastSessionDate, setSessionCount, setTotalTimeMeditated, setLongestTimeMeditated, setShortestTimeMeditated].forEach(setter => setter(0));
+    setMeditationHistory({}); // Reset history to an empty object
+    setLastSessionDate(null); // Explicitly null for date
   };
 
   const resetShortestStatistics = async () => {
@@ -76,6 +115,9 @@ export function SessionProvider({children}) {
       resetShortestStatistics,
       longestTimeMeditated,
       shortestTimeMeditated,
+      currentStreak,
+      longestStreak,
+      meditationHistory,
       buttonDurations,
       setButtonSelectedDuration,
       setSessionInProgress,
@@ -85,6 +127,9 @@ export function SessionProvider({children}) {
     totalTimeMeditated,
     longestTimeMeditated,
     shortestTimeMeditated,
+    currentStreak,
+    longestStreak,
+    meditationHistory,
     buttonDurations,
     setSessionInProgress,
     sessionInProgress,

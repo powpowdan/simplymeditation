@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as Animatable from 'react-native-animatable';
-import {View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 
 const sentences = [
   'Be the change that you wish to see in the world',
@@ -32,50 +32,59 @@ const sentences = [
   'Worry pretends to be necessary but serves no useful purpose',
 ];
 
+const getRandomIndex = () => Math.floor(Math.random() * sentences.length);
 
 const Quotes = () => {
-  const [availableIndexes, setAvailableIndexes] = useState([...Array(sentences.length).keys()]);
-  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(null);
-  const [lastSentenceIndex, setLastSentenceIndex] = useState(null);
-  const [animation, setAnimation] = useState('fadeIn');
+  const [initialIndex] = useState(getRandomIndex);
+  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(initialIndex);
+  const [availableIndexes, setAvailableIndexes] = useState(() => 
+    [...Array(sentences.length).keys()].filter(i => i !== initialIndex)
+  );
+  
+  const [animation, setAnimation] = useState(null);
 
   useEffect(() => {
-    // Select a random index from availableIndexes
-    const getRandomSentenceIndex = () => {
-      if (availableIndexes.length === 0) {
-        // Refresh the list when all quotes have been shown
-        setAvailableIndexes([...Array(sentences.length).keys()]);
-      }
- 
-      const randomIndex = Math.floor(Math.random() * availableIndexes.length);
-      const index = availableIndexes[randomIndex];
-      setAvailableIndexes(prev => prev.filter(i => i !== index)); // Remove selected index
-      return index;
+    const selectAndSetIndex = () => {
+      setAvailableIndexes(currentAvailable => {
+        let nextAvailable = [...currentAvailable];
+        if (nextAvailable.length === 0) {
+          nextAvailable = [...Array(sentences.length).keys()];
+        }
+
+        const randomIndex = Math.floor(Math.random() * nextAvailable.length);
+        const index = nextAvailable[randomIndex];
+
+        setCurrentSentenceIndex(index);
+        return nextAvailable.filter(i => i !== index);
+      });
     };
 
     const timer = setInterval(() => {
-      setAnimation('fadeOut'); // Fade out first
+      setAnimation('fadeOut'); 
       setTimeout(() => {
-        setCurrentSentenceIndex(prevCurrentIndex => {
-          const newIndex = getRandomSentenceIndex();
-          setLastSentenceIndex(prevCurrentIndex);
-          setAnimation('fadeIn'); // Reset to fadeIn
-          return newIndex;
-        });
-      }, 1000); // Smoother transition time
-    }, 7000); // Change quote every 7 seconds
+        selectAndSetIndex();
+        setAnimation('fadeIn'); 
+      }, 1000); 
+    }, 7000); 
 
-    return () => clearInterval(timer); // Cleanup on unmount
-  }, [availableIndexes]);
+    // wait on mount then fade in 1st quote
+    const initialAnimation = setTimeout(() => setAnimation('fadeIn'), 50);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(initialAnimation);
+    };
+  }, []); 
 
   const currentSentence = sentences[currentSentenceIndex];
 
   return (
     <View>
       <Animatable.Text
-        style={styles.instructions}
+        style={[styles.instructions, !animation && { opacity: 0 }]}
         animation={animation}
-        duration={1000}>
+        duration={1000}
+        key={currentSentenceIndex}>
         {currentSentence}
       </Animatable.Text>
     </View>
@@ -86,13 +95,13 @@ const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   instructions: {
-    height: height * 0.06,          // ~40px on typical screens
+    height: height * 0.06,          
     textAlign: 'center',
     color: '#ededed',
-    marginBottom: height * 0.010,   // ~15px
-    marginTop: height * 0.015,      // ~10px
-    paddingHorizontal: width * 0.03, // ~10px
-    fontSize: width * 0.035,        // added for better scaling text size
+    marginBottom: height * 0.010,   
+    marginTop: height * 0.015,      
+    paddingHorizontal: width * 0.03, 
+    fontSize: width * 0.035,        
   },
 });
 

@@ -34,7 +34,7 @@ const sentences = [
 
 const getRandomIndex = () => Math.floor(Math.random() * sentences.length);
 
-const Quotes = () => {
+const Quotes = ({overrideQuote}) => {
   const [initialIndex] = useState(getRandomIndex);
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(initialIndex);
   const [availableIndexes, setAvailableIndexes] = useState(() => 
@@ -44,6 +44,11 @@ const Quotes = () => {
   const [animation, setAnimation] = useState(null);
 
   useEffect(() => {
+    if (overrideQuote) {
+      setAnimation('fadeIn');
+      return;
+    }
+
     const selectAndSetIndex = () => {
       setAvailableIndexes(currentAvailable => {
         let nextAvailable = [...currentAvailable];
@@ -74,9 +79,9 @@ const Quotes = () => {
       clearInterval(timer);
       clearTimeout(initialAnimation);
     };
-  }, []); 
+  }, [overrideQuote]);
 
-  const currentSentence = sentences[currentSentenceIndex];
+  const currentSentence = overrideQuote || sentences[currentSentenceIndex];
 
   return (
     <View>
@@ -84,7 +89,7 @@ const Quotes = () => {
         style={[styles.instructions, !animation && { opacity: 0 }]}
         animation={animation}
         duration={1000}
-        key={currentSentenceIndex}>
+        key={overrideQuote || currentSentenceIndex}>
         {currentSentence}
       </Animatable.Text>
     </View>

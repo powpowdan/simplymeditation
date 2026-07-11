@@ -1,7 +1,16 @@
 import React, {useState, useRef, useEffect} from 'react';
-import {View, TouchableOpacity, Text, StyleSheet, Alert, Dimensions} from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Alert,
+  Dimensions,
+  Animated,
+} from 'react-native';
 import Sound from 'react-native-sound';
 import BackgroundTimer from 'react-native-background-timer';
+import LinearGradient from 'react-native-linear-gradient';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import {useSessionContext} from '../context/SessionContext';
 import Quotes from '../components/Quotes';
@@ -10,6 +19,51 @@ import SessionProgress from '../components/SessionProgress';
 import Logo from '../components/Logo';
 import useMusic from '../hooks/useMusic';
 import useAppStateTimer from '../hooks/useAppStateTimer';
+
+const RIPPLE_COUNT = 3;
+
+const RippleEffect = ({onComplete}) => {
+  const rippleAnims = useRef(
+    [...Array(RIPPLE_COUNT)].map(() => new Animated.Value(0)),
+  ).current;
+
+  useEffect(() => {
+    const animations = rippleAnims.map(anim =>
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+    );
+    Animated.stagger(1000, animations).start(() => {
+      onComplete && onComplete();
+    });
+  }, []);
+
+  return (
+    <View style={styles.rippleWrapper} pointerEvents="none">
+      {rippleAnims.map((animValue, index) => {
+        const scale = animValue.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 4],
+        });
+        const opacity = animValue.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [0.7, 0.5, 0],
+        });
+        return (
+          <Animated.View
+            key={index}
+            style={[
+              styles.rippleCircle,
+              {transform: [{scale}], opacity},
+            ]}
+          />
+        );
+      })}
+    </View>
+  );
+};
 
 function HomeScreen() {
   // State Declarations
@@ -51,8 +105,10 @@ function HomeScreen() {
   // Derived States, nothing set by users
   const {playMusic, stopMusic, isMusicPlaying} = useMusic(); // Refactored custom hook
   const [sliderDisabled, setSliderDisabled] = useState(false);
+  const [endOfSessionQuote, setEndOfSessionQuote] = useState(null);
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
-  const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [showRipple, setShowRipple] = useState(false);
+  const shimmerAnimation = useRef(new Animated.Value(0)).current;
 
   // Listening to app state changes (foreground and background)
   // This function is triggered when the app comes to the foreground after being in background. fixes time issue
@@ -60,12 +116,28 @@ function HomeScreen() {
     setRemainingSeconds(adjustedRemainingSeconds); // Set the updated time
   }, [adjustedRemainingSeconds]);
 
+  // This effect handles the special end-of-session state
+  useEffect(() => {
+    if (showRipple) {
+      setEndOfSessionQuote('Your session is complete.');
+    } else {
+      setEndOfSessionQuote(null);
+    }
+  }, [showRipple]);
+
+  const handleAnimationComplete = () => {
+    // Wait a moment after the ripple finishes, then hide it.
+    setTimeout(() => setShowRipple(false), 500);
+  };
+
   // FUNCTIONS
   //when user starts a session this is where it starts
   const beginSession = () => {
     //adjusts the time for timer if randomtime
     const randomizedDuration = calculateRandomizedDuration();
-    const totalSeconds = Math.round(randomizedDuration * 60);
+    let totalSeconds = Math.round(randomizedDuration * 60);
+ 
+
     playTone(selectedChimePath);
     setSessionInProgress(true);
     setSliderDisabled(true);
@@ -137,7 +209,7 @@ function HomeScreen() {
 
     stopSession();
     setSliderDisabled(false);
-    setSessionCompleted(true);
+    setShowRipple(true);
   };
 
   //can run if user stops session or after natural session is done and handTimer is called
@@ -210,12 +282,13 @@ function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {showRipple && <RippleEffect onComplete={handleAnimationComplete} />}
       <Logo
         sliderDisabled={sessionInProgress}
         headerText="Simply Meditation"
         style={{marginTop: 20}}
       />
-      <Quotes />
+      <Quotes overrideQuote={endOfSessionQuote} />
       <SessionProgress
         sessionInProgress={sessionInProgress}
         remainingSeconds={remainingSeconds}
@@ -296,6 +369,22 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '80%',
     alignItems: 'center',
+  },
+  rippleWrapper: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: -1,
+    overflow: 'hidden',
+  },
+  rippleCircle: {
+   width: width * 0.5,
+    height: width * 0.5,
+    borderRadius: (width * 0.5) / 2, 
+    backgroundColor: 'transparent', 
+    borderWidth: 2 * scale, 
+    borderColor: '#74aff7', 
+    position: 'absolute',
   },
 });
 

@@ -66,11 +66,17 @@ export function SessionProvider({children}) {
     setSessionCount(prevCount => prevCount + 1);
 
     const today = new Date();
-    const todayDateString = today.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    // Correctly format date string based on local timezone to avoid UTC issues.
+    const todayDateString = `${today.getFullYear()}-${String(
+      today.getMonth() + 1,
+    ).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
-    const yesterdayDateString = yesterday.toISOString().split('T')[0];
+    // yesterday's date string locally.
+    const yesterdayDateString = `${yesterday.getFullYear()}-${String(
+      yesterday.getMonth() + 1,
+    ).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
     if (lastSessionDate === yesterdayDateString) {
       // Streak continues

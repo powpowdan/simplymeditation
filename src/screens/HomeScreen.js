@@ -20,11 +20,9 @@ import Logo from '../components/Logo';
 import useMusic from '../hooks/useMusic';
 import useAppStateTimer from '../hooks/useAppStateTimer';
 
-const RIPPLE_COUNT = 3;
-
-const RippleEffect = ({onComplete}) => {
+const RippleEffect = ({onComplete, count = 3, stagger = 1000}) => {
   const rippleAnims = useRef(
-    [...Array(RIPPLE_COUNT)].map(() => new Animated.Value(0)),
+    [...Array(count)].map(() => new Animated.Value(0)),
   ).current;
 
   useEffect(() => {
@@ -35,9 +33,14 @@ const RippleEffect = ({onComplete}) => {
         useNativeDriver: true,
       }),
     );
-    Animated.stagger(1000, animations).start(() => {
-      onComplete && onComplete();
-    });
+
+    if (count > 1) {
+      Animated.stagger(stagger, animations).start(() => {
+        onComplete && onComplete();
+      });
+    } else {
+      animations[0].start(() => onComplete && onComplete());
+    }
   }, []);
 
   return (
@@ -107,6 +110,7 @@ function HomeScreen() {
   const [sliderDisabled, setSliderDisabled] = useState(false);
   const [endOfSessionQuote, setEndOfSessionQuote] = useState(null);
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
+  const [showStartRipple, setShowStartRipple] = useState(false);
   const [showRipple, setShowRipple] = useState(false);
   const shimmerAnimation = useRef(new Animated.Value(0)).current;
 
@@ -137,7 +141,7 @@ function HomeScreen() {
     const randomizedDuration = calculateRandomizedDuration();
     let totalSeconds = Math.round(randomizedDuration * 60);
  
-
+    setShowStartRipple(true);
     playTone(selectedChimePath);
     setSessionInProgress(true);
     setSliderDisabled(true);
@@ -282,6 +286,9 @@ function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {showStartRipple && (
+        <RippleEffect count={1} onComplete={() => setShowStartRipple(false)} />
+      )}
       {showRipple && <RippleEffect onComplete={handleAnimationComplete} />}
       <Logo
         sliderDisabled={sessionInProgress}

@@ -136,7 +136,7 @@ function HomeScreen() {
   const [totalMeditationTime, setTotalMeditationTime] = useState(0);
   const [showStartRipple, setShowStartRipple] = useState(false);
   const [showRipple, setShowRipple] = useState(false);
-  const shimmerAnimation = useRef(new Animated.Value(0)).current;
+  const [animatedPreset, setAnimatedPreset] = useState(null);
 
   // Listening to app state changes (foreground and background)
   // This function is triggered when the app comes to the foreground after being in background. fixes time issue
@@ -323,6 +323,20 @@ function HomeScreen() {
     setSaveModalVisible(true);
   };
 
+  const triggerShimmer = presetKey => {
+    const shimmerAnimation = new Animated.Value(0);
+    setAnimatedPreset({key: presetKey, animation: shimmerAnimation});
+
+    Animated.timing(shimmerAnimation, {
+      toValue: 1,
+      duration: 1000, // Shimmer duration
+      useNativeDriver: true,
+    }).start(() => {
+      // After animation, reset the state
+      setAnimatedPreset(null);
+    });
+  };
+
   const handleSavePreset = () => {
     if (!editingPresetKey) return;
 
@@ -345,6 +359,7 @@ function HomeScreen() {
     };
 
     updatePreset(editingPresetKey, newPresetData);
+    triggerShimmer(editingPresetKey);
     setSaveModalVisible(false);
     setEditingPresetKey(null);
   };
@@ -375,7 +390,7 @@ function HomeScreen() {
         handleButtonLongPress={handleButtonLongPress}
         savedPresets={savedPresets}
         sliderDisabled={sliderDisabled}
-        styles={styles}
+        animatedPreset={animatedPreset}
       />
       <Modal
         visible={isSaveModalVisible}

@@ -1,17 +1,41 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, Animated} from 'react-native';
 import Slider from '@react-native-community/slider';
+import LinearGradient from 'react-native-linear-gradient';
 
-const TimerButton = ({name, duration, onPress, onLongPress, disabled}) => (
-  <TouchableOpacity
-    style={[styles.timerButton, disabled && styles.timerButtonDisabled]}
-    onPress={onPress}
-    onLongPress={onLongPress}
-    disabled={disabled}>
-    <Text style={[styles.presetName, disabled && styles.colorBlackDisabled]}>{name}</Text>
-    <Text style={[styles.presetDuration, disabled && styles.colorBlackDisabled]}>{duration} Mins</Text>
-  </TouchableOpacity>
-);
+const TimerButton = ({name, duration, onPress, onLongPress, disabled, shimmerAnimation}) => {
+  const translateX = shimmerAnimation
+    ? shimmerAnimation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [-200, 200], // Move gradient across the button
+      })
+    : new Animated.Value(-200);
+
+  return (
+    <TouchableOpacity
+      style={[styles.timerButton, disabled && styles.timerButtonDisabled]}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      disabled={disabled}>
+      {shimmerAnimation && (
+        <Animated.View style={[StyleSheet.absoluteFill, {transform: [{translateX}]}]}>
+          <LinearGradient
+            colors={['transparent', 'rgba(151, 210, 247, 0.3)', 'transparent']}
+            start={{x: 0, y: 0.5}}
+            end={{x: 1, y: 0.5}}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
+      )}
+      <Text style={[styles.presetName, disabled && styles.colorBlackDisabled]}>
+        {name}
+      </Text>
+      <Text style={[styles.presetDuration, disabled && styles.colorBlackDisabled]}>
+        {duration} Mins
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const DurationSelector = ({
   selectedDuration,
@@ -20,6 +44,7 @@ const DurationSelector = ({
   handleButtonLongPress,
   savedPresets,
   sliderDisabled,
+  animatedPreset,
 }) => {
  // Extract the button durations and their keys dynamically from the prop
  const buttonConfig = Object.entries(savedPresets).map(([key, preset]) => ({
@@ -54,7 +79,10 @@ const DurationSelector = ({
             duration={button.duration}
             onPress={() => handlePresetSelect(button.key)}
             onLongPress={() => handleButtonLongPress(button.key)}
-            disabled={sliderDisabled} 
+            disabled={sliderDisabled}
+            shimmerAnimation={
+              animatedPreset?.key === button.key ? animatedPreset.animation : null
+            }
           />
         ))}
       </View>
@@ -113,6 +141,7 @@ const styles = StyleSheet.create({
     width: '48%', // Ensures two buttons fit per row
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden', // This is important to contain the shimmer
     marginVertical: 5,
     borderRadius: 8,
     paddingVertical: 8,

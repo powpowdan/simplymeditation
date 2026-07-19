@@ -3,9 +3,11 @@ import {
   View,
   TouchableOpacity,
   Text,
+  TextInput,
   StyleSheet,
   Alert,
   Dimensions,
+  Modal,
   Animated,
 } from 'react-native';
 import Sound from 'react-native-sound';
@@ -78,25 +80,47 @@ function HomeScreen() {
     incrementSessionCount,
     setSessionInProgress,
     sessionInProgress,
+    savedPresets,
+    updatePreset,
   } = useSessionContext();
 
   const {
     musicSwitchState,
+    setMusicSwitchState,
     intervalBellsSwitchState,
+    setIntervalBellsSwitchState,
     interval25Active,
+    setInterval25Active,
     interval50Active,
+    setInterval50Active,
     interval75Active,
+    setInterval75Active,
     interval90Active,
+    setInterval90Active,
     adjustmentSwitchState,
 
     //paths for passing music and volume, background is in useffect
     selectedChimePath,
+    setSelectedChimePath,
     savedChimeIsouPath,
+    setSavedChimeIsouPath,
     volume,
+    setVolume,
     volumeIsou,
+    setVolumeIsou,
+    selectedSongPathBg,
+    setselectedSongPathBg,
+    volumeBg,
+    setVolumeBg,
+    selectedChimeName,
+    selectedChimeNameBg,
+    selectedChimeNameIsou,
   } = useMusicSwitchContext();
 
-  const {buttonDurations, setButtonSelectedDuration} = useSessionContext();
+  // State for Save Preset Modal
+  const [isSaveModalVisible, setSaveModalVisible] = useState(false);
+  const [editingPresetKey, setEditingPresetKey] = useState(null);
+  const [newPresetName, setNewPresetName] = useState('');
 
   // Refs
   const timerRef = useRef();
@@ -267,21 +291,62 @@ function HomeScreen() {
     });
   };
 
-  const handleButtonLongPress = buttonKey => {
-    Alert.alert(
-      'Confirmation:',
-      `Are you sure you want to set this button's duration to ${selectedDuration} minutes?`,
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'OK',
-          onPress: () => {
-            setButtonSelectedDuration(buttonKey, selectedDuration);
-          },
-        },
-      ],
-      {cancelable: false},
-    );
+  const handlePresetSelect = presetKey => {
+    const preset = savedPresets[presetKey];
+    if (!preset) return;
+
+    // Apply all settings from the preset
+    setSelectedDuration(preset.duration);
+
+    // Music
+    setMusicSwitchState(preset.music.enabled);
+    setselectedSongPathBg(preset.music.path);
+    setVolumeBg(preset.music.volume);
+
+    // Chime
+    setSelectedChimePath(preset.chime.path);
+    setVolume(preset.chime.volume);
+
+    // Intervals
+    setIntervalBellsSwitchState(preset.intervals.enabled);
+    setSavedChimeIsouPath(preset.intervals.path);
+    setVolumeIsou(preset.intervals.volume);
+    setInterval25Active(preset.intervals.percentages['25']);
+    setInterval50Active(preset.intervals.percentages['50']);
+    setInterval75Active(preset.intervals.percentages['75']);
+    setInterval90Active(preset.intervals.percentages['90']);
+  };
+
+  const handleButtonLongPress = presetKey => {
+    setEditingPresetKey(presetKey);
+    setNewPresetName(savedPresets[presetKey].name);
+    setSaveModalVisible(true);
+  };
+
+  const handleSavePreset = () => {
+    if (!editingPresetKey) return;
+
+    const newPresetData = {
+      name: newPresetName,
+      duration: selectedDuration,
+      chime: { path: selectedChimePath, volume: volume },
+      music: { path: selectedSongPathBg, volume: volumeBg, enabled: musicSwitchState },
+      intervals: {
+          path: savedChimeIsouPath,
+          volume: volumeIsou,
+          enabled: intervalBellsSwitchState,
+          percentages: {
+              '25': interval25Active,
+              '50': interval50Active,
+              '75': interval75Active,
+              '90': interval90Active,
+          }
+      }
+    };
+
+    updatePreset(editingPresetKey, newPresetData);
+    setSaveModalVisible(false);
+    setEditingPresetKey(null);
   };
 
   return (
@@ -306,11 +371,59 @@ function HomeScreen() {
       <DurationSelector
         selectedDuration={selectedDuration}
         handleTimerChange={handleTimerChange}
+        handlePresetSelect={handlePresetSelect}
         handleButtonLongPress={handleButtonLongPress}
-        buttonSelectedDuration={buttonDurations}
+        savedPresets={savedPresets}
         sliderDisabled={sliderDisabled}
         styles={styles}
       />
+      <Modal
+        visible={isSaveModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setSaveModalVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Save Preset</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={newPresetName}
+              onChangeText={setNewPresetName}
+              placeholder="Preset Name"
+              placeholderTextColor="#888"
+            />
+            <Text style={styles.modalSectionTitle}>Settings Summary:</Text>
+            <View style={styles.summaryContainer}>
+              <Text style={styles.summaryText}>Duration: {selectedDuration} Minutes</Text>
+              <Text style={styles.summaryText}>Chime: {selectedChimeName} ({(volume * 100).toFixed(0)}% vol)</Text>
+              <Text style={styles.summaryText}>Music: {musicSwitchState ? `${selectedChimeNameBg} (${(volumeBg * 100).toFixed(0)}% vol)` : 'Off'}</Text>
+              <Text style={styles.summaryText}>Intervals: {intervalBellsSwitchState ? `${selectedChimeNameIsou} (${(volumeIsou * 100).toFixed(0)}% vol)` : 'Off'}</Text>
+              {intervalBellsSwitchState && (
+                <Text style={styles.summaryText}>
+                  At: {[
+                    interval25Active && '25%',
+                    interval50Active && '50%',
+                    interval75Active && '75%',
+                    interval90Active && '90%',
+                  ].filter(Boolean).join(', ') || 'None'}
+                </Text>
+              )}
+            </View>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setSaveModalVisible(false)}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
+                onPress={handleSavePreset}>
+                <Text style={styles.modalButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <View style={styles.beginEndContainer}>
         {!sessionInProgress ? (
           <TouchableOpacity
@@ -392,6 +505,81 @@ const styles = StyleSheet.create({
     borderWidth: 2 * scale, 
     borderColor: '#74aff7', 
     position: 'absolute',
+  },
+  // Modal Styles
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  },
+  modalContent: {
+    backgroundColor: '#2C2C2C',
+    borderRadius: 10,
+    padding: 20,
+    width: '90%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 15,
+  },
+  modalInput: {
+    width: '100%',
+    backgroundColor: '#404040',
+    borderRadius: 5,
+    padding: 10,
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#CCCCCC',
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  summaryContainer: {
+    width: '100%',
+    backgroundColor: '#353535',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 20,
+  },
+  summaryText: {
+    color: '#E0E0E0',
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalButton: {
+    borderRadius: 5,
+    padding: 12,
+    width: '48%',
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#555',
+  },
+  saveButton: {
+    backgroundColor: '#74aff7',
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 

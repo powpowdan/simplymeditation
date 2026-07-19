@@ -154,13 +154,17 @@ export function MusicSwitchProvider({children}) {
       intervalBellsSwitchState,
       setIntervalBellsSwitchState,
       interval25Active,
+      setInterval25Active,
       toggleInterval25,
       interval50Active,
+      setInterval50Active,
       toggleInterval50,
       interval75Active,
+      setInterval75Active,
       toggleInterval75,
       interval90Active,
       toggleInterval90,
+      setInterval90Active,
       adjustmentSwitchState,
       toggleAdjustmentSwitch,
       adjustmentValue,
@@ -231,7 +235,7 @@ export function MusicSwitchProvider({children}) {
     savedChimeIsou,
     selectedChimeNameIsou,
 
-  ]);
+  ]); // State setters are stable and don't need to be in the dependency array
 
   return (
     <MusicSwitchContext.Provider value={contextValue}>

@@ -29,20 +29,31 @@ export function SessionProvider({children}) {
   );
   const [sessionInProgress, setSessionInProgress] = useState(false);
 
-  const [buttonDurations, setButtonDurations] = useAsyncStorage(
-    'buttonDurations',
+  const [savedPresets, setSavedPresets] = useAsyncStorage(
+    'savedPresets',
     {
-      button5Mins: 5,
-      button10Mins: 10,
-      button15Mins: 15,
-      button20Mins: 20,
+      preset1: {
+        name: 'Preset 1',
+        duration: 5,
+        chime: { path: 'Default', volume: 1 },
+        music: { path: 'empty', volume: 1, enabled: false },
+        intervals: {
+          path: 'DefaultISOU',
+          volume: 0.8,
+          enabled: false,
+          percentages: { '25': false, '50': false, '75': false, '90': false }
+        }
+      },
+      preset2: { name: 'Preset 2', duration: 10, chime: { path: 'Default', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'DefaultISOU', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } },
+      preset3: { name: 'Preset 3', duration: 15, chime: { path: 'Default', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'DefaultISOU', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } },
+      preset4: { name: 'Preset 4', duration: 20, chime: { path: 'Default', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'DefaultISOU', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } }
     },
   );
 
-  const setButtonSelectedDuration = (key, duration) => {
-    setButtonDurations(prev => ({
+  const updatePreset = (presetKey, newPresetData) => {
+    setSavedPresets(prev => ({
       ...prev,
-      [key]: duration,
+      [presetKey]: newPresetData,
     }));
   };
 
@@ -124,8 +135,8 @@ export function SessionProvider({children}) {
       currentStreak,
       longestStreak,
       meditationHistory,
-      buttonDurations,
-      setButtonSelectedDuration,
+      savedPresets,
+      updatePreset,
       setSessionInProgress,
       sessionInProgress,
     };
@@ -136,7 +147,7 @@ export function SessionProvider({children}) {
     currentStreak,
     longestStreak,
     meditationHistory,
-    buttonDurations,
+    savedPresets,
     setSessionInProgress,
     sessionInProgress,
   ]);

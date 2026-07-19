@@ -2,29 +2,30 @@ import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import Slider from '@react-native-community/slider';
 
-const TimerButton = ({duration, onPress, onLongPress, disabled}) => (
+const TimerButton = ({name, duration, onPress, onLongPress, disabled}) => (
   <TouchableOpacity
     style={[styles.timerButton, disabled && styles.timerButtonDisabled]}
     onPress={onPress}
     onLongPress={onLongPress}
     disabled={disabled}>
-    <Text style={[styles.colorBlack, disabled && styles.colorBlackDisabled]}>
-      {duration} Mins
-    </Text>
+    <Text style={[styles.presetName, disabled && styles.colorBlackDisabled]}>{name}</Text>
+    <Text style={[styles.presetDuration, disabled && styles.colorBlackDisabled]}>{duration} Mins</Text>
   </TouchableOpacity>
 );
 
 const DurationSelector = ({
   selectedDuration,
   handleTimerChange,
+  handlePresetSelect,
   handleButtonLongPress,
-  buttonSelectedDuration, //comes from sessioncontext now
+  savedPresets,
   sliderDisabled,
 }) => {
  // Extract the button durations and their keys dynamically from the prop
- const buttonConfig = Object.entries(buttonSelectedDuration).map(([key, duration]) => ({
+ const buttonConfig = Object.entries(savedPresets).map(([key, preset]) => ({
   key,
-  duration,
+  name: preset.name,
+  duration: preset.duration,
 }));
  
 
@@ -49,8 +50,9 @@ const DurationSelector = ({
         {buttonConfig.map((button) => (
           <TimerButton
             key={button.key}
+            name={button.name}
             duration={button.duration}
-            onPress={() => handleTimerChange(button.duration)}
+            onPress={() => handlePresetSelect(button.key)}
             onLongPress={() => handleButtonLongPress(button.key)}
             disabled={sliderDisabled} 
           />
@@ -89,6 +91,17 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 15,
   },
+  presetName: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  presetDuration: {
+    textAlign: 'center',
+    color: '#ccc',
+    fontSize: 12,
+  },
   buttonGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap', // Allows buttons to wrap into multiple rows
@@ -102,7 +115,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 5,
     borderRadius: 8,
-    paddingVertical: 15,
+    paddingVertical: 8,
     backgroundColor: '#1A1A1A',
 
     borderWidth: .5, //  outline

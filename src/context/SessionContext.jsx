@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useMemo, useState} from 'react';
+import React, {createContext, useContext, useMemo, useState, useEffect} from 'react';
 import useAsyncStorage from '../hooks/useAsyncStorage'; // Import the custom hook
 
 const SessionContext = createContext();
@@ -56,6 +56,31 @@ export function SessionProvider({children}) {
       [presetKey]: newPresetData,
     }));
   };
+
+  useEffect(() => {
+    // This effect runs once when the app loads to check if the streak is broken.
+    if (!lastSessionDate) {
+      // If there's no last session date, the streak must be 0.
+      setCurrentStreak(0);
+      return;
+    }
+
+    const today = new Date();
+    const todayDateString = `${today.getFullYear()}-${String(
+      today.getMonth() + 1,
+    ).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayDateString = `${yesterday.getFullYear()}-${String(
+      yesterday.getMonth() + 1,
+    ).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+    // If the last session was not today and not yesterday, the streak is broken.
+    if (lastSessionDate !== todayDateString && lastSessionDate !== yesterdayDateString) {
+      setCurrentStreak(0);
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount.
 
   const addMeditationTime = minutes => {
     const totalTimeInSeconds = totalTimeMeditated + minutes * 60;

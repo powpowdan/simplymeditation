@@ -18,14 +18,12 @@ const ChimeSelector2 = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [selectedSongPath, setselectedSongPath] = useState(null); //value path to music
   const {
-    savedChime,
-    setSavedChime,
     selectedChimeName,
     setSelectedChimeName,
     volume,
     setVolume,
+    selectedChimePath,
     setSelectedChimePath,
   } = useMusicSwitchContext();
 
@@ -34,7 +32,7 @@ const ChimeSelector2 = () => {
     // Preview states
   const [previewChimeName, setPreviewChimeName] = useState(null);
   const [previewChimePath, setPreviewChimePath] = useState(null);
-  const [previewVolume, setPreviewVolume] = useState(volume); // optional
+  const [previewVolume, setPreviewVolume] = useState(volume);
 
   const availableChimes = {
     Nature: [
@@ -101,8 +99,8 @@ const ChimeSelector2 = () => {
   };
 
   const openModal = () => {
-    setPreviewChimeName(selectedChimeName);
-    setPreviewChimePath(selectedSongPath);
+    setPreviewChimeName(selectedChimeName); // Initialize preview with current name from context
+    setPreviewChimePath(selectedChimePath); // Initialize preview with current path from context
     setPreviewVolume(volume);
     setModalVisible(true);
   };
@@ -115,14 +113,7 @@ const ChimeSelector2 = () => {
       });
     }
 
-    setSavedChime(
-      JSON.stringify({
-        chime: {label: previewChimeName, value: previewChimePath},
-        volume: previewVolume,
-      }),
-    );
-    setSelectedChimeName(previewChimeName);
-    setselectedSongPath(previewChimePath);
+    
     setVolume(previewVolume);
     setSelectedChimePath(previewChimePath);
     setIsMusicPlaying(false);
@@ -205,23 +196,15 @@ const playNewSound = () => {
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
 
+  // This is the key to fixing the synchronization issue.
+  // When the path changes from anywhere (e.g., loading a preset in HomeScreen),
+  // this effect finds the matching chime from the list and updates the name in the context.
   useEffect(() => {
-    if (savedChime) {
-      const parsedSavedChime = JSON.parse(savedChime);
-      setSelectedChimeName(parsedSavedChime?.chime?.label || 'No Chime');
-      setselectedSongPath(parsedSavedChime?.chime?.value || 'empty');
-      setVolume(parsedSavedChime?.volume || 0.8);
-    } else {
-      // Default structure when no chime is set
-      const defaultChime = {
-        chime: {value: 'empty', label: 'No Chime'},
-        volume: 0.8,
-      };
-      setSelectedChimeName(defaultChime.chime.label);
-      setselectedSongPath(defaultChime.chime.value);
-      setVolume(defaultChime.volume);
+    const chime = availableChimes.All.find(c => c.value === selectedChimePath);
+    if (chime && chime.label !== selectedChimeName) {
+      setSelectedChimeName(chime.label);
     }
-  }, [savedChime]);
+  }, [selectedChimePath]);
 
   return (
     <View style={styles.container}>

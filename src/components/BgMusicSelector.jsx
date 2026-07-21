@@ -21,8 +21,6 @@ const BgMusicSelector = () => {
   const {
     selectedSongPathBg,
     setselectedSongPathBg,
-    savedChimeBg,
-    setSavedChimeBg,
     selectedChimeNameBg,
     setSelectedChimeNameBg,
     volumeBg,
@@ -38,7 +36,7 @@ const BgMusicSelector = () => {
   const [previewChimePathBg, setPreviewChimePathBg] = useState(null);
   const [previewVolumeBg, setPreviewVolumeBg] = useState(0.8);
 
-  const availableChimes = {
+  const availableMusic = {
     Nature: [
       {
         label: 'Zen river',
@@ -183,13 +181,7 @@ const BgMusicSelector = () => {
       soundInstance.stop(() => soundInstance.release());
     }
 
-    setSavedChimeBg(
-      JSON.stringify({
-        chime: {label: previewChimeNameBg, value: previewChimePathBg},
-        volumeBg: previewVolumeBg,
-      }),
-    );
-    setSelectedChimeNameBg(previewChimeNameBg);
+    // Update the context directly. This is the single source of truth.
     setselectedSongPathBg(previewChimePathBg);
     setVolumeBg(previewVolumeBg);
     setIsMusicPlaying(false);
@@ -283,23 +275,19 @@ const BgMusicSelector = () => {
     }
   };
 
-  const chimesToDisplay =
-    availableChimes[selectedCategory] || availableChimes.All;
+  const musicToDisplay =
+    availableMusic[selectedCategory] || availableMusic.All;
 
+  // This is the key to fixing the synchronization issue.
+  // When the path changes from anywhere (e.g., loading a preset in HomeScreen),
+  // this effect finds the matching music from the list and updates the name in the context.
   useEffect(() => {
-    if (isMusicPlaying && previewChimePathBg !== previousSongPathBg) {
-      setIsMusicPlaying(false); // Just change the label; don’t stop the sound
+    const music = availableMusic.All.find(m => m.value === selectedSongPathBg);
+    // If a matching music item is found and its label is different from the one in the context
+    if (music && music.label !== selectedChimeNameBg) {
+      setSelectedChimeNameBg(music.label);
     }
-  }, [previewChimePathBg]);
-
-  useEffect(() => {
-    if (savedChimeBg) {
-      const savedChimeData = JSON.parse(savedChimeBg);
-      setSelectedChimeNameBg(savedChimeData?.chime?.label || null);
-      setselectedSongPathBg(savedChimeData?.chime?.value || null);
-      setVolumeBg(savedChimeData?.volumeBg || 0.8);
-    }
-  }, [savedChimeBg]);
+  }, [selectedSongPathBg]); // This effect runs whenever the background music path changes
 
   return (
     <View style={styles.container}>
@@ -349,7 +337,7 @@ const BgMusicSelector = () => {
                 </View>
 
                 <ScrollView contentContainerStyle={styles.optionsContainer}>
-                  {chimesToDisplay.map(chime => (
+                  {musicToDisplay.map(chime => (
                     <TouchableOpacity
                       key={chime.value || chime.label}
                       style={styles.option}

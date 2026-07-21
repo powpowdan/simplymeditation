@@ -14,21 +14,19 @@ import Sound from 'react-native-sound';
 import {useMusicSwitchContext} from '../context/MusicSwitchContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const IntervalBellSelector = () => {
+const IntervalBellSelector2 = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
  const {
-    savedChimeIsou,
-    setSavedChimeIsou,
     selectedChimeNameIsou,
     setSelectedChimeNameIsou,  
+    savedChimeIsouPath,
     setSavedChimeIsouPath,
     volumeIsou,
     setVolumeIsou,
   } = useMusicSwitchContext();
 
-  const [selectedSongPathIsou, setSelectedSongPathIsou] = useState(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [soundInstance, setSoundInstance] = useState(null);
 
@@ -103,8 +101,8 @@ const IntervalBellSelector = () => {
 
   const openModal = () => {
     setPreviewChimeName(selectedChimeNameIsou);
-    setPreviewChimePath(selectedSongPathIsou);
-    setPreviewVolume(volumeIsou);
+    setPreviewChimePath(savedChimeIsouPath); // Use path from context
+    setPreviewVolume(volumeIsou); // Use volume from context
     setModalVisible(true);
   };
 
@@ -116,14 +114,6 @@ const IntervalBellSelector = () => {
       });
     }
 
-    setSavedChimeIsou(
-      JSON.stringify({
-        chime: {label: previewChimeName, value: previewChimePath},
-        volumeIsou: previewVolume,
-      }),
-    );
-    setSelectedChimeNameIsou(previewChimeName);
-    setSelectedSongPathIsou(previewChimePath);
     setSavedChimeIsouPath(previewChimePath);
     setVolumeIsou(previewVolume);
     setIsMusicPlaying(false);
@@ -202,15 +192,14 @@ const playNewSound = () => {
   const chimesToDisplay =
     availableChimes[selectedCategory] || availableChimes.All;
 
+  // When the path changes from anywhere (e.g., loading a preset),
+  // this effect finds the matching chime and updates the name in the context.
   useEffect(() => {
-    if (savedChimeIsou) {
-      const savedChimeData = JSON.parse(savedChimeIsou);
-      setSelectedChimeNameIsou(savedChimeData?.chime?.label || null);
-      setSelectedSongPathIsou(savedChimeData?.chime?.value || null);
-      setSavedChimeIsouPath(savedChimeData?.chime?.value || null);
-      setVolumeIsou(savedChimeData?.volumeIsou || 0.8);
+    const chime = availableChimes.All.find(c => c.value === savedChimeIsouPath);
+    if (chime && chime.label !== selectedChimeNameIsou) {
+      setSelectedChimeNameIsou(chime.label);
     }
-  }, [savedChimeIsou]);
+  }, [savedChimeIsouPath]);
 
   return (
     <View style={styles.container}>
@@ -478,4 +467,4 @@ const styles = StyleSheet.create({
     paddingRight: '6%',
   },
 });
-export default IntervalBellSelector;
+export default IntervalBellSelector2;

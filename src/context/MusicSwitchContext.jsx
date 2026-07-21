@@ -39,29 +39,16 @@ export function MusicSwitchProvider({children}) {
     'adjustmentValue',
     0,
   );
-  const [selectedTone, setSelectedTone] = useAsyncStorage(
-    'selectedTone',
-    'audio_file.mp3',
-  ); 
-  const [selectedIntervalTone, setIntervalSelectedTone] = useAsyncStorage(
-    'selectedIntervalTone',
-    'intervalbell.mp3', 
-  ); 
 
-  const [selectedBgTone, setBgSelectedTone] = useAsyncStorage(
-    'selectedBgTone',
-    'intervalbell.mp3',
-  );  
 
-  //Chime, combine!
   const [selectedChimePath, setSelectedChimePath] = useAsyncStorage(
     'selectedChimePath',
-    'Default',
+    'audio_file.mp3',
   ); 
 
   const [selectedChimeName, setSelectedChimeName] = useAsyncStorage(
     'selectedChimeName',
-    'Default',
+    'Classic start',
   );   
 
   const [volume, setVolume] = useAsyncStorage(
@@ -69,11 +56,6 @@ export function MusicSwitchProvider({children}) {
       1,
   ); 
  
-  const [savedChime, setSavedChime] = useAsyncStorage(
-    'savedChime',
-    JSON.stringify({ chime: 'empty', volume: 0.8 }), // To store the saved chime(path) and volume
-  );
-
     //bgMusicSelector
 
     const [selectedSongPathBg, setselectedSongPathBg] = useAsyncStorage(
@@ -91,21 +73,16 @@ export function MusicSwitchProvider({children}) {
         1,
     ); 
    
-    const [savedChimeBg, setSavedChimeBg] = useAsyncStorage(
-      'savedChimeBg',
-      JSON.stringify({ chime: 'empty', volume: 0.8 }), // To store the saved chime(path) and volume
-    );
-
      //intervalSelector
 
      const [savedChimeIsouPath, setSavedChimeIsouPath] = useAsyncStorage(
       'savedChimeIsouPath',
       'empty'
     );
-
+ 
      const [selectedChimeNameIsou, setSelectedChimeNameIsou] = useAsyncStorage(
-      'selectedChimeNameBg',
-      'None',
+      'selectedChimeNameIsou',
+      'Default ISOU',
     );   
   
     const [volumeIsou, setVolumeIsou] = useAsyncStorage(
@@ -113,15 +90,6 @@ export function MusicSwitchProvider({children}) {
         1,
     ); 
    
-    const [savedChimeIsou, setSavedChimeIsou] = useAsyncStorage(
-      'savedChimeIsou',
-      JSON.stringify({ chime: 'DefaultISOU', volume: 0.8 }), // To store the saved chime(path) and volume
-    );
-
-    
-  
-    
-  
 
   const toggleInterval25 = () => {
     setInterval25Active(!interval25Active);
@@ -169,20 +137,11 @@ export function MusicSwitchProvider({children}) {
       toggleAdjustmentSwitch,
       adjustmentValue,
       setAdjustment,
-      selectedTone,
-      setSelectedTone, 
-      selectedIntervalTone,
-      setIntervalSelectedTone,
-      selectedBgTone,
-      setBgSelectedTone,
 
       selectedChimeName,
       setSelectedChimeName,
       volume,
       setVolume,
-      savedChime,
-      setSavedChime,
-
       selectedChimePath,
       setSelectedChimePath,
 
@@ -193,17 +152,10 @@ export function MusicSwitchProvider({children}) {
       setSelectedChimeNameBg,
       volumeBg,
       setVolumeBg,
-      savedChimeBg,
-      setSavedChimeBg,
-
-      
       selectedChimeNameIsou,
       setSelectedChimeNameIsou,
       volumeIsou,
       setVolumeIsou,
-      savedChimeIsou,
-      setSavedChimeIsou,
-
       savedChimeIsouPath,
       setSavedChimeIsouPath,
     };
@@ -216,23 +168,15 @@ export function MusicSwitchProvider({children}) {
     interval90Active,
     adjustmentSwitchState,
     adjustmentValue,
-    selectedTone,
-    selectedIntervalTone,
-    selectedBgTone,
 
     selectedChimePath,
     selectedChimeName, 
     volume,
-    savedChime,
-     
     selectedSongPathBg,
     volumeBg,
-    savedChimeBg,
     selectedChimeNameBg,
-
     savedChimeIsouPath,
     volumeIsou,
-    savedChimeIsou,
     selectedChimeNameIsou,
 
   ]); // State setters are stable and don't need to be in the dependency array

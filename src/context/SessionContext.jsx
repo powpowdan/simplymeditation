@@ -35,18 +35,18 @@ export function SessionProvider({children}) {
       preset1: {
         name: 'Preset 1',
         duration: 5,
-        chime: { path: 'Default', volume: 1 },
+        chime: { path: 'audio_file.mp3', volume: 1 },
         music: { path: 'empty', volume: 1, enabled: false },
         intervals: {
-          path: 'DefaultISOU',
+          path: 'defaultisou.mp3',
           volume: 0.8,
           enabled: false,
           percentages: { '25': false, '50': false, '75': false, '90': false }
         }
       },
-      preset2: { name: 'Preset 2', duration: 10, chime: { path: 'Default', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'DefaultISOU', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } },
-      preset3: { name: 'Preset 3', duration: 15, chime: { path: 'Default', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'DefaultISOU', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } },
-      preset4: { name: 'Preset 4', duration: 20, chime: { path: 'Default', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'DefaultISOU', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } }
+      preset2: { name: 'Preset 2', duration: 10, chime: { path: 'audio_file.mp3', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'defaultisou.mp3', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } },
+      preset3: { name: 'Preset 3', duration: 15, chime: { path: 'audio_file.mp3', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'defaultisou.mp3', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } },
+      preset4: { name: 'Preset 4', duration: 20, chime: { path: 'audio_file.mp3', volume: 1 }, music: { path: 'empty', volume: 1, enabled: false }, intervals: { path: 'defaultisou.mp3', volume: 0.8, enabled: false, percentages: { '25': false, '50': false, '75': false, '90': false } } }
     },
   );
 
